@@ -44,6 +44,12 @@ class InspectorScenarioTest(BaremetalScenarioTest):
     ironic_api_version = LATEST_MICROVERSION
 
     @classmethod
+    def skip_checks(cls):
+        super(InspectorScenarioTest, cls).skip_checks()
+        if not CONF.service_available.ironic_inspector:
+            raise cls.skipException('Ironic Inspector is not enabled.')
+
+    @classmethod
     def setup_clients(cls):
         super(InspectorScenarioTest, cls).setup_clients()
         inspector_manager = introspection_client.Manager()
