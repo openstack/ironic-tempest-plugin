@@ -12,19 +12,19 @@
 
 import six
 
-from ironic_tempest_plugin.tests.scenario import baremetal_manager
 from tempest import config
 from tempest.lib import decorators
 from tempest import test  # noqa
 
-from ironic_inspector.test.inspector_tempest_plugin.tests import manager
+from ironic_tempest_plugin.tests.scenario import baremetal_manager
+from ironic_tempest_plugin.tests.scenario import introspection_manager
 
 CONF = config.CONF
 
 ProvisionStates = baremetal_manager.BaremetalProvisionStates
 
 
-class InspectorDiscoveryTest(manager.InspectorScenarioTest):
+class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(InspectorDiscoveryTest, cls).skip_checks()

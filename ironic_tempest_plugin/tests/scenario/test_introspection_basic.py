@@ -10,15 +10,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from ironic_tempest_plugin.tests.scenario import baremetal_manager
 from tempest.common import utils
 from tempest.config import CONF
 from tempest.lib import decorators
 
-from ironic_inspector.test.inspector_tempest_plugin.tests import manager
+from ironic_tempest_plugin.tests.scenario import baremetal_manager
+from ironic_tempest_plugin.tests.scenario import introspection_manager
 
 
-class InspectorBasicTest(manager.InspectorScenarioTest):
+class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
 
     def verify_node_introspection_data(self, node):
         data = self.introspection_data(node['uuid'])
@@ -146,7 +146,7 @@ class InspectorBasicTest(manager.InspectorScenarioTest):
             self.verify_introspection_aborted(node_id)
 
 
-class InspectorSmokeTest(manager.InspectorScenarioTest):
+class InspectorSmokeTest(introspection_manager.InspectorScenarioTest):
 
     @decorators.idempotent_id('a702d1f1-88e4-42ce-88ef-cba2d9e3312e')
     @decorators.attr(type='smoke')

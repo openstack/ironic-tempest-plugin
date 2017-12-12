@@ -24,7 +24,7 @@ from ironic_tempest_plugin import config as project_config
 _opts = [
     (project_config.baremetal_group, project_config.BaremetalGroup),
     (project_config.baremetal_features_group,
-     project_config.BaremetalFeaturesGroup)
+     project_config.BaremetalFeaturesGroup),
     (project_config.baremetal_introspection_group,
      project_config.BaremetalIntrospectionGroup),
 ]
