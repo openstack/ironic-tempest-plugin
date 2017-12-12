@@ -2,8 +2,8 @@
 Ironic tempest plugin
 =====================
 
-This directory contains Tempest tests to cover the Ironic project,
-as well as a plugin to automatically load these tests into tempest.
+This directory contains Tempest tests to cover the ironic and ironic-inspector
+projects, as well as a plugin to automatically load these tests into tempest.
 
 See the tempest plugin documentation for information about creating
 a plugin, stable API interface, TempestPlugin class interface, plugin
