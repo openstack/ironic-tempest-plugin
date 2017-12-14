@@ -13,6 +13,7 @@
 import json
 import os
 import time
+
 import six
 import tempest
 from tempest import config
