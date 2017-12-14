@@ -1,0 +1,12 @@
+- project:
+    name: openstack/ironic-tempest-plugin
+    check:
+      jobs:
+        - ironic-dsvm-standalone
+        - ironic-grenade-dsvm-multinode-multitenant
+        - ironic-tempest-dsvm-ironic-inspector
+    gate:
+      jobs:
+        - ironic-dsvm-standalone
+        - ironic-grenade-dsvm-multinode-multitenant
+        - ironic-tempest-dsvm-ironic-inspector
