@@ -23,8 +23,8 @@ ironic_service_option = cfg.BoolOpt('ironic',
                                     help='Whether or not ironic is expected '
                                     'to be available')
 
-inspector_service_option = cfg.BoolOpt("ironic-inspector",
-                                       default=True,
+inspector_service_option = cfg.BoolOpt("ironic_inspector",
+                                       default=False,
                                        help="Whether or not ironic-inspector "
                                        "is expected to be available")
 
