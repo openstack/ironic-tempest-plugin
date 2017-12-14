@@ -21,6 +21,7 @@ from tempest.lib.common.api_version_utils import LATEST_MICROVERSION
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 
+import ironic_tempest_plugin
 from ironic_tempest_plugin import exceptions
 from ironic_tempest_plugin.services import \
     introspection_client
@@ -138,11 +139,9 @@ class InspectorScenarioTest(BaremetalScenarioTest):
         return flavor
 
     def get_rule_path(self, rule_file):
-        base_path = os.path.split(
-            os.path.dirname(os.path.abspath(__file__)))[0]
-        base_path = os.path.split(base_path)[0]
-        return os.path.join(base_path, "inspector_tempest_plugin",
-                            "rules", rule_file)
+        base_path = os.path.dirname(
+            os.path.abspath(ironic_tempest_plugin.__file__))
+        return os.path.join(base_path, "rules", rule_file)
 
     def boot_instance(self):
         return super(InspectorScenarioTest, self).boot_instance()
