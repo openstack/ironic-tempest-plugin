@@ -129,6 +129,8 @@ BaremetalGroup = [
     cfg.ListOpt('enabled_rescue_interfaces',
                 default=['no-rescue'],
                 help="List of Ironic enabled rescue interfaces."),
+    cfg.StrOpt('default_rescue_interface',
+               help="Ironic default rescue interface."),
     cfg.IntOpt('adjusted_root_disk_size_gb',
                min=0,
                help="Ironic adjusted disk size to use in the standalone tests "

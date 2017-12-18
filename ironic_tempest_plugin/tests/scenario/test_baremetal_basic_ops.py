@@ -45,6 +45,26 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
           expected state transitions
     """
 
+    TEST_RESCUE_MODE = False
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalBasicOps, cls).skip_checks()
+
+        # If default rescue interface is configured to test the rescue
+        # feature, then skips this test and let the test derived class
+        # to be executed.
+        rescue_if = CONF.baremetal.default_rescue_interface
+        if cls.TEST_RESCUE_MODE:
+            if not rescue_if or rescue_if == 'no-rescue':
+                msg = 'Node rescue interface is not enabled.'
+                raise cls.skipException(msg)
+        else:
+            if rescue_if and rescue_if != 'no-rescue':
+                msg = ('Node rescue interface is enabled, but %s class '
+                       'cannot test rescue operations.' % cls.__name__)
+                raise cls.skipException(msg)
+
     @staticmethod
     def _is_version_supported(version):
         """Return whether an API microversion is supported."""
@@ -193,7 +213,6 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         self.validate_ports()
         self.validate_scheduling()
         ip_address = self.get_server_ip(self.instance)
-        self.get_remote_client(ip_address).validate_authentication()
         vm_client = self.get_remote_client(ip_address)
 
         # We expect the ephemeral partition to be mounted on /mnt and to have
@@ -205,4 +224,15 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             self.create_timestamp(
                 ip_address, private_key=self.keypair['private_key'])
 
+        # Test rescue mode
+        if self.TEST_RESCUE_MODE:
+            self.rescue_instance(self.instance, self.node, ip_address)
+            self.unrescue_instance(self.instance, self.node, ip_address)
+
         self.terminate_instance(self.instance)
+
+
+class BaremetalBasicOpsAndRescue(BaremetalBasicOps):
+    """This test includes rescue/unrescue ops."""
+
+    TEST_RESCUE_MODE = True

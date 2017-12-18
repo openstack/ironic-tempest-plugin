@@ -19,6 +19,7 @@ import time
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common import api_version_utils
+from tempest.lib.common.utils.linux import remote_client
 from tempest.lib import exceptions as lib_exc
 
 from ironic_tempest_plugin import clients
@@ -232,3 +233,44 @@ class BaremetalScenarioTest(manager.ScenarioTest):
              BaremetalProvisionStates.AVAILABLE],
             timeout=CONF.baremetal.unprovision_timeout,
             interval=30)
+
+    def rescue_instance(self, instance, node, server_ip,
+                        servers_client=None):
+        """Rescue the instance, verify we can ping and SSH."""
+        if servers_client is None:
+            servers_client = self.servers_client
+
+        rescuing_instance = servers_client.rescue_server(instance['id'])
+        rescue_password = rescuing_instance['adminPass']
+
+        self.wait_provisioning_state(
+            node['uuid'],
+            BaremetalProvisionStates.RESCUE,
+            timeout=CONF.baremetal.rescue_timeout)
+        waiters.wait_for_server_status(servers_client,
+                                       instance['id'], 'RESCUE')
+        # Ping server ip
+        self.assertTrue(self.ping_ip_address(server_ip))
+        # Open ssh connection to server
+        linux_client = remote_client.RemoteClient(
+            server_ip,
+            'rescue',
+            password=rescue_password,
+            server=self.instance,
+            servers_client=servers_client,
+            ssh_timeout=CONF.baremetal.rescue_timeout)
+        linux_client.validate_authentication()
+
+    def unrescue_instance(self, instance, node, server_ip,
+                          servers_client=None):
+        if servers_client is None:
+            servers_client = self.servers_client
+        self.servers_client.unrescue_server(instance['id'])
+        self.wait_provisioning_state(
+            node['uuid'],
+            BaremetalProvisionStates.ACTIVE,
+            timeout=CONF.baremetal.unrescue_timeout)
+        waiters.wait_for_server_status(servers_client,
+                                       instance['id'], 'ACTIVE')
+        # Verify server connection
+        self.get_remote_client(server_ip)
