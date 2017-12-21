@@ -147,3 +147,18 @@ class BaremetalIpmiPartitioned(bsm.BaremetalStandaloneScenarioTest):
     def test_ip_access_to_server(self):
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=True))
+
+
+class BaremetalIpmiAnsibleWholedisk(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ipmi'
+    deploy_interface = 'ansible'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+
+    @decorators.idempotent_id('cde532cc-81ba-4489-b374-b4a85cc203eb')
+    @utils.services('image', 'network')
+    def test_ip_access_to_server(self):
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
