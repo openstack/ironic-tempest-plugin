@@ -1,19 +1,15 @@
-===============================
-ironic-tempest-plugin
-===============================
+==============================================
+Tempest plugin for ironic and ironic-inspector
+==============================================
 
-Tempest plugin for ironic
-
-Please fill here a long description which must be at least 3 lines wrapped on
-80 cols, so that distribution package maintainers can use it in their packages.
-Note that this is a hard requirement.
+This repository contains a Tempest_ plugin for OpenStack `Bare Metal`_ and
+`Bare Metal Introspection`_ projects.
 
 * Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/ironic-tempest-plugin
-* Source: http://git.openstack.org/cgit/openstack/ironic-tempest-plugin
-* Bugs: http://bugs.launchpad.net/ironic
+* Documentation: https://docs.openstack.org/ironic-tempest-plugin
+* Source: https://git.openstack.org/cgit/openstack/ironic-tempest-plugin
+* Bugs: https://bugs.launchpad.net/ironic
 
-Features
---------
-
-* TODO
+.. _Tempest: https://docs.openstack.org/tempest/latest/
+.. _Bare Metal: https://docs.openstack.org/ironic/latest/
+.. _Bare Metal Introspection: https://docs.openstack.org/ironic-inspector/latest/
