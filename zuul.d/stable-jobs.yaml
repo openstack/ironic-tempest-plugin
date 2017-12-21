@@ -12,10 +12,22 @@
       branch_override: stable/pike
 
 - job:
+    name: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-ocata
+    parent: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
+    vars:
+      branch_override: stable/ocata
+
+- job:
     name: ironic-tempest-dsvm-ironic-inspector-pike
     parent: ironic-tempest-dsvm-ironic-inspector
     vars:
       branch_override: stable/pike
+
+- job:
+    name: ironic-tempest-dsvm-ironic-inspector-ocata
+    parent: ironic-tempest-dsvm-ironic-inspector
+    vars:
+      branch_override: stable/ocata
 
 - job:
     name: ironic-inspector-grenade-dsvm-pike

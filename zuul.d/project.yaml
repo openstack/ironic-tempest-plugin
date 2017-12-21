@@ -6,8 +6,10 @@
         - ironic-dsvm-standalone-pike
         - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
         - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-pike
+        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-ocata
         - ironic-tempest-dsvm-ironic-inspector
         - ironic-tempest-dsvm-ironic-inspector-pike
+        - ironic-tempest-dsvm-ironic-inspector-ocata
         - ironic-inspector-grenade-dsvm
         - ironic-inspector-grenade-dsvm-pike
     gate:
@@ -16,7 +18,9 @@
         - ironic-dsvm-standalone-pike
         - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
         - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-pike
+        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-ocata
         - ironic-tempest-dsvm-ironic-inspector
         - ironic-tempest-dsvm-ironic-inspector-pike
+        - ironic-tempest-dsvm-ironic-inspector-ocata
         - ironic-inspector-grenade-dsvm
         - ironic-inspector-grenade-dsvm-pike
