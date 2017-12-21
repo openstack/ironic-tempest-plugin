@@ -206,7 +206,7 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         return nodes[0]
 
     @classmethod
-    def boot_node(cls, driver, image_ref, image_checksum=None):
+    def boot_node(cls, driver, image_ref, image_checksum=None, **interfaces):
         """Boot ironic node.
 
         The following actions are executed:
@@ -222,10 +222,11 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         :param image_ref: Reference to user image to boot node with.
         :param image_checksum: md5sum of image specified in image_ref.
                                Needed only when direct HTTP link is provided.
+        :param interfaces: driver interfaces to set on the node
         :returns: Ironic node.
         """
         node = cls.get_and_reserve_node()
-        cls.update_node_driver(node['uuid'], driver)
+        cls.update_node_driver(node['uuid'], driver, **interfaces)
         network, subnet, router = cls.create_networks()
         n_port = cls.create_neutron_port(network_id=network['id'])
         cls.vif_attach(node_id=node['uuid'], vif_id=n_port['id'])
@@ -280,6 +281,9 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # The node driver to use in the test
     driver = None
 
+    # The deploy interface to use by the HW type
+    deploy_interface = None
+
     # User image ref to boot node with.
     image_ref = None
 
@@ -307,6 +311,13 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                     'driver': cls.driver,
                     'enabled_drivers': CONF.baremetal.enabled_drivers,
                     'enabled_hw_types': CONF.baremetal.enabled_hardware_types})
+        if (cls.deploy_interface and cls.deploy_interface not in
+                CONF.baremetal.enabled_deploy_interfaces):
+            raise cls.skipException(
+                "Deploy interface %(iface)s required by test is not "
+                "in the list of enabled deploy interfaces %(enabled)s" % {
+                    'iface': cls.deploy_interface,
+                    'enabled': CONF.baremetal.enabled_deploy_interfaces})
         if not cls.wholedisk_image and CONF.baremetal.use_provision_network:
             raise cls.skipException(
                 'Partitioned images are not supported with multitenancy.')
@@ -322,8 +333,10 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         image_checksum = None
         if not uuidutils.is_uuid_like(cls.image_ref):
             image_checksum = cls.image_checksum
-        cls.node = cls.boot_node(cls.driver, cls.image_ref,
-                                 image_checksum=image_checksum)
+        boot_kwargs = {'image_checksum': image_checksum}
+        if cls.deploy_interface:
+            boot_kwargs['deploy_interface'] = cls.deploy_interface
+        cls.node = cls.boot_node(cls.driver, cls.image_ref, **boot_kwargs)
         cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
 
     @classmethod

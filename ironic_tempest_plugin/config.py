@@ -113,6 +113,9 @@ BaremetalGroup = [
     cfg.ListOpt('enabled_hardware_types',
                 default=['ipmi'],
                 help="List of Ironic enabled hardware types."),
+    cfg.ListOpt('enabled_deploy_interfaces',
+                default=['iscsi', 'direct'],
+                help="List of Ironic enabled deploy interfaces."),
     cfg.IntOpt('adjusted_root_disk_size_gb',
                min=0,
                help="Ironic adjusted disk size to use in the standalone tests "
