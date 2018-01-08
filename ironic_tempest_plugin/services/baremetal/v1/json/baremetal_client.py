@@ -387,6 +387,7 @@ class BaremetalClient(base.BaremetalClient):
                            'properties/local_gb',
                            'properties/memory_mb',
                            'driver',
+                           'deploy_interface',
                            'instance_uuid',
                            'resource_class')
         if not patch:

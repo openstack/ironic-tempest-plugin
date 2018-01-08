@@ -140,9 +140,9 @@ class BaremetalScenarioTest(manager.ScenarioTest):
 
     @classmethod
     @retry_on_conflict
-    def update_node_driver(cls, node_id, driver):
+    def update_node_driver(cls, node_id, driver, **interfaces):
         _, body = cls.baremetal_client.update_node(
-            node_id, driver=driver)
+            node_id, driver=driver, **interfaces)
         return body
 
     @classmethod

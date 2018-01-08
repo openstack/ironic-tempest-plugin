@@ -121,7 +121,9 @@ class BaremetalPxeIpmitoolPartitioned(bsm.BaremetalStandaloneScenarioTest):
 
 class BaremetalIpmiWholedisk(bsm.BaremetalStandaloneScenarioTest):
 
+    api_microversion = '1.31'  # to set the deploy_interface
     driver = 'ipmi'
+    deploy_interface = 'direct'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
 
@@ -134,7 +136,9 @@ class BaremetalIpmiWholedisk(bsm.BaremetalStandaloneScenarioTest):
 
 class BaremetalIpmiPartitioned(bsm.BaremetalStandaloneScenarioTest):
 
+    api_microversion = '1.31'  # to set the deploy_interface
     driver = 'ipmi'
+    deploy_interface = 'iscsi'
     image_ref = CONF.baremetal.partition_image_ref
     wholedisk_image = False
 
