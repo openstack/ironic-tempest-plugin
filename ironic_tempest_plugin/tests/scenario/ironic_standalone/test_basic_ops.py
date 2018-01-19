@@ -237,3 +237,99 @@ class BaremetalIpmiRescuePartitioned(bsm.BaremetalStandaloneScenarioTest):
         self.unrescue_node(self.node['uuid'])
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=True))
+
+
+class BaremetalIloDirectWholediskHttpLink(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo'
+    deploy_interface = 'direct'
+    boot_interface = 'ilo-virtual-media'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    @decorators.idempotent_id('c2db24e7-b9bb-44df-6765-e60134346fd0')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIloDirectPartitioned(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo'
+    deploy_interface = 'direct'
+    boot_interface = 'ilo-virtual-media'
+    image_ref = CONF.baremetal.partition_image_ref
+    wholedisk_image = False
+
+    @decorators.idempotent_id('ea85e19c-d8dc-4577-4d05-fbbbe4ce3f8c')
+    @utils.services('image', 'network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIloIscsiWholediskHttpLink(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo'
+    deploy_interface = 'iscsi'
+    boot_interface = 'ilo-virtual-media'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    @decorators.idempotent_id('71ccf06f-45db-8f93-afd0-d4efae2bfd4e')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIloIscsiPartitioned(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo'
+    deploy_interface = 'iscsi'
+    boot_interface = 'ilo-virtual-media'
+    image_ref = CONF.baremetal.partition_image_ref
+    wholedisk_image = False
+
+    @decorators.idempotent_id('d926c683-4d05-8252-b9bb-35babbed6e86')
+    @utils.services('image', 'network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIloPxeWholediskHttpLink(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo'
+    deploy_interface = 'direct'
+    boot_interface = 'ilo-pxe'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    @decorators.idempotent_id('d926c683-1a32-edbc-07dc-95cd74eefecb')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIloPxePartitioned(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo'
+    deploy_interface = 'direct'
+    boot_interface = 'ilo-pxe'
+    image_ref = CONF.baremetal.partition_image_ref
+    wholedisk_image = False
+
+    @decorators.idempotent_id('71ccf06f-07dc-4577-6869-1b1bfa423b9b')
+    @utils.services('image', 'network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
