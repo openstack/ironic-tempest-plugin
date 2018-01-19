@@ -640,3 +640,58 @@ class BaremetalClient(base.BaremetalClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         return resp, self.deserialize(body)
+
+    @base.handle_errors
+    def list_node_traits(self, node_uuid):
+        """List all traits associated with the node.
+
+        :param node_uuid: The unique identifier of the node.
+        """
+        return self._list_request('/nodes/%s/traits' % node_uuid)
+
+    @base.handle_errors
+    def set_node_traits(self, node_uuid, traits):
+        """Set all traits of the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+        :param traits: A list of traits to set.
+        """
+        request = {'traits': traits}
+        resp, body = self._put_request('nodes/%s/traits' %
+                                       node_uuid, request)
+        self.expected_success(http_client.NO_CONTENT, resp.status)
+        return resp, body
+
+    @base.handle_errors
+    def add_node_trait(self, node_uuid, trait):
+        """Add a trait to the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+        :param trait: A trait to add.
+        """
+        resp, body = self._put_request('nodes/%s/traits/%s' %
+                                       (node_uuid, trait), {})
+        self.expected_success(http_client.NO_CONTENT, resp.status)
+        return resp, body
+
+    @base.handle_errors
+    def remove_node_traits(self, node_uuid):
+        """Remove all traits from the specified node.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        """
+        resp, body = self._delete_request('nodes/%s/traits' % node_uuid, {})
+        self.expected_success(http_client.NO_CONTENT, resp.status)
+        return resp, body
+
+    @base.handle_errors
+    def remove_node_trait(self, node_uuid, trait):
+        """Remove a trait from the specified node.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param trait: A trait to remove.
+        """
+        resp, body = self._delete_request('nodes/%s/traits/%s' %
+                                          (node_uuid, trait), {})
+        self.expected_success(http_client.NO_CONTENT, resp.status)
+        return resp, body
