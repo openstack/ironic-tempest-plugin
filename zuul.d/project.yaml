@@ -1,5 +1,4 @@
 - project:
-    name: openstack/ironic-tempest-plugin
     check:
       jobs:
         - ironic-dsvm-standalone
