@@ -388,6 +388,7 @@ class BaremetalClient(base.BaremetalClient):
                            'properties/memory_mb',
                            'driver',
                            'deploy_interface',
+                           'rescue_interface',
                            'instance_uuid',
                            'resource_class')
         if not patch:
@@ -460,7 +461,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def set_node_provision_state(self, node_uuid, state, configdrive=None,
-                                 clean_steps=None):
+                                 clean_steps=None, rescue_password=None):
         """Set provision state of the specified node.
 
         :param node_uuid: The unique identifier of the node.
@@ -469,6 +470,7 @@ class BaremetalClient(base.BaremetalClient):
         :param configdrive: A gzipped, base64-encoded
             configuration drive string.
         :param clean_steps: A list with clean steps to execute.
+        :param rescue_password: user password used to rescue.
         """
         data = {'target': state}
         # NOTE (vsaienk0): Add both here if specified, do not check anything.
@@ -477,6 +479,8 @@ class BaremetalClient(base.BaremetalClient):
             data['configdrive'] = configdrive
         if clean_steps is not None:
             data['clean_steps'] = clean_steps
+        if rescue_password is not None:
+            data['rescue_password'] = rescue_password
         return self._put_request('nodes/%s/states/provision' % node_uuid,
                                  data)
 

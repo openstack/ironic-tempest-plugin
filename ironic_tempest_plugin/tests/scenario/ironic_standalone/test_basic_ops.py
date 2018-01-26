@@ -162,3 +162,51 @@ class BaremetalIpmiAnsibleWholedisk(bsm.BaremetalStandaloneScenarioTest):
     def test_ip_access_to_server(self):
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=True))
+
+
+class BaremetalIpmiRescueWholedisk(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.38'
+    min_microversion = '1.38'
+    driver = 'ipmi'
+    rescue_interface = 'agent'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+
+    # NOTE(tiendc) Using direct deploy interface and a whole disk
+    # image may lead to the bug:
+    # https://bugs.launchpad.net/ironic/+bug/1750958
+    # This is a workaround by using iscsi deploy interface.
+    deploy_interface = 'iscsi'
+
+    @decorators.idempotent_id('d6a1780f-c4bb-4136-8144-29e822e14d66')
+    @utils.services('image', 'network')
+    def test_rescue_mode(self):
+        self.rescue_node(self.node['uuid'], 'abc123')
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
+
+        self.unrescue_node(self.node['uuid'])
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
+
+
+class BaremetalIpmiRescuePartitioned(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.38'
+    min_microversion = '1.38'
+    driver = 'ipmi'
+    rescue_interface = 'agent'
+    image_ref = CONF.baremetal.partition_image_ref
+    wholedisk_image = False
+
+    @decorators.idempotent_id('113acd0a-9872-4631-b3ee-54da7e3bb262')
+    @utils.services('image', 'network')
+    def test_rescue_mode(self):
+        self.rescue_node(self.node['uuid'], 'abc123')
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
+
+        self.unrescue_node(self.node['uuid'])
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
