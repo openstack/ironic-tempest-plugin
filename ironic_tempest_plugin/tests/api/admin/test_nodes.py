@@ -427,7 +427,7 @@ class TestNodesTraits(base.BaseBaremetalTest):
 
         self.client.set_node_traits(self.node['uuid'], self.traits)
         _, body = self.client.list_node_traits(self.node['uuid'])
-        self.assertEqual(self.traits, body['traits'])
+        self.assertEqual(self.traits, sorted(body['traits']))
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('3b83dbd3-4a89-4173-920a-ca33ed3aad69')
@@ -444,7 +444,7 @@ class TestNodesTraits(base.BaseBaremetalTest):
         self.client.set_node_traits(self.node['uuid'], self.traits)
 
         _, body = self.client.list_node_traits(self.node['uuid'])
-        self.assertEqual(self.traits, body['traits'])
+        self.assertEqual(self.traits, sorted(body['traits']))
 
         self.client.set_node_traits(self.node['uuid'], [])
 
@@ -608,7 +608,7 @@ class TestNodesTraits(base.BaseBaremetalTest):
         for node in body['nodes']:
             self.assertIn('traits', node)
             if node['uuid'] == self.node['uuid']:
-                self.assertEqual(self.traits, node['traits'])
+                self.assertEqual(self.traits, sorted(node['traits']))
 
     @decorators.idempotent_id('2b82f704-1580-403a-af92-92c29a7eebb7')
     def test_list_nodes_traits_field(self):
@@ -621,7 +621,7 @@ class TestNodesTraits(base.BaseBaremetalTest):
         for node in body['nodes']:
             self.assertIn('traits', node)
             if node['uuid'] == self.node['uuid']:
-                self.assertEqual(self.traits, node['traits'])
+                self.assertEqual(self.traits, sorted(node['traits']))
 
     @decorators.idempotent_id('c83c537a-76aa-4d8a-8673-128d01ee403d')
     def test_show_node(self):
@@ -631,7 +631,7 @@ class TestNodesTraits(base.BaseBaremetalTest):
         _, body = self.client.show_node(self.node['uuid'])
 
         self.assertIn('traits', body)
-        self.assertEqual(self.traits, body['traits'])
+        self.assertEqual(self.traits, sorted(body['traits']))
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('9ab6a19c-83b9-4600-b55b-325a51e2f8f6')
