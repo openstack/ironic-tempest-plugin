@@ -10,9 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import functools
 
 from oslo_serialization import jsonutils as json
+import six
 from six.moves import http_client
 from six.moves.urllib import parse as urllib
 from tempest.lib.common import api_version_utils
@@ -36,7 +36,7 @@ def reset_baremetal_api_microversion():
 def handle_errors(f):
     """A decorator that allows to ignore certain types of errors."""
 
-    @functools.wraps(f)
+    @six.wraps(f)
     def wrapper(*args, **kwargs):
         param_name = 'ignore_errors'
         ignored_errors = kwargs.get(param_name, tuple())
