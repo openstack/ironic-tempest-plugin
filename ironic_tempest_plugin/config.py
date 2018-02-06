@@ -120,6 +120,9 @@ BaremetalGroup = [
                min=0,
                help="Ironic adjusted disk size to use in the standalone tests "
                     "as instance_info/root_gb value."),
+    cfg.IntOpt('available_nodes', min=0, default=None,
+               help="The number of baremetal hosts available to use for "
+                    "the tests.")
 ]
 
 BaremetalFeaturesGroup = [
