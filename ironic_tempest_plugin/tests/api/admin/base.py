@@ -10,8 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import functools
-
+import six
 from tempest import config
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
@@ -41,7 +40,7 @@ def creates(resource):
     """Decorator that adds resources to the appropriate cleanup list."""
 
     def decorator(f):
-        @functools.wraps(f)
+        @six.wraps(f)
         def wrapper(cls, *args, **kwargs):
             resp, body = f(cls, *args, **kwargs)
 
