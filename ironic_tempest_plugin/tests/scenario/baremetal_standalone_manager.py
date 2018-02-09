@@ -146,6 +146,18 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         return floating_ip['floating_ip_address']
 
     @classmethod
+    def get_server_ip(cls, node_id):
+        """Get the server fixed IP.
+
+        :param node_id: Name or UUID of the node.
+        :returns: IP address of associated fixed IP.
+        """
+        vif = cls.get_node_vifs(node_id)[0]
+        body = cls.ports_client.show_port(vif)['port']
+        fixed_ip = body['fixed_ips'][0]
+        return fixed_ip['ip_address']
+
+    @classmethod
     def cleanup_floating_ip(cls, ip_address):
         """Removes floating IP."""
         body = cls.os_admin.floating_ips_client.list_floatingips()
@@ -337,11 +349,19 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         if cls.deploy_interface:
             boot_kwargs['deploy_interface'] = cls.deploy_interface
         cls.node = cls.boot_node(cls.driver, cls.image_ref, **boot_kwargs)
-        cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
+        if CONF.validation.connect_method == 'floating':
+            cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
+        elif CONF.validation.connect_method == 'fixed':
+            cls.node_ip = cls.get_server_ip(cls.node['uuid'])
+        else:
+            m = ('Configuration option "[validation]/connect_method" '
+                 'must be set.')
+            raise lib_exc.InvalidConfiguration(m)
 
     @classmethod
     def resource_cleanup(cls):
-        cls.cleanup_floating_ip(cls.node_ip)
+        if CONF.validation.connect_method == 'floating':
+            cls.cleanup_floating_ip(cls.node_ip)
         vifs = cls.get_node_vifs(cls.node['uuid'])
         # Remove ports before deleting node, to catch regression for cases
         # when user did this prior unprovision node.
