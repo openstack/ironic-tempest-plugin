@@ -1,8 +1,18 @@
 ---
 - job:
+    name: ironic-dsvm-standalone-queens
+    parent: ironic-dsvm-standalone
+    override-checkout: stable/queens
+
+- job:
     name: ironic-dsvm-standalone-pike
     parent: ironic-dsvm-standalone
     override-checkout: stable/pike
+
+- job:
+    name: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-queens
+    parent: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
+    override-checkout: stable/queens
 
 - job:
     name: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-pike
@@ -15,6 +25,11 @@
     override-checkout: stable/ocata
 
 - job:
+    name: ironic-tempest-dsvm-ironic-inspector-queens
+    parent: ironic-tempest-dsvm-ironic-inspector
+    override-checkout: stable/queens
+
+- job:
     name: ironic-tempest-dsvm-ironic-inspector-pike
     parent: ironic-tempest-dsvm-ironic-inspector
     override-checkout: stable/pike
@@ -23,6 +38,11 @@
     name: ironic-tempest-dsvm-ironic-inspector-ocata
     parent: ironic-tempest-dsvm-ironic-inspector
     override-checkout: stable/ocata
+
+- job:
+    name: ironic-inspector-grenade-dsvm-queens
+    parent: ironic-inspector-grenade-dsvm
+    override-checkout: stable/queens
 
 - job:
     name: ironic-inspector-grenade-dsvm-pike
