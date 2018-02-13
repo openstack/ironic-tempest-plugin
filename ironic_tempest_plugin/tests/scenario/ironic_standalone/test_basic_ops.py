@@ -119,7 +119,22 @@ class BaremetalPxeIpmitoolPartitioned(bsm.BaremetalStandaloneScenarioTest):
                                              should_succeed=True))
 
 
-class BaremetalIpmiWholedisk(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalIpmiIscsiWholedisk(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ipmi'
+    deploy_interface = 'iscsi'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+
+    @decorators.idempotent_id('f25b71df-2150-45d7-a780-7f5b07124808')
+    @utils.services('image', 'network')
+    def test_ip_access_to_server(self):
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
+
+
+class BaremetalIpmiDirectWholedisk(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
     driver = 'ipmi'
@@ -134,7 +149,7 @@ class BaremetalIpmiWholedisk(bsm.BaremetalStandaloneScenarioTest):
                                              should_succeed=True))
 
 
-class BaremetalIpmiPartitioned(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalIpmiIscsiPartitioned(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
     driver = 'ipmi'
@@ -143,6 +158,21 @@ class BaremetalIpmiPartitioned(bsm.BaremetalStandaloneScenarioTest):
     wholedisk_image = False
 
     @decorators.idempotent_id('7d0b205e-edbc-4e2d-9f6d-95cd74eefecb')
+    @utils.services('image', 'network')
+    def test_ip_access_to_server(self):
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
+
+
+class BaremetalIpmiDirectPartitioned(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ipmi'
+    deploy_interface = 'direct'
+    image_ref = CONF.baremetal.partition_image_ref
+    wholedisk_image = False
+
+    @decorators.idempotent_id('7b4b2dcd-2bbb-44f5-991f-0964300af6b7')
     @utils.services('image', 'network')
     def test_ip_access_to_server(self):
         self.assertTrue(self.ping_ip_address(self.node_ip,
