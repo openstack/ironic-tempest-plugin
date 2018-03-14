@@ -19,7 +19,14 @@ If introspection tests are needed, also enable support for ironic-inspector:
     [service_enabled]
     ironic_inspector = True
 
-.. TODO(dtantsur): I'm pretty sure more configuration is required, fill it in
+See the following example configurations for more details:
+
+.. toctree::
+   :maxdepth: 1
+
+   config/with-nova
+
+.. TODO(dtantsur): cover standalone tests
 
 .. _Tempest configuration: https://docs.openstack.org/tempest/latest/configuration.html
 
