@@ -57,6 +57,7 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
             interval=self.wait_provisioning_state_interval)
 
     @decorators.idempotent_id('03bf7990-bee0-4dd7-bf74-b97ad7b52a4b')
+    @decorators.attr(type='smoke')
     @utils.services('compute', 'image', 'network')
     def test_baremetal_introspection(self):
         """This smoke test case follows this set of operations:
@@ -144,33 +145,3 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
         # verify nodes status and provision state
         for node_id in self.node_ids:
             self.verify_introspection_aborted(node_id)
-
-
-class InspectorSmokeTest(introspection_manager.InspectorScenarioTest):
-
-    @decorators.idempotent_id('a702d1f1-88e4-42ce-88ef-cba2d9e3312e')
-    @decorators.attr(type='smoke')
-    @utils.services('object_storage')
-    def test_baremetal_introspection(self):
-        """This smoke test case follows this very basic set of operations:
-
-            * Fetches expected properties from baremetal flavor
-            * Removes all properties from one node
-            * Sets the node to manageable state
-            * Inspects the node
-            * Sets the node to available state
-
-        """
-        # NOTE(dtantsur): we can't silently skip this test because it runs in
-        # grenade with several other tests, and we won't have any indication
-        # that it was not run.
-        assert self.node_ids, "No available nodes"
-        node_id = next(iter(self.node_ids))
-        self.introspect_node(node_id)
-
-        # settle down introspection
-        self.wait_for_introspection_finished([node_id])
-        self.wait_provisioning_state(
-            node_id, 'manageable',
-            timeout=CONF.baremetal_introspection.ironic_sync_timeout,
-            interval=self.wait_provisioning_state_interval)

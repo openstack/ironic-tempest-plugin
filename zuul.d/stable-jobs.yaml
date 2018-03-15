@@ -38,13 +38,3 @@
     name: ironic-tempest-dsvm-ironic-inspector-ocata
     parent: ironic-tempest-dsvm-ironic-inspector
     override-checkout: stable/ocata
-
-- job:
-    name: ironic-inspector-grenade-dsvm-queens
-    parent: ironic-inspector-grenade-dsvm
-    override-checkout: stable/queens
-
-- job:
-    name: ironic-inspector-grenade-dsvm-pike
-    parent: ironic-inspector-grenade-dsvm
-    override-checkout: stable/pike
