@@ -12,6 +12,10 @@
         - ironic-tempest-dsvm-ironic-inspector-queens
         - ironic-tempest-dsvm-ironic-inspector-pike
         - ironic-tempest-dsvm-ironic-inspector-ocata
+        - ironic-inspector-tempest-dsvm-discovery
+        - ironic-inspector-tempest-dsvm-discovery-queens
+        - ironic-inspector-tempest-dsvm-discovery-pike
+        - ironic-inspector-tempest-dsvm-discovery-ocata
     gate:
       jobs:
         - ironic-dsvm-standalone
@@ -25,3 +29,7 @@
         - ironic-tempest-dsvm-ironic-inspector-queens
         - ironic-tempest-dsvm-ironic-inspector-pike
         - ironic-tempest-dsvm-ironic-inspector-ocata
+        - ironic-inspector-tempest-dsvm-discovery
+        - ironic-inspector-tempest-dsvm-discovery-queens
+        - ironic-inspector-tempest-dsvm-discovery-pike
+        - ironic-inspector-tempest-dsvm-discovery-ocata
