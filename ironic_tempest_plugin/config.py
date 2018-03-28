@@ -168,4 +168,10 @@ BaremetalIntrospectionGroup = [
                 help="Is the auto-discovery feature enabled. Enroll hook "
                      "should be specified in node_not_found_hook - processing "
                      "section of inspector.conf"),
+    cfg.StrOpt('auto_discovery_default_driver',
+               # TODO(dtantsur): change to fake-hardware when Queens is no
+               # longer supported.
+               default='fake',
+               help="The driver expected to be set on newly discovered nodes. "
+                    "Only has effect with auto_discovery_feature is True."),
 ]
