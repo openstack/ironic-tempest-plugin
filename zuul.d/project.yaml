@@ -4,10 +4,10 @@
         - ironic-dsvm-standalone
         - ironic-dsvm-standalone-queens
         - ironic-dsvm-standalone-pike
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-queens
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-pike
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-ocata
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-ocata
         - ironic-tempest-dsvm-ironic-inspector
         - ironic-tempest-dsvm-ironic-inspector-queens
         - ironic-tempest-dsvm-ironic-inspector-pike
@@ -17,10 +17,10 @@
         - ironic-dsvm-standalone
         - ironic-dsvm-standalone-queens
         - ironic-dsvm-standalone-pike
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-queens
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-pike
-        - ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-ocata
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-ocata
         - ironic-tempest-dsvm-ironic-inspector
         - ironic-tempest-dsvm-ironic-inspector-queens
         - ironic-tempest-dsvm-ironic-inspector-pike
