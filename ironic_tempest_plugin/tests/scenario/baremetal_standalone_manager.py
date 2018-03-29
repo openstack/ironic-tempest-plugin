@@ -272,6 +272,27 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
             timeout=CONF.baremetal.unprovision_timeout,
             interval=1)
 
+    @classmethod
+    def rescue_node(cls, node_id, rescue_password):
+        """Rescue the node."""
+        cls.set_node_provision_state(node_id, 'rescue',
+                                     rescue_password=rescue_password)
+        cls.wait_provisioning_state(
+            node_id,
+            bm.BaremetalProvisionStates.RESCUE,
+            timeout=CONF.baremetal.rescue_timeout,
+            interval=1)
+
+    @classmethod
+    def unrescue_node(cls, node_id):
+        """Unrescue the node."""
+        cls.set_node_provision_state(node_id, 'unrescue')
+        cls.wait_provisioning_state(
+            node_id,
+            bm.BaremetalProvisionStates.ACTIVE,
+            timeout=CONF.baremetal.unrescue_timeout,
+            interval=1)
+
 
 class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
 
@@ -283,6 +304,9 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
 
     # The deploy interface to use by the HW type
     deploy_interface = None
+
+    # The rescue interface to use by the HW type
+    rescue_interface = None
 
     # User image ref to boot node with.
     image_ref = None
@@ -318,6 +342,13 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 "in the list of enabled deploy interfaces %(enabled)s" % {
                     'iface': cls.deploy_interface,
                     'enabled': CONF.baremetal.enabled_deploy_interfaces})
+        if (cls.rescue_interface and cls.rescue_interface not in
+                CONF.baremetal.enabled_rescue_interfaces):
+            raise cls.skipException(
+                "Rescue interface %(iface)s required by test is not "
+                "in the list of enabled rescue interfaces %(enabled)s" % {
+                    'iface': cls.rescue_interface,
+                    'enabled': CONF.baremetal.enabled_rescue_interfaces})
         if not cls.wholedisk_image and CONF.baremetal.use_provision_network:
             raise cls.skipException(
                 'Partitioned images are not supported with multitenancy.')
@@ -336,6 +367,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         boot_kwargs = {'image_checksum': image_checksum}
         if cls.deploy_interface:
             boot_kwargs['deploy_interface'] = cls.deploy_interface
+        if cls.rescue_interface:
+            boot_kwargs['rescue_interface'] = cls.rescue_interface
         cls.node = cls.boot_node(cls.driver, cls.image_ref, **boot_kwargs)
         cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
 

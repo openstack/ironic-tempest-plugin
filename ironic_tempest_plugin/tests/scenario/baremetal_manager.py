@@ -69,6 +69,7 @@ class BaremetalProvisionStates(object):
     DELETED = 'deleted'
     ERROR = 'error'
     MANAGEABLE = 'manageable'
+    RESCUE = 'rescue'
 
 
 class BaremetalScenarioTest(manager.ScenarioTest):
@@ -153,9 +154,10 @@ class BaremetalScenarioTest(manager.ScenarioTest):
     @classmethod
     @retry_on_conflict
     def set_node_provision_state(cls, node_id, state, configdrive=None,
-                                 clean_steps=None):
+                                 clean_steps=None, rescue_password=None):
         cls.baremetal_client.set_node_provision_state(
-            node_id, state, configdrive=configdrive, clean_steps=clean_steps)
+            node_id, state, configdrive=configdrive,
+            clean_steps=clean_steps, rescue_password=rescue_password)
 
     def verify_connectivity(self, ip=None):
         if ip:

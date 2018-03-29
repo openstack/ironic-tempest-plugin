@@ -80,6 +80,12 @@ BaremetalGroup = [
                help="Timeout for unprovisioning an Ironic node. "
                     "Takes longer since Kilo as Ironic performs an extra "
                     "step in Node cleaning."),
+    cfg.IntOpt('rescue_timeout',
+               default=300,
+               help="Timeout for rescuing an Ironic node."),
+    cfg.IntOpt('unrescue_timeout',
+               default=300,
+               help="Timeout for unrescuing an Ironic node."),
     cfg.StrOpt('min_microversion',
                help="Lower version of the test target microversion range. "
                     "The format is 'X.Y', where 'X' and 'Y' are int values. "
@@ -116,6 +122,9 @@ BaremetalGroup = [
     cfg.ListOpt('enabled_deploy_interfaces',
                 default=['iscsi', 'direct'],
                 help="List of Ironic enabled deploy interfaces."),
+    cfg.ListOpt('enabled_rescue_interfaces',
+                default=['no-rescue'],
+                help="List of Ironic enabled rescue interfaces."),
     cfg.IntOpt('adjusted_root_disk_size_gb',
                min=0,
                help="Ironic adjusted disk size to use in the standalone tests "
