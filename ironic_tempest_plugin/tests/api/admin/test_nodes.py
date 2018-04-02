@@ -165,6 +165,11 @@ class TestNodes(base.BaseBaremetalTest):
         self.assertEqual(1, len(body['nodes']))
         self.assertIn(self.node['uuid'], [n['uuid'] for n in body['nodes']])
 
+    @decorators.idempotent_id('b85af8c6-572b-4f20-815e-1cf31844b9f6')
+    def test_fault_hidden(self):
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertNotIn('fault', loaded_node)
+
 
 class TestNodesResourceClass(base.BaseBaremetalTest):
 
@@ -723,3 +728,35 @@ class TestNodesTraitsOldApi(base.BaseBaremetalTest):
         """Show a node, ensure it has no traits."""
         _, body = self.client.show_node(self.node['uuid'])
         self.assertNotIn('traits', body)
+
+
+class TestNodeFault(base.BaseBaremetalTest):
+    """Tests for fault of baremetal nodes."""
+
+    min_microversion = '1.42'
+
+    def setUp(self):
+        super(TestNodeFault, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+    @decorators.idempotent_id('649b4660-4f76-4d67-94df-6631a2cb2cd9')
+    def test_fault_shown(self):
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertIn('fault', loaded_node)
+
+    @decorators.idempotent_id('62f453be-8f30-4cfe-a19a-23656068e546')
+    def test_list_nodes_fault(self):
+        _, body = self.client.list_nodes()
+        self.assertIn(self.node['uuid'], [n['uuid'] for n in body['nodes']])
+
+        _, body = self.client.list_nodes(fault='power failure')
+        self.assertNotIn(self.node['uuid'],
+                         [n['uuid'] for n in body['nodes']])
+
+    @decorators.idempotent_id('c8fb55f1-873f-4fb9-bd57-6f1de0479873')
+    def test_list_nodes_with_invalid_fault(self):
+        self.assertRaises(
+            lib_exc.BadRequest,
+            self.client.list_nodes, fault='somefake')
