@@ -11,7 +11,7 @@
 #    under the License.
 
 
-def get_node(client, node_id=None, instance_uuid=None):
+def get_node(client, node_id=None, instance_uuid=None, api_version=None):
     """Get a node by its identifier or instance UUID.
 
     If both node_id and instance_uuid specified, node_id will be used.
@@ -19,15 +19,17 @@ def get_node(client, node_id=None, instance_uuid=None):
     :param client: an instance of tempest plugin BaremetalClient.
     :param node_id: identifier (UUID or name) of the node.
     :param instance_uuid: UUID of the instance.
+    :param api_version: Ironic API version to use.
     :returns: the requested node.
     :raises: AssertionError, if neither node_id nor instance_uuid was provided
     """
     assert node_id or instance_uuid, ('Either node or instance identifier '
                                       'has to be provided.')
     if node_id:
-        _, body = client.show_node(node_id)
+        _, body = client.show_node(node_id, api_version=api_version)
         return body
     elif instance_uuid:
-        _, body = client.show_node_by_instance_uuid(instance_uuid)
+        _, body = client.show_node_by_instance_uuid(instance_uuid,
+                                                    api_version=api_version)
         if body['nodes']:
             return body['nodes'][0]

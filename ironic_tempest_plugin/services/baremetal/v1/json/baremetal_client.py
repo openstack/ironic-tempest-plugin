@@ -20,6 +20,24 @@ class BaremetalClient(base.BaremetalClient):
     version = '1'
     uri_prefix = 'v1'
 
+    @staticmethod
+    def _get_headers(api_version):
+        """Return headers for a request.
+
+        Currently supports a header specifying the API version to use.
+
+        :param api_version: Ironic API version to use.
+        :return: a 2-tuple of (extra_headers, headers), where 'extra_headers'
+            is whether to use headers, and 'headers' is a list of headers to
+            use in the request.
+        """
+        extra_headers = False
+        headers = None
+        if api_version is not None:
+            extra_headers = True
+            headers = {'x-openstack-ironic-api-version': api_version}
+        return extra_headers, headers
+
     @base.handle_errors
     def list_nodes(self, **kwargs):
         """List all existing nodes."""
@@ -81,28 +99,33 @@ class BaremetalClient(base.BaremetalClient):
         return self._list_request('drivers')
 
     @base.handle_errors
-    def show_node(self, uuid):
+    def show_node(self, uuid, api_version=None):
         """Gets a specific node.
 
         :param uuid: Unique identifier of the node in UUID format.
+        :param api_version: Ironic API version to use.
         :return: Serialized node as a dictionary.
 
         """
-        return self._show_request('nodes', uuid)
+        extra_headers, headers = self._get_headers(api_version)
+        return self._show_request('nodes', uuid, headers=headers,
+                                  extra_headers=extra_headers)
 
     @base.handle_errors
-    def show_node_by_instance_uuid(self, instance_uuid):
+    def show_node_by_instance_uuid(self, instance_uuid, api_version=None):
         """Gets a node associated with given instance uuid.
 
         :param instance_uuid: Unique identifier of the instance in UUID format.
+        :param api_version: Ironic API version to use.
         :return: Serialized node as a dictionary.
 
         """
         uri = '/nodes/detail?instance_uuid=%s' % instance_uuid
-
+        extra_headers, headers = self._get_headers(api_version)
         return self._show_request('nodes',
                                   uuid=None,
-                                  uri=uri)
+                                  uri=uri, headers=headers,
+                                  extra_headers=extra_headers)
 
     @base.handle_errors
     def show_chassis(self, uuid):

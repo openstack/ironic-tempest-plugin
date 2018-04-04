@@ -154,10 +154,14 @@ class BaremetalClient(rest_client.RestClient):
                       resource,
                       uuid=None,
                       permanent=False,
+                      headers=None,
+                      extra_headers=False,
                       **kwargs):
         """Gets a specific object of the specified type.
 
         :param uuid: Unique identifier of the object in UUID format.
+        :param headers: List of headers to use in request.
+        :param extra_headers: Specify whether to use headers.
         :returns: Serialized object as a dictionary.
 
         """
@@ -165,7 +169,8 @@ class BaremetalClient(rest_client.RestClient):
             uri = kwargs['uri']
         else:
             uri = self._get_uri(resource, uuid=uuid, permanent=permanent)
-        resp, body = self.get(uri)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers)
         self.expected_success(http_client.OK, resp.status)
 
         return resp, self.deserialize(body)

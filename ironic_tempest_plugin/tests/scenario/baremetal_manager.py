@@ -120,8 +120,9 @@ class BaremetalScenarioTest(manager.ScenarioTest):
                                                       instance_id)
 
     @classmethod
-    def get_node(cls, node_id=None, instance_id=None):
-        return utils.get_node(cls.baremetal_client, node_id, instance_id)
+    def get_node(cls, node_id=None, instance_id=None, api_version=None):
+        return utils.get_node(cls.baremetal_client, node_id, instance_id,
+                              api_version)
 
     def get_ports(self, node_uuid):
         ports = []

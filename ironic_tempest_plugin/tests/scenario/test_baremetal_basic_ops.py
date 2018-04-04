@@ -35,6 +35,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         * Monitors the associated Ironic node for power and
           expected state transitions
         * Validates Ironic node's port data has been properly updated
+        * Validates Ironic node's resource class and traits have been honoured
         * Verifies SSH connectivity using created keypair via fixed IP
         * Associates a floating ip
         * Verifies SSH connectivity using created keypair via floating IP
@@ -43,6 +44,16 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         * Monitors the associated Ironic node for power and
           expected state transitions
     """
+
+    @staticmethod
+    def _is_version_supported(version):
+        """Return whether an API microversion is supported."""
+        min_version = api_version_request.APIVersionRequest(
+            CONF.baremetal.min_microversion)
+        max_version = api_version_request.APIVersionRequest(
+            CONF.baremetal.max_microversion)
+        version = api_version_request.APIVersionRequest(version)
+        return min_version <= version <= max_version
 
     def rebuild_instance(self, preserve_ephemeral=False):
         self.rebuild_server(server_id=self.instance['id'],
@@ -105,9 +116,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         vifs = []
         # TODO(vsaienko) switch to get_node_vifs() when all stable releases
         # supports Ironic API 1.28
-        if (api_version_request.APIVersionRequest(
-            CONF.baremetal.max_microversion) >=
-                api_version_request.APIVersionRequest('1.28')):
+        if self._is_version_supported('1.28'):
             vifs = self.get_node_vifs(node_uuid)
         else:
             for port in self.get_ports(self.node['uuid']):
@@ -124,12 +133,65 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             self.assertEqual(n_port['device_id'], self.instance['id'])
             self.assertIn(n_port['mac_address'], ir_ports_addresses)
 
+    def validate_scheduling(self):
+        """Validate scheduling attributes of the node against the flavor.
+
+        Validates the resource class and traits requested by the flavor against
+        those set on the node. Does not assume that resource classes and traits
+        are in use.
+        """
+        # Try to get a node with resource class (1.21) and traits (1.37).
+        # TODO(mgoddard): Remove this when all stable releases support these
+        # API versions.
+        for version in ('1.37', '1.21'):
+            if self._is_version_supported(version):
+                node = self.get_node(instance_id=self.instance['id'],
+                                     api_version=version)
+                break
+        else:
+            # Neither API is supported - cannot test.
+            LOG.warning("Cannot validate resource class and trait based "
+                        "scheduling as these require API version 1.21 and "
+                        "1.37 respectively")
+            return
+
+        f_id = self.instance['flavor']['id']
+        extra_specs = self.flavors_client.list_flavor_extra_specs(f_id)
+        extra_specs = extra_specs['extra_specs']
+
+        # Pull the requested resource class and traits from the flavor.
+        resource_class = None
+        traits = set()
+        for key, value in extra_specs.items():
+            if key.startswith('resources:CUSTOM_') and value == '1':
+                resource_class = key.partition(':')[2]
+            if key.startswith('trait:') and value == 'required':
+                trait = key.partition(':')[2]
+                traits.add(trait)
+
+        # Validate requested resource class and traits against the node.
+        if resource_class is not None:
+            # The resource class in ironic may be lower case, and must omit the
+            # CUSTOM_ prefix. Normalise it.
+            node_resource_class = node['resource_class']
+            node_resource_class = node_resource_class.upper()
+            node_resource_class = 'CUSTOM_' + node_resource_class
+            self.assertEqual(resource_class, node_resource_class)
+
+        if 'traits' in node and traits:
+            self.assertIn('traits', node['instance_info'])
+            # All flavor traits should be added as instance traits.
+            self.assertEqual(traits, set(node['instance_info']['traits']))
+            # Flavor traits should be a subset of node traits.
+            self.assertTrue(traits.issubset(set(node['traits'])))
+
     @decorators.idempotent_id('549173a5-38ec-42bb-b0e2-c8b9f4a08943')
     @utils.services('compute', 'image', 'network')
     def test_baremetal_server_ops(self):
         self.add_keypair()
         self.instance, self.node = self.boot_instance()
         self.validate_ports()
+        self.validate_scheduling()
         ip_address = self.get_server_ip(self.instance)
         self.get_remote_client(ip_address).validate_authentication()
         vm_client = self.get_remote_client(ip_address)
