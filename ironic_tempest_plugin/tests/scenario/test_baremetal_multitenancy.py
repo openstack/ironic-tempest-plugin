@@ -44,6 +44,11 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
         if not CONF.baremetal.use_provision_network:
             msg = 'Ironic/Neutron tenant isolation is not configured.'
             raise cls.skipException(msg)
+        if (CONF.baremetal.available_nodes is not None and
+                CONF.baremetal.available_nodes < 2):
+            msg = ('Not enough baremetal nodes, %d configured, test requires '
+                   'a minimum of 2') % CONF.baremetal.available_nodes
+            raise cls.skipException(msg)
 
     def create_tenant_network(self, clients, tenant_cidr):
         network = self._create_network(
