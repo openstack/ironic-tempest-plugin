@@ -230,6 +230,12 @@ class BaremetalIpmiRescuePartitioned(bsm.BaremetalStandaloneScenarioTest):
     image_ref = CONF.baremetal.partition_image_ref
     wholedisk_image = False
 
+    # NOTE(jroll) the ansible deploy interface doesn't support partition images
+    # with netboot mode. Since that's what is happening here, explicitly choose
+    # a deploy interface to be sure we don't end up with a node using the
+    # ansible interface here.
+    deploy_interface = 'iscsi'
+
     @decorators.idempotent_id('113acd0a-9872-4631-b3ee-54da7e3bb262')
     @utils.services('image', 'network')
     def test_rescue_mode(self):
