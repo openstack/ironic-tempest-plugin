@@ -314,10 +314,16 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # The node driver to use in the test
     driver = None
 
-    # The deploy interface to use by the HW type
+    # The deploy interface to use by the HW type. The deploy interface of
+    # the node used in the test will be set to this value. If set to None,
+    # the node will retain its existing deploy_interface value (which may have
+    # been set via a different test).
     deploy_interface = None
 
-    # The rescue interface to use by the HW type
+    # The rescue interface to use by the HW type. The rescue interface of
+    # the node used in the test will be set to this value. If set to None,
+    # the node will retain its existing rescue_interface value (which may have
+    # been set via a different test).
     rescue_interface = None
 
     # User image ref to boot node with.
