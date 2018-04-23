@@ -10,18 +10,18 @@
     override-checkout: stable/pike
 
 - job:
-    name: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-queens
-    parent: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
+    name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
+    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
     override-checkout: stable/queens
 
 - job:
-    name: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-pike
-    parent: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
+    name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
+    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
     override-checkout: stable/pike
 
 - job:
-    name: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa-ocata
-    parent: ironic-tempest-dsvm-ipa-wholedisk-bios-agent_ipmitool-tinyipa
+    name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-ocata
+    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
     override-checkout: stable/ocata
 
 - job:
