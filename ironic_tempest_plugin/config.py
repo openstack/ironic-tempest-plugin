@@ -52,9 +52,10 @@ BaremetalGroup = [
     cfg.StrOpt('catalog_type',
                default='baremetal',
                help="Catalog type of the baremetal provisioning service"),
+    # TODO(dtantsur): change to fake-hardware when Ocata is no longer supported
     cfg.StrOpt('driver',
                default='fake',
-               help="Driver name which Ironic uses"),
+               help="Driver name to use for API tests"),
     cfg.StrOpt('endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
