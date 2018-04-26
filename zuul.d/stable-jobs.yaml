@@ -38,3 +38,18 @@
     name: ironic-tempest-dsvm-ironic-inspector-ocata
     parent: ironic-tempest-dsvm-ironic-inspector
     override-checkout: stable/ocata
+
+- job:
+    name: ironic-inspector-tempest-dsvm-discovery-queens
+    parent: ironic-inspector-tempest-dsvm-discovery
+    override-checkout: stable/queens
+
+- job:
+    name: ironic-inspector-tempest-dsvm-discovery-pike
+    parent: ironic-inspector-tempest-dsvm-discovery
+    override-checkout: stable/pike
+
+- job:
+    name: ironic-inspector-tempest-dsvm-discovery-ocata
+    parent: ironic-inspector-tempest-dsvm-discovery
+    override-checkout: stable/ocata
