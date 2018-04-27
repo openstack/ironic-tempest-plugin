@@ -10,8 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from tempest import config
 from tempest.lib import decorators
 from tempest import test  # noqa
@@ -40,7 +38,26 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
         discovered_node = self._get_discovery_node()
         self.node_info = self._get_node_info(discovered_node)
 
-        rule = self._generate_discovery_rule(self.node_info)
+        rule = {
+            "description": "Auto-discovery rule",
+            "actions": [
+                # Set an attribute in case we cannot access the introspection
+                # data to check the auto_discovered flag directly.
+                {"action": "set-attribute",
+                 "path": "/extra/discovered",
+                 "value": "yes"},
+                # Re-assign the name to use it later in the test.
+                {"action": "set-attribute",
+                 "path": "/name",
+                 "value": self.node_info['name']},
+            ],
+            # This flag must be automatically set by the auto-discovery process
+            "conditions": [
+                {"op": "eq",
+                 "field": "data://auto_discovered",
+                 "value": True}
+            ]
+        }
 
         self.rule_import_from_dict(rule)
         self.addCleanup(self.rule_purge)
@@ -65,27 +82,9 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
         self.assertIsNotNone(discovered_node)
         return discovered_node
 
-    def _generate_discovery_rule(self, node):
-        rule = dict()
-        rule["description"] = "Node %s discovery rule" % node['name']
-        rule["actions"] = [
-            {"action": "set-attribute", "path": "/name",
-             "value": "%s" % node['name']},
-            {"action": "set-attribute", "path": "/driver",
-             "value": "%s" % node['driver']},
-        ]
-
-        for key, value in node['driver_info'].items():
-            rule["actions"].append(
-                {"action": "set-attribute", "path": "/driver_info/%s" % key,
-                 "value": "%s" % value})
-        rule["conditions"] = [
-            {"op": "eq", "field": "data://auto_discovered", "value": True}
-        ]
-        return rule
-
     def verify_node_introspection_data(self, node):
         data = self.introspection_data(node['uuid'])
+        self.assertTrue(data['auto_discovered'])
         self.assertEqual(data['cpu_arch'],
                          self.flavor['properties']['cpu_arch'])
         self.assertEqual(int(data['memory_mb']),
@@ -109,11 +108,6 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
         self.assertEqual(expected_cpu_arch,
                          node['properties']['cpu_arch'])
 
-    def verify_node_driver_info(self, node_info, inspected_node):
-        for key in node_info['driver_info']:
-            self.assertEqual(six.text_type(node_info['driver_info'][key]),
-                             inspected_node['driver_info'].get(key))
-
     @decorators.idempotent_id('dd3abe5e-0d23-488d-bb4e-344cdeff7dcb')
     def test_bearmetal_auto_discovery(self):
         """This test case follows this set of operations:
@@ -121,9 +115,9 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
            * Choose appropriate node, based on provision state;
            * Get node info;
            * Generate discovery rule;
-           * Delete discovered node from ironic;
-           * Start baremetal vm via virsh;
-           * Wating for node introspection;
+           * Start introspection via ironic-inspector API;
+           * Delete the node from ironic;
+           * Wating for node discovery;
            * Verify introspected node.
         """
         # NOTE(aarefiev): workaround for infra, 'tempest' user doesn't
@@ -145,6 +139,9 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
         self.verify_node_flavor(inspected_node)
         if CONF.service_available.swift:
             self.verify_node_introspection_data(inspected_node)
-        self.verify_node_driver_info(self.node_info, inspected_node)
         self.assertEqual(ProvisionStates.ENROLL,
                          inspected_node['provision_state'])
+        self.assertEqual(
+            CONF.baremetal_introspection.auto_discovery_default_driver,
+            inspected_node['driver'])
+        self.assertEqual('yes', inspected_node['extra']['discovered'])
