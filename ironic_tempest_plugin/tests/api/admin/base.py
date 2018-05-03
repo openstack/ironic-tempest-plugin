@@ -28,7 +28,7 @@ CONF = config.CONF
 # will require passing driver-specific data to Tempest (addresses,
 # credentials, etc).  Until then, only support testing against the fake driver,
 # which has no external dependencies.
-SUPPORTED_DRIVERS = ['fake']
+SUPPORTED_DRIVERS = ['fake', 'fake-hardware']
 
 # NOTE(jroll): resources must be deleted in a specific order, this list
 # defines the resource types to clean up, and the correct order.
