@@ -4,6 +4,7 @@
         - ironic-dsvm-standalone
         - ironic-dsvm-standalone-queens
         - ironic-dsvm-standalone-pike
+        - ironic-tempest-dsvm-functional-python3
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
@@ -21,6 +22,7 @@
         - ironic-dsvm-standalone
         - ironic-dsvm-standalone-queens
         - ironic-dsvm-standalone-pike
+        - ironic-tempest-dsvm-functional-python3
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
