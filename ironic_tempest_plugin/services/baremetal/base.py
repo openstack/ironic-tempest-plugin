@@ -212,18 +212,21 @@ class BaremetalClient(rest_client.RestClient):
 
         return resp
 
-    def _delete_request(self, resource, uuid):
+    def _delete_request(self, resource, uuid,
+                        expected_status=http_client.NO_CONTENT):
         """Delete specified object.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
+        :param expected_status: Expected response status code. By default is
+                                http_client.NO_CONTENT (204)
         :returns: A tuple with the server response and the response body.
 
         """
         uri = self._get_uri(resource, uuid)
 
         resp, body = self.delete(uri)
-        self.expected_success(http_client.NO_CONTENT, resp.status)
+        self.expected_success(expected_status, resp.status)
         return resp, body
 
     def _patch_request(self, resource, uuid, patch_object):

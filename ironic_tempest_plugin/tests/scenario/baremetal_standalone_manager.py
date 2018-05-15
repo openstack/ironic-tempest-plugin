@@ -274,15 +274,18 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         :param node_id: Name or UUID for the node.
         """
         cls.detach_all_vifs_from_node(node_id)
-        cls.set_node_provision_state(node_id, 'deleted')
-        # NOTE(vsaienko) We expect here fast switching from deleted to
-        # available as automated cleaning is disabled so poll status each 1s.
-        cls.wait_provisioning_state(
-            node_id,
-            [bm.BaremetalProvisionStates.NOSTATE,
-             bm.BaremetalProvisionStates.AVAILABLE],
-            timeout=CONF.baremetal.unprovision_timeout,
-            interval=1)
+
+        if cls.delete_node:
+            cls.set_node_provision_state(node_id, 'deleted')
+            # NOTE(vsaienko) We expect here fast switching from deleted to
+            # available as automated cleaning is disabled so poll status
+            # each 1s.
+            cls.wait_provisioning_state(
+                node_id,
+                [bm.BaremetalProvisionStates.NOSTATE,
+                 bm.BaremetalProvisionStates.AVAILABLE],
+                timeout=CONF.baremetal.unprovision_timeout,
+                interval=1)
 
     @classmethod
     def rescue_node(cls, node_id, rescue_password):
@@ -304,6 +307,63 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
             bm.BaremetalProvisionStates.ACTIVE,
             timeout=CONF.baremetal.unrescue_timeout,
             interval=1)
+
+    def manual_cleaning(self, node, clean_steps):
+        """Performs manual cleaning.
+
+        The following actions are executed:
+           * Expects node to be in available state.
+           * Brings the node to manageable state.
+           * Do manual cleaning.
+           * Brings the node back to original available.
+
+        :param node: Ironic node to associate instance_uuid with.
+        :param clean_steps: clean steps for manual cleaning.
+        """
+        self.set_node_provision_state(node['uuid'], 'manage')
+        self.wait_provisioning_state(
+            node['uuid'],
+            [bm.BaremetalProvisionStates.MANAGEABLE],
+            timeout=CONF.baremetal.unprovision_timeout,
+            interval=30)
+        self.set_node_provision_state(
+            node['uuid'], 'clean', clean_steps=clean_steps)
+        self.wait_provisioning_state(
+            node['uuid'],
+            [bm.BaremetalProvisionStates.MANAGEABLE],
+            timeout=CONF.baremetal.unprovision_timeout,
+            interval=30)
+        self.set_node_provision_state(node['uuid'], 'provide')
+        self.wait_provisioning_state(
+            node['uuid'],
+            [bm.BaremetalProvisionStates.NOSTATE,
+             bm.BaremetalProvisionStates.AVAILABLE],
+            timeout=CONF.baremetal.unprovision_timeout,
+            interval=30)
+
+    def check_manual_partition_cleaning(self, node):
+        """Tests the cleanup step for erasing devices metadata.
+
+        :param node: Ironic node to associate instance_uuid with, it is
+            expected to be in 'active' state
+        """
+        self.set_node_provision_state(node['uuid'], 'deleted')
+        self.wait_provisioning_state(
+            node['uuid'],
+            [bm.BaremetalProvisionStates.NOSTATE,
+             bm.BaremetalProvisionStates.AVAILABLE],
+            timeout=CONF.baremetal.unprovision_timeout,
+            interval=30)
+        clean_steps = [
+            {
+                "interface": "deploy",
+                "step": "erase_devices_metadata"
+            }
+        ]
+        self.manual_cleaning(node, clean_steps=clean_steps)
+        # TODO(yolanda): we currently are not checking it the cleanup
+        # was actually removing the metadata, because there was not a good
+        # way to achieve that check for vms and baremetal
 
 
 class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
@@ -334,6 +394,9 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
 
     # Image checksum, required when image is stored on HTTP server.
     image_checksum = None
+
+    # If we need to set provision state 'deleted' for the node  after test
+    delete_node = True
 
     mandatory_attr = ['driver', 'image_ref', 'wholedisk_image']
 
@@ -405,7 +468,10 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         # Remove ports before deleting node, to catch regression for cases
         # when user did this prior unprovision node.
         for vif in vifs:
-            cls.ports_client.delete_port(vif)
+            try:
+                cls.ports_client.delete_port(vif)
+            except lib_exc.NotFound:
+                pass
         cls.terminate_node(cls.node['uuid'])
         base.reset_baremetal_api_microversion()
         super(BaremetalStandaloneManager, cls).resource_cleanup()
