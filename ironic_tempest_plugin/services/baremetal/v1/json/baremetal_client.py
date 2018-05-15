@@ -89,6 +89,11 @@ class BaremetalClient(base.BaremetalClient):
         return self._list_request('/nodes/%s/states' % uuid)
 
     @base.handle_errors
+    def list_node_bios_settings(self, uuid):
+        """List node bios settings."""
+        return self._list_request('/nodes/%s/bios' % uuid)
+
+    @base.handle_errors
     def list_ports_detail(self, **kwargs):
         """Details list all existing ports."""
         return self._list_request('/ports/detail', **kwargs)
@@ -410,6 +415,7 @@ class BaremetalClient(base.BaremetalClient):
                            'properties/local_gb',
                            'properties/memory_mb',
                            'driver',
+                           'bios_interface',
                            'deploy_interface',
                            'rescue_interface',
                            'instance_uuid',

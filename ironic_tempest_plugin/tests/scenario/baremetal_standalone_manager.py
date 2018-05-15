@@ -359,6 +359,38 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         # was actually removing the metadata, because there was not a good
         # way to achieve that check for vms and baremetal
 
+    def check_bios_apply_and_reset_configuration(self, node, settings):
+        clean_steps = [
+            {
+                "interface": "bios",
+                "step": "apply_configuration",
+                "args": {"settings": settings}
+            }
+        ]
+        self.manual_cleaning(node, clean_steps=clean_steps)
+
+        # query the api to check node bios settings
+        _, bios_settings = self.baremetal_client.list_node_bios_settings(
+            node['uuid'])
+
+        for setting in settings:
+            self.assertIn(setting['name'],
+                          [i['name'] for i in bios_settings['bios']])
+            self.assertIn(setting['value'],
+                          [i['value'] for i in bios_settings['bios']])
+
+        # reset bios and ensure that the settings are not there
+        clean_steps = [
+            {
+                "interface": "bios",
+                "step": "factory_reset"
+            }
+        ]
+        self.manual_cleaning(node, clean_steps=clean_steps)
+        _, bios_settings = self.baremetal_client.list_node_bios_settings(
+            node['uuid'])
+        self.assertEqual([], bios_settings['bios'])
+
 
 class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
 
@@ -367,6 +399,12 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
 
     # The node driver to use in the test
     driver = None
+
+    # The bios interface to use by the HW type. The bios interface of the
+    # node used in the test will be set to this value. If set to None, the
+    # node will retain its existing bios_interface value (which may have been
+    # set via a different test).
+    bios_interface = None
 
     # The deploy interface to use by the HW type. The deploy interface of
     # the node used in the test will be set to this value. If set to None,
@@ -404,6 +442,13 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                     'driver': cls.driver,
                     'enabled_drivers': CONF.baremetal.enabled_drivers,
                     'enabled_hw_types': CONF.baremetal.enabled_hardware_types})
+        if (cls.bios_interface and cls.bios_interface not in
+                CONF.baremetal.enabled_bios_interfaces):
+            raise cls.skipException(
+                "Bios interface %(iface)s required by the test is not in the "
+                "list of enabled bios interfaces %(enabled)s" % {
+                    'iface': cls.bios_interface,
+                    'enabled': CONF.baremetal.enabled_bios_interfaces})
         if (cls.deploy_interface and cls.deploy_interface not in
                 CONF.baremetal.enabled_deploy_interfaces):
             raise cls.skipException(
@@ -446,6 +491,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         if not uuidutils.is_uuid_like(cls.image_ref):
             image_checksum = cls.image_checksum
         boot_kwargs = {'image_checksum': image_checksum}
+        if cls.bios_interface:
+            boot_kwargs['bios_interface'] = cls.bios_interface
         if cls.deploy_interface:
             boot_kwargs['deploy_interface'] = cls.deploy_interface
         if cls.rescue_interface:
