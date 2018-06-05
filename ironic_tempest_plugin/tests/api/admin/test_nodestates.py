@@ -21,7 +21,7 @@ from ironic_tempest_plugin.tests.api.admin import base
 
 
 class TestNodeStatesMixin(object):
-    """Mixin for for baremetal node states tests."""
+    """Mixin for baremetal node states tests."""
 
     @classmethod
     def resource_setup(cls):
