@@ -35,6 +35,9 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
     # attach VIF to a node.
     min_microversion = '1.28'
 
+    image_ref = None
+    image_checksum = None
+
     @classmethod
     def skip_checks(cls):
         """Defines conditions to skip these tests."""
@@ -218,30 +221,28 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         return nodes[0]
 
     @classmethod
-    def boot_node(cls, driver, image_ref, image_checksum=None, **interfaces):
+    def boot_node(cls, image_ref=None, image_checksum=None):
         """Boot ironic node.
 
         The following actions are executed:
-          * Randomly pick an available node for deployment and reserve it.
-          * Update node driver.
           * Create/Pick networks to boot node in.
           * Create Neutron port and attach it to node.
           * Update node image_source/root_gb.
           * Deploy node.
           * Wait until node is deployed.
 
-        :param driver: Node driver to use.
         :param image_ref: Reference to user image to boot node with.
         :param image_checksum: md5sum of image specified in image_ref.
                                Needed only when direct HTTP link is provided.
-        :param interfaces: driver interfaces to set on the node
-        :returns: Ironic node.
         """
-        node = cls.get_and_reserve_node()
-        cls.update_node_driver(node['uuid'], driver, **interfaces)
+        if image_ref is None:
+            image_ref = cls.image_ref
+        if image_checksum is None:
+            image_checksum = cls.image_checksum
+
         network, subnet, router = cls.create_networks()
         n_port = cls.create_neutron_port(network_id=network['id'])
-        cls.vif_attach(node_id=node['uuid'], vif_id=n_port['id'])
+        cls.vif_attach(node_id=cls.node['uuid'], vif_id=n_port['id'])
         patch = [{'path': '/instance_info/image_source',
                   'op': 'add',
                   'value': image_ref}]
@@ -253,14 +254,14 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
                       'op': 'add',
                       'value': CONF.baremetal.adjusted_root_disk_size_gb})
         # TODO(vsaienko) add testing for custom configdrive
-        cls.update_node(node['uuid'], patch=patch)
-        cls.set_node_provision_state(node['uuid'], 'active')
-        cls.wait_power_state(node['uuid'], bm.BaremetalPowerStates.POWER_ON)
-        cls.wait_provisioning_state(node['uuid'],
+        cls.update_node(cls.node['uuid'], patch=patch)
+        cls.set_node_provision_state(cls.node['uuid'], 'active')
+        cls.wait_power_state(cls.node['uuid'],
+                             bm.BaremetalPowerStates.POWER_ON)
+        cls.wait_provisioning_state(cls.node['uuid'],
                                     bm.BaremetalProvisionStates.ACTIVE,
                                     timeout=CONF.baremetal.active_timeout,
                                     interval=30)
-        return node
 
     @classmethod
     def terminate_node(cls, node_id):
@@ -347,13 +348,6 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         :param node: Ironic node to associate instance_uuid with, it is
             expected to be in 'active' state
         """
-        self.set_node_provision_state(node['uuid'], 'deleted')
-        self.wait_provisioning_state(
-            node['uuid'],
-            [bm.BaremetalProvisionStates.NOSTATE,
-             bm.BaremetalProvisionStates.AVAILABLE],
-            timeout=CONF.baremetal.unprovision_timeout,
-            interval=30)
         clean_steps = [
             {
                 "interface": "deploy",
@@ -386,14 +380,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # been set via a different test).
     rescue_interface = None
 
-    # User image ref to boot node with.
-    image_ref = None
-
     # Boolean value specify if image is wholedisk or not.
     wholedisk_image = None
-
-    # Image checksum, required when image is stored on HTTP server.
-    image_checksum = None
 
     # If we need to set provision state 'deleted' for the node  after test
     delete_node = True
@@ -435,6 +423,18 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 'Partitioned images are not supported with multitenancy.')
 
     @classmethod
+    def set_node_to_active(cls, image_ref=None, image_checksum=None):
+        cls.boot_node(image_ref, image_checksum)
+        if CONF.validation.connect_method == 'floating':
+            cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
+        elif CONF.validation.connect_method == 'fixed':
+            cls.node_ip = cls.get_server_ip(cls.node['uuid'])
+        else:
+            m = ('Configuration option "[validation]/connect_method" '
+                 'must be set.')
+            raise lib_exc.InvalidConfiguration(m)
+
+    @classmethod
     def resource_setup(cls):
         super(BaremetalStandaloneScenarioTest, cls).resource_setup()
         base.set_baremetal_api_microversion(cls.api_microversion)
@@ -450,20 +450,17 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
             boot_kwargs['deploy_interface'] = cls.deploy_interface
         if cls.rescue_interface:
             boot_kwargs['rescue_interface'] = cls.rescue_interface
-        cls.node = cls.boot_node(cls.driver, cls.image_ref, **boot_kwargs)
-        if CONF.validation.connect_method == 'floating':
-            cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
-        elif CONF.validation.connect_method == 'fixed':
-            cls.node_ip = cls.get_server_ip(cls.node['uuid'])
-        else:
-            m = ('Configuration option "[validation]/connect_method" '
-                 'must be set.')
-            raise lib_exc.InvalidConfiguration(m)
+
+        # just get an available node
+        cls.node = cls.get_and_reserve_node()
+        cls.update_node_driver(cls.node['uuid'], cls.driver, **boot_kwargs)
 
     @classmethod
     def resource_cleanup(cls):
         if CONF.validation.connect_method == 'floating':
-            cls.cleanup_floating_ip(cls.node_ip)
+            if cls.node_ip:
+                cls.cleanup_floating_ip(cls.node_ip)
+
         vifs = cls.get_node_vifs(cls.node['uuid'])
         # Remove ports before deleting node, to catch regression for cases
         # when user did this prior unprovision node.
@@ -475,3 +472,9 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         cls.terminate_node(cls.node['uuid'])
         base.reset_baremetal_api_microversion()
         super(BaremetalStandaloneManager, cls).resource_cleanup()
+
+    def boot_and_verify_node(self, image_ref=None, image_checksum=None,
+                             should_succeed=True):
+        self.set_node_to_active(image_ref, image_checksum)
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=should_succeed))
