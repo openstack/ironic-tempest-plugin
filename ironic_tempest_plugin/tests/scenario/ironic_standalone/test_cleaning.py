@@ -18,7 +18,6 @@ from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 
-from ironic_tempest_plugin.services.baremetal import base
 from ironic_tempest_plugin.tests.scenario import \
     baremetal_standalone_manager as bsm
 
@@ -33,11 +32,11 @@ class BaremetalCleaningAgentIpmitoolWholedisk(
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
     delete_node = False
+    api_microversion = '1.28'
 
     @decorators.idempotent_id('0d82cedd-9697-4cf7-8e4a-80d510f53615')
     @utils.services('image', 'network')
     def test_manual_cleaning(self):
-        base.set_baremetal_api_microversion('1.28')
         self.check_manual_partition_cleaning(self.node)
 
 
@@ -48,11 +47,11 @@ class BaremetalCleaningPxeIpmitoolWholedisk(
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
     delete_node = False
+    api_microversion = '1.28'
 
     @decorators.idempotent_id('fb03abfa-cdfc-41ec-aaa8-c70402786a85')
     @utils.services('image', 'network')
     def test_manual_cleaning(self):
-        base.set_baremetal_api_microversion('1.28')
         self.check_manual_partition_cleaning(self.node)
 
 
@@ -63,9 +62,10 @@ class BaremetalCleaningIpmiWholedisk(
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
     delete_node = False
+    deploy_interface = 'iscsi'
+    api_microversion = '1.31'
 
     @decorators.idempotent_id('065238db-1b6d-4d75-a9da-c240f8cbd956')
     @utils.services('image', 'network')
     def test_manual_cleaning(self):
-        base.set_baremetal_api_microversion('1.28')
         self.check_manual_partition_cleaning(self.node)
