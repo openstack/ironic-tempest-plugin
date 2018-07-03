@@ -111,7 +111,7 @@ class TestNodes(base.BaseBaremetalTest):
 
         _, node = self.create_node(self.chassis['uuid'], **props)
 
-        new_p = {'cpu_arch': 'x86',
+        new_p = {'cpu_arch': 'arm64',
                  'cpus': '1',
                  'local_gb': '10000',
                  'memory_mb': '12300'}
