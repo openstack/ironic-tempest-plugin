@@ -409,6 +409,66 @@ class TestNodesVif(base.BaseBaremetalTest):
         self.client.vif_detach(self.node['uuid'], self.nport_id)
 
 
+class TestHardwareInterfaces(base.BaseBaremetalTest):
+
+    min_microversion = '1.31'
+    # Subclasses can override this with more interfaces available in later API
+    # versions.
+    hardware_interfaces = [
+        'boot',
+        'console',
+        'deploy',
+        'inspect',
+        'management',
+        'power',
+        'raid',
+        'vendor',
+    ]
+
+    @classmethod
+    def skip_checks(cls):
+        super(TestHardwareInterfaces, cls).skip_checks()
+        if CONF.baremetal.driver != 'fake-hardware':
+            raise cls.skipException('These tests rely on fake-hardware')
+
+    @property
+    def optional_interfaces(self):
+        return set(self.hardware_interfaces) - {'boot', 'deploy',
+                                                'management', 'power'}
+
+    def setUp(self):
+        super(TestHardwareInterfaces, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+        # Reset optional interfaces to non-default values
+        for iface in self.optional_interfaces:
+            self.client.update_node(self.node['uuid'],
+                                    [{'path': '/%s_interface' % iface,
+                                      'op': 'add',
+                                      'value': 'no-%s' % iface}])
+
+    def test_set_interfaces(self):
+        for iface in self.hardware_interfaces:
+            field = '%s_interface' % iface
+            self.client.update_node(self.node['uuid'],
+                                    [{'path': '/%s' % field,
+                                      'op': 'add',
+                                      'value': 'fake'}])
+            _, node = self.client.show_node(self.node['uuid'])
+            self.assertEqual('fake', node[field])
+
+    def test_reset_interfaces(self):
+        for iface in self.hardware_interfaces:
+            field = '%s_interface' % iface
+            self.client.update_node(self.node['uuid'],
+                                    [{'path': '/%s' % field,
+                                      'op': 'remove'}])
+            _, node = self.client.show_node(self.node['uuid'])
+            self.assertEqual('fake', node[field])
+
+
 class TestNodesTraits(base.BaseBaremetalTest):
 
     min_microversion = '1.37'
