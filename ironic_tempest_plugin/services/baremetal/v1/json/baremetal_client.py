@@ -410,6 +410,11 @@ class BaremetalClient(base.BaremetalClient):
         :return: A tuple with the server response and the updated node.
 
         """
+        if 'reset_interfaces' in kwargs:
+            params = {'reset_interfaces': str(kwargs.pop('reset_interfaces'))}
+        else:
+            params = {}
+
         node_attributes = ('properties/cpu_arch',
                            'properties/cpus',
                            'properties/local_gb',
@@ -423,7 +428,7 @@ class BaremetalClient(base.BaremetalClient):
         if not patch:
             patch = self._make_patch(node_attributes, **kwargs)
 
-        return self._patch_request('nodes', uuid, patch)
+        return self._patch_request('nodes', uuid, patch, params=params)
 
     @base.handle_errors
     def update_chassis(self, uuid, **kwargs):

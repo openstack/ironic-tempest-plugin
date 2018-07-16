@@ -85,7 +85,8 @@ class BaremetalClient(rest_client.RestClient):
 
         return json.loads(object_str)
 
-    def _get_uri(self, resource_name, uuid=None, permanent=False):
+    def _get_uri(self, resource_name, uuid=None, permanent=False,
+                 params=None):
         """Get URI for a specific resource or object.
 
         :param resource_name: The name of the REST resource, e.g., 'nodes'.
@@ -94,10 +95,15 @@ class BaremetalClient(rest_client.RestClient):
 
         """
         prefix = self.uri_prefix if not permanent else ''
+        if params:
+            params = '?' + '&'.join('%s=%s' % tpl for tpl in params.items())
+        else:
+            params = ''
 
-        return '{pref}/{res}{uuid}'.format(pref=prefix,
-                                           res=resource_name,
-                                           uuid='/%s' % uuid if uuid else '')
+        return '{pref}/{res}{uuid}{params}'.format(
+            pref=prefix, res=resource_name,
+            uuid='/%s' % uuid if uuid else '',
+            params=params)
 
     def _make_patch(self, allowed_attributes, **kwargs):
         """Create a JSON patch according to RFC 6902.
@@ -229,16 +235,17 @@ class BaremetalClient(rest_client.RestClient):
         self.expected_success(expected_status, resp.status)
         return resp, body
 
-    def _patch_request(self, resource, uuid, patch_object):
+    def _patch_request(self, resource, uuid, patch_object, params=None):
         """Update specified object with JSON-patch.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
+        :param params: query parameters to pass.
         :returns: A tuple with the server response and the serialized patched
                  object.
 
         """
-        uri = self._get_uri(resource, uuid)
+        uri = self._get_uri(resource, uuid, params=params)
         patch_body = json.dumps(patch_object)
 
         resp, body = self.patch(uri, body=patch_body)

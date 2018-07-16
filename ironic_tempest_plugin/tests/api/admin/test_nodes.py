@@ -469,6 +469,36 @@ class TestHardwareInterfaces(base.BaseBaremetalTest):
             self.assertEqual('fake', node[field])
 
 
+class TestResetInterfaces(TestHardwareInterfaces):
+
+    min_microversion = '1.45'
+
+    @classmethod
+    def skip_checks(cls):
+        super(TestResetInterfaces, cls).skip_checks()
+        if 'ipmi' not in CONF.baremetal.enabled_hardware_types:
+            raise cls.skipException('These tests rely on ipmi enabled')
+
+    def test_no_reset_by_default(self):
+        self.assertRaises(
+            lib_exc.BadRequest,
+            self.client.update_node,
+            self.node['uuid'],
+            [{'path': '/driver', 'value': 'ipmi', 'op': 'replace'}])
+        _, node = self.client.show_node(self.node['uuid'])
+        self.assertEqual('fake-hardware', node['driver'])
+
+    def test_reset_all_interfaces(self):
+        self.client.update_node(self.node['uuid'],
+                                [{'path': '/driver',
+                                  'value': 'ipmi',
+                                  'op': 'replace'}],
+                                reset_interfaces=True)
+        _, node = self.client.show_node(self.node['uuid'])
+        for iface in self.hardware_interfaces:
+            self.assertNotEqual('fake', node['%s_interface' % iface])
+
+
 class TestNodesTraits(base.BaseBaremetalTest):
 
     min_microversion = '1.37'
