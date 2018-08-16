@@ -1,4 +1,8 @@
 - project:
+    templates:
+      - check-requirements
+      - publish-openstack-sphinx-docs
+      - tempest-plugin-jobs
     check:
       jobs:
         - ironic-dsvm-standalone
@@ -18,6 +22,7 @@
         - ironic-inspector-tempest-dsvm-discovery-pike
         - ironic-inspector-tempest-dsvm-discovery-ocata
     gate:
+      queue: ironic
       jobs:
         - ironic-dsvm-standalone
         - ironic-dsvm-standalone-queens
