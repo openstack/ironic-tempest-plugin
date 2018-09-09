@@ -418,6 +418,12 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # been set via a different test).
     rescue_interface = None
 
+    # The boot interface to use by the HW type. The boot interface of the
+    # node used in the test will be set to this value. If set to None, the
+    # node will retain its existing boot_interface value (which may have been
+    # set via a different test).
+    boot_interface = None
+
     # Boolean value specify if image is wholedisk or not.
     wholedisk_image = None
 
@@ -463,6 +469,13 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 "in the list of enabled rescue interfaces %(enabled)s" % {
                     'iface': cls.rescue_interface,
                     'enabled': CONF.baremetal.enabled_rescue_interfaces})
+        if (cls.boot_interface and cls.boot_interface not in
+                CONF.baremetal.enabled_boot_interfaces):
+            raise cls.skipException(
+                "Boot interface %(iface)s required by test is not "
+                "in the list of enabled boot interfaces %(enabled)s" % {
+                    'iface': cls.boot_interface,
+                    'enabled': CONF.baremetal.enabled_boot_interfaces})
         if not cls.wholedisk_image and CONF.baremetal.use_provision_network:
             raise cls.skipException(
                 'Partitioned images are not supported with multitenancy.')
@@ -497,6 +510,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
             boot_kwargs['deploy_interface'] = cls.deploy_interface
         if cls.rescue_interface:
             boot_kwargs['rescue_interface'] = cls.rescue_interface
+        if cls.boot_interface:
+            boot_kwargs['boot_interface'] = cls.boot_interface
 
         # just get an available node
         cls.node = cls.get_and_reserve_node()
