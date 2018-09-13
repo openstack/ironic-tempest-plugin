@@ -46,6 +46,8 @@ Configuration
     # Minimum and maximum API versions to test against.
     min_microversion = <min API version as X.Y>
     max_microversion = <max API version as X.Y>
+    # Driver to use for API tests for Queens and newer:
+    driver = fake-hardware
 
     [compute]
     # Configure the bare metal flavor so that the Compute services provisions
