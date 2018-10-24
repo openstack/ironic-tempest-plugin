@@ -850,3 +850,97 @@ class TestNodeFault(base.BaseBaremetalTest):
         self.assertRaises(
             lib_exc.BadRequest,
             self.client.list_nodes, fault='somefake')
+
+
+class TestNodeProtected(base.BaseBaremetalTest):
+    """Tests for protected baremetal nodes."""
+
+    min_microversion = '1.48'
+
+    def setUp(self):
+        super(TestNodeProtected, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+        self.provide_node(self.node['uuid'])
+
+    def tearDown(self):
+        try:
+            self.client.update_node(self.node['uuid'], protected=False)
+        except Exception:
+            pass
+        super(TestNodeProtected, self).tearDown()
+
+    @decorators.idempotent_id('52f0cb1c-ad7b-43dc-8e22-a76438b67716')
+    def test_node_protected_set_unset(self):
+        self.deploy_node(self.node['uuid'])
+        _, self.node = self.client.show_node(self.node['uuid'])
+        self.assertFalse(self.node['protected'])
+        self.assertIsNone(self.node['protected_reason'])
+
+        self.client.update_node(self.node['uuid'], protected=True,
+                                protected_reason='reason!')
+        _, self.node = self.client.show_node(self.node['uuid'])
+        self.assertTrue(self.node['protected'])
+        self.assertEqual('reason!', self.node['protected_reason'])
+
+        self.client.update_node(self.node['uuid'], protected=False)
+        _, self.node = self.client.show_node(self.node['uuid'])
+        self.assertFalse(self.node['protected'])
+        self.assertIsNone(self.node['protected_reason'])
+
+    @decorators.idempotent_id('8fbd101e-90e6-4843-b41a-556b34802972')
+    def test_node_protected(self):
+        self.deploy_node(self.node['uuid'])
+        self.client.update_node(self.node['uuid'], protected=True)
+
+        self.assertRaises(lib_exc.Forbidden,
+                          self.set_node_provision_state,
+                          self.node['uuid'], 'deleted', 'available')
+        self.assertRaises(lib_exc.Forbidden,
+                          self.set_node_provision_state,
+                          self.node['uuid'], 'rebuild', 'active')
+
+    @decorators.idempotent_id('04a21b51-2991-4213-8c2f-a96cfdada802')
+    def test_node_protected_from_deletion(self):
+        self.deploy_node(self.node['uuid'])
+        self.client.update_node(self.node['uuid'], protected=True,
+                                maintenance=True)
+
+        self.assertRaises(lib_exc.Forbidden,
+                          self.client.delete_node,
+                          self.node['uuid'])
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('1c819f4c-6c1d-4150-ba4a-3b0dcb3c8694')
+    def test_node_protected_negative(self):
+        # Cannot be set for available nodes
+        self.assertRaises(lib_exc.Conflict,
+                          self.client.update_node,
+                          self.node['uuid'], protected=True)
+
+        self.deploy_node(self.node['uuid'])
+
+        # Reason cannot be set for nodes that are not protected
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.update_node,
+                          self.node['uuid'], protected_reason='reason!')
+
+
+class TestNodesProtectedOldApi(base.BaseBaremetalTest):
+
+    def setUp(self):
+        super(TestNodesProtectedOldApi, self).setUp()
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+        self.deploy_node(self.node['uuid'])
+        _, self.node = self.client.show_node(self.node['uuid'])
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('08971546-27cc-40ab-851e-ba7bb52c00ab')
+    def test_node_protected_old_api(self):
+        exc = self.assertRaises(
+            lib_exc.RestClientException,
+            self.client.update_node, self.node['uuid'], protected=True)
+        # 400 for old ironic, 406 for new ironic with old microversion.
+        self.assertIn(exc.resp.status, (400, 406))

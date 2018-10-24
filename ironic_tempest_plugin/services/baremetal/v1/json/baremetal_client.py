@@ -424,7 +424,12 @@ class BaremetalClient(base.BaremetalClient):
                            'deploy_interface',
                            'rescue_interface',
                            'instance_uuid',
-                           'resource_class')
+                           'resource_class',
+                           'protected',
+                           'protected_reason',
+                           # TODO(dtantsur): maintenance is set differently
+                           # in newer API versions.
+                           'maintenance')
         if not patch:
             patch = self._make_patch(node_attributes, **kwargs)
 
