@@ -282,9 +282,8 @@ class BaremetalClient(base.BaremetalClient):
             uuid: UUID of the port group. Optional.
         :return: A tuple with the server response and the created port group.
         """
-        portgroup = {'extra': kwargs.get('extra', {'foo': 'bar'})}
-
-        portgroup['node_uuid'] = node_uuid
+        portgroup = {'extra': kwargs.get(
+            'extra', {'foo': 'bar', 'open': 'stack'}), 'node_uuid': node_uuid}
 
         if kwargs.get('address'):
             portgroup['address'] = kwargs['address']
@@ -293,6 +292,17 @@ class BaremetalClient(base.BaremetalClient):
             portgroup['name'] = kwargs['name']
 
         return self._create_request('portgroups', portgroup)
+
+    @base.handle_errors
+    def update_portgroup(self, uuid, patch):
+        """Update the specified port group.
+
+        :param uuid: The unique identifier of the port group.
+        :param patch: List of dicts representing json patches.
+        :return: A tuple with the server response and the updated port group.
+        """
+
+        return self._patch_request('portgroups', uuid, patch)
 
     @base.handle_errors
     def create_volume_connector(self, node_uuid, **kwargs):

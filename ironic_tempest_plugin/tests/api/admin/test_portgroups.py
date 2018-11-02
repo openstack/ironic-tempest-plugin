@@ -72,3 +72,83 @@ class TestPortGroups(base.BaseBaremetalTest):
                       [i['address'] for i in body['portgroups']])
         self.assertIn(self.portgroup['name'],
                       [i['name'] for i in body['portgroups']])
+
+    @decorators.idempotent_id('6a491006-2dd5-4c82-be39-a4fa015071c0')
+    def test_update_portgroup_replace(self):
+        """Update portgroup by replacing it's address and extra data."""
+        new_address = data_utils.rand_mac_address()
+        new_extra = {'foo': 'test'}
+
+        patch = [{'path': '/address',
+                  'op': 'replace',
+                  'value': new_address},
+                 {'path': '/extra/foo',
+                  'op': 'replace',
+                  'value': new_extra['foo']},
+                 ]
+
+        self.client.update_portgroup(self.portgroup['uuid'], patch)
+
+        _, body = self.client.show_portgroup(self.portgroup['uuid'])
+
+        self.assertEqual(new_address, body['address'])
+        self._assertExpected(new_extra, body['extra'])
+
+    @decorators.idempotent_id('9834a4ec-be41-40b4-a3a4-8e46ad7eb19d')
+    def test_update_portgroup_remove_by_key(self):
+        """Update portgroup by removing value from extra data."""
+        self.client.update_portgroup(
+            self.portgroup['uuid'],
+            [{'path': '/extra/foo', 'op': 'remove'}]
+        )
+        _, body = self.client.show_portgroup(self.portgroup['uuid'])
+        self.assertNotIn('foo', body['extra'])
+        self._assertExpected({'open': 'stack'}, body['extra'])
+
+    @decorators.idempotent_id('5da2f7c7-03e8-4db0-8c3e-2fe6ebcc4439')
+    def test_update_portgroup_remove_collection(self):
+        """Update portgroup by removing collection from extra data."""
+        self.client.update_portgroup(
+            self.portgroup['uuid'],
+            [{'path': '/extra', 'op': 'remove'}]
+        )
+        _, body = self.client.show_portgroup(self.portgroup['uuid'])
+        self.assertEqual({}, body['extra'])
+
+    @decorators.idempotent_id('a1123416-7bb6-4a6a-9f14-859c72550552')
+    def test_update_portgroup_add(self):
+        """Update portgroup by adding new extra data and properties."""
+        patch = [{'path': '/extra/key1',
+                  'op': 'add',
+                  'value': 'value1'},
+                 {'path': '/properties/key1',
+                  'op': 'add',
+                  'value': 'value1'}]
+
+        self.client.update_portgroup(self.portgroup['uuid'], patch)
+
+        _, body = self.client.show_portgroup(self.portgroup['uuid'])
+        self._assertExpected({'key1': 'value1'}, body['extra'])
+        self._assertExpected({'key1': 'value1'}, body['properties'])
+
+    @decorators.idempotent_id('67d5013e-5158-44e8-8d1c-a01d04542be4')
+    def test_update_portgroup_mixed_ops(self):
+        """Update port group with add, replace and remove ops in one patch."""
+        new_address = data_utils.rand_mac_address()
+        new_extra = {'key3': {'cat': 'meow'}}
+
+        patch = [{'path': '/address',
+                  'op': 'replace',
+                  'value': new_address},
+                 {'path': '/extra/foo',
+                  'op': 'remove'},
+                 {'path': '/extra/key3',
+                  'op': 'add',
+                  'value': new_extra['key3']}]
+
+        self.client.update_portgroup(self.portgroup['uuid'], patch)
+
+        _, body = self.client.show_portgroup(self.portgroup['uuid'])
+        self.assertEqual(new_address, body['address'])
+        self._assertExpected(new_extra, body['extra'])
+        self.assertNotIn('foo', body['extra'])
