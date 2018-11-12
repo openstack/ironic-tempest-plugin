@@ -21,6 +21,7 @@ from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
 from ironic_tempest_plugin.tests.api.admin import base
 
 
+
 class TestVolumeConnector(base.BaseBaremetalTest):
     """Basic test cases for volume connector."""
 
@@ -55,6 +56,15 @@ class TestVolumeConnector(base.BaseBaremetalTest):
             self.node['uuid'],
             type=self.volume_connector['type'],
             connector_id=self.volume_connector['connector_id'])
+
+    @decorators.idempotent_id('3c3cbf45-488a-4386-a811-bf0aa2589c69')
+    def test_create_volume_connector(self):
+        """Create a volume connector.
+
+        """
+        params={'type':'iqn','connector_id':'iqn.2017-07.org.openstack:01:d9a51732c3f','extra':{}}
+        resp,body=self.create_volume_connector(self.node['uuid'],**params)
+        self.assertEqual(201,int(resp['status']))
 
     @decorators.idempotent_id('5795f816-0789-42e6-bb9c-91b4876ad13f')
     def test_delete_volume_connector(self):
@@ -103,6 +113,16 @@ class TestVolumeConnector(base.BaseBaremetalTest):
                       [i['type'] for i in body['connectors']])
         self.assertIn(self.volume_connector['connector_id'],
                       [i['connector_id'] for i in body['connectors']])
+
+    @decorators.idempotent_id('a4725698-e164-4ee5-96a0-66119a35f783')
+    def test_list_volume_connectors_by_node(self):
+        """List volume connectors."""
+        params={'type':'iqn','connector_id':'iqn.2018-09.org.openstack:01:d8a52832c3f','extra':{}}
+        resp, volume_connector = self.create_volume_connector(self.node['uuid'],**params)
+        print('-------resp.status=%s----------',resp['status'])
+        _, body = self.client.list_volume_connectors_by_node(self.node['uuid'])
+        self.assertIn(volume_connector['uuid'],
+                      [p['uuid'] for p in body['connectors']])
 
     @decorators.idempotent_id('1d0459ad-01c0-46db-b930-7301bc2a3c98')
     def test_list_with_limit(self):

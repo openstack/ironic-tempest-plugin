@@ -28,7 +28,7 @@ CONF = config.CONF
 # will require passing driver-specific data to Tempest (addresses,
 # credentials, etc).  Until then, only support testing against the fake driver,
 # which has no external dependencies.
-SUPPORTED_DRIVERS = ['fake', 'fake-hardware']
+SUPPORTED_DRIVERS = ['fake', 'fake-hardware', 'ipmi', 'agent_ipmitool']
 
 # NOTE(jroll): resources must be deleted in a specific order, this list
 # defines the resource types to clean up, and the correct order.
@@ -163,7 +163,7 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     @creates('node')
     def create_node(cls, chassis_id, cpu_arch='x86_64', cpus=8, local_gb=10,
-                    memory_mb=4096, resource_class=None):
+                    memory_mb=4096, resource_class=None, **kwargs):
         """Wrapper utility for creating test baremetal nodes.
 
         :param chassis_id: The unique identifier of the chassis.
@@ -175,11 +175,14 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         :return: A tuple with the server response and the created node.
 
         """
+        if 'driver' not in kwargs or not kwargs.get('driver'):
+            kwargs['driver'] = cls.driver
         resp, body = cls.client.create_node(chassis_id, cpu_arch=cpu_arch,
                                             cpus=cpus, local_gb=local_gb,
                                             memory_mb=memory_mb,
-                                            driver=cls.driver,
-                                            resource_class=resource_class)
+#                                            driver=cls.driver,
+                                            resource_class=resource_class,
+                                            kwrags=kwargs)
 
         return resp, body
 
