@@ -91,8 +91,6 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
     def test_baremetal_multitenancy(self):
 
         tenant_cidr = '10.0.100.0/24'
-        fixed_ip1 = '10.0.100.3'
-        fixed_ip2 = '10.0.100.5'
         keypair = self.create_keypair()
         network, subnet, router = self.create_tenant_network(
             self.os_primary, tenant_cidr)
@@ -103,8 +101,8 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
             clients=self.os_primary,
             keypair=keypair,
             net_id=network['id'],
-            fixed_ip=fixed_ip1
         )
+        fixed_ip1 = instance1['addresses'][network['name']][0]['addr']
         floating_ip1 = self.create_floating_ip(
             instance1,
         )['floating_ip_address']
@@ -121,8 +119,8 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
             keypair=alt_keypair,
             clients=self.os_alt,
             net_id=alt_network['id'],
-            fixed_ip=fixed_ip2
         )
+        fixed_ip2 = alt_instance['addresses'][alt_network['name']][0]['addr']
         alt_floating_ip = self.create_floating_ip(
             alt_instance,
             client=self.os_alt.floating_ips_client
