@@ -181,7 +181,7 @@ class BaremetalClient(rest_client.RestClient):
 
         return resp, self.deserialize(body)
 
-    def _create_request(self, resource, object_dict):
+    def _create_request(self, resource, object_dict,expected_status=http_client.CREATED):
         """Create an object of the specified type.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
@@ -195,9 +195,11 @@ class BaremetalClient(rest_client.RestClient):
         uri = self._get_uri(resource)
 
         resp, body = self.post(uri, body=body)
-        self.expected_success(http_client.CREATED, resp.status)
-
-        return resp, self.deserialize(body)
+        self.expected_success(expected_status, resp.status)
+        if body:
+           return resp,self.deserialize(body)
+        else:
+           return resp,body
 
     def _create_request_no_response_body(self, resource, object_dict):
         """Create an object of the specified type.

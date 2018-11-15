@@ -708,7 +708,6 @@ class BaremetalClient(base.BaremetalClient):
         :param method_name: The name of the method.
 
         """
- #       resp, body = self._list_request('nodes/%s/vendor_passthru?method=%s' % (node_uuid,method_name))
         body = {'bar': 'fake'}
         resp, body = self._create_request('nodes/%s/vendor_passthru?method=%s' % (node_uuid,method_name),
                                           body, expected_status=202)
@@ -750,7 +749,7 @@ class BaremetalClient(base.BaremetalClient):
     def call_method_by_driver(self,driver_name,method_name):
         """.
 
-        :param driver_name: The name of the driver.
+        :param driver_name: The name of th driver.
         :param method_name: The name of the method.
 
         """

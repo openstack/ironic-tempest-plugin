@@ -119,7 +119,6 @@ class TestVolumeConnector(base.BaseBaremetalTest):
         """List volume connectors."""
         params={'type':'iqn','connector_id':'iqn.2018-09.org.openstack:01:d8a52832c3f','extra':{}}
         resp, volume_connector = self.create_volume_connector(self.node['uuid'],**params)
-        print('-------resp.status=%s----------',resp['status'])
         _, body = self.client.list_volume_connectors_by_node(self.node['uuid'])
         self.assertIn(volume_connector['uuid'],
                       [p['uuid'] for p in body['connectors']])

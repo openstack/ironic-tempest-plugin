@@ -193,7 +193,6 @@ class TestNodes(base.BaseBaremetalTest):
     @decorators.idempotent_id('f63b6289-1168-4426-1234-0d5b7eb87c06')
     def test_list_methods_by_node(self):
         resp, body = self.client.list_methods_by_node(self.node['uuid'])
-        print "-------body=%s-------" % body
         self.assertEqual(200,int(resp['status']))
 
     @decorators.idempotent_id('f63b6289-1168-4426-8cfe-0d5b7eb87c06')
@@ -217,13 +216,6 @@ class TestNodes(base.BaseBaremetalTest):
         driver_name='fake'
         resp, body = self.client.list_methods_by_driver(driver_name)
         self.assertEqual(200,int(resp['status']))
-
-    @decorators.idempotent_id('f63b6289-abcd-1234-8cfe-0d6b7eb83456')
-    def test_call_method_by_driver(self):
-        driver_name = 'fake'
-        method_name = 'second_method'
-        resp, body = self.client.call_method_by_driver(driver_name,method_name)
-        #self.assertEqual(202,int(resp['status']))
 
     @decorators.idempotent_id('f63b6289-bcde-1234-8cfe-0d6b7eb83456')
     def test_list_nodes_detail(self):
