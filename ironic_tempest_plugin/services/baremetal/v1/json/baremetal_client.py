@@ -746,19 +746,6 @@ class BaremetalClient(base.BaremetalClient):
         return resp, body
 
     @base.handle_errors
-    def call_method_by_driver(self,driver_name,method_name):
-        """.
-
-        :param driver_name: The name of the driver.
-        :param method_name: The name of the method.
-
-        """
-        body = {'bar': 'fake'}
-        resp, body = self._create_request('drivers/%s/vendor_passthru?method=%s' % (driver_name,method_name),
-                                          body, expected_status=202)
-        return resp, body
-
-    @base.handle_errors
     def validate_node(self,node_uuid):
         """.
 
