@@ -749,7 +749,7 @@ class BaremetalClient(base.BaremetalClient):
     def call_method_by_driver(self,driver_name,method_name):
         """.
 
-        :param driver_name: The name of th driver.
+        :param driver_name: The name of the driver.
         :param method_name: The name of the method.
 
         """
