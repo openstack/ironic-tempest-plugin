@@ -420,6 +420,10 @@ class BaremetalClient(base.BaremetalClient):
                            'properties/local_gb',
                            'properties/memory_mb',
                            'driver',
+                           'driver_info/ipmi_address',
+                           'driver_info/ipmi_password',
+                           'driver_info/ipmi_username',
+                           'driver_info/ipmi_port',
                            'bios_interface',
                            'deploy_interface',
                            'rescue_interface',
@@ -610,6 +614,145 @@ class BaremetalClient(base.BaremetalClient):
         resp, body = self._put_request('nodes/%s/states/console' % node_uuid,
                                        enabled)
         self.expected_success(http_client.ACCEPTED, resp.status)
+        return resp, body
+
+    @base.handle_errors
+    def set_node_maintenance(self, node_uuid, reason=None):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param enabled: Boolean value; whether to enable or disable the
+                        console.
+
+        """
+        reason = {"reason": None}
+        resp, body = self._put_request('nodes/%s/maintenance' % node_uuid, reason)
+
+        self.expected_success(http_client.ACCEPTED, resp.status)
+        return resp, body
+
+    @base.handle_errors
+    def clear_node_maintenance(self, node_uuid):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param enabled: Boolean value; whether to enable or disable the
+                        console.
+
+        """
+        resp,body = self._delete_request('nodes/%s/maintenance' % node_uuid, {}, expected_status=202)
+
+        return resp,body
+
+    @base.handle_errors
+    def inject_node_nmi(self, node_uuid):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param enabled: Boolean value; whether to enable or disable the
+                        console.
+
+        """
+        resp, body = self._put_request('nodes/%s/management/inject_nmi' % node_uuid,{})
+        return resp, body
+
+    @base.handle_errors
+    def list_volume_resource_by_node(self, node_uuid):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param enabled: Boolean value; whether to enable or disable the
+                        console.
+
+        """
+        resp, body = self._list_request('nodes/%s/volume' % node_uuid)
+        return resp, body
+
+    @base.handle_errors
+    def list_volume_connectors_by_node(self, node_uuid):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param enabled: Boolean value; whether to enable or disable the
+                        console.
+
+        """
+        resp, body = self._list_request('nodes/%s/volume/connectors' % node_uuid)
+        return resp, body
+
+    @base.handle_errors
+    def list_volume_targets_by_node(self, node_uuid):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+
+        """
+        resp, body = self._list_request('nodes/%s/volume/targets' % node_uuid)
+        return resp, body
+
+    @base.handle_errors
+    def list_methods_by_node(self, node_uuid):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+
+        """
+        resp, body = self._list_request('nodes/%s/vendor_passthru/methods' % node_uuid)
+        return resp, body
+
+    @base.handle_errors
+    def call_method_by_node(self, node_uuid,method_name):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param method_name: The name of the method.
+
+        """
+        body = {'bar': 'fake'}
+        resp, body = self._create_request('nodes/%s/vendor_passthru?method=%s' % (node_uuid,method_name),
+                                          body, expected_status=202)
+        return resp, body
+
+    @base.handle_errors
+    def agent_lookup(self,node_uuid=None, addresses=None):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+
+        """
+        resp, body = self._list_request('lookup?node_uuid=%s&&addresses=%s' % (node_uuid, addresses))
+        return resp, body
+
+    @base.handle_errors
+    def agent_heart_beat(self,node_uuid=None):
+        """.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+
+        """
+        callback_url={"callback_url":"/v1/heartbeat"}
+        resp, body = self._create_request('heartbeat/%s' % node_uuid,callback_url,
+                                          expected_status=202)
+        return resp, body
+
+    @base.handle_errors
+    def list_methods_by_driver(self,driver_name):
+        """.
+
+        :param driver_name: The name of the driver.
+
+        """
+        resp, body = self._list_request('drivers/%s/vendor_passthru/methods' % driver_name)
+        return resp, body
+
+    @base.handle_errors
+    def validate_node(self,node_uuid):
+        """.
+
+        :node_uuid: The uuid of the node.
+
+        """
+        resp, body = self._list_request('nodes/%s/validate' % node_uuid)
         return resp, body
 
     @base.handle_errors

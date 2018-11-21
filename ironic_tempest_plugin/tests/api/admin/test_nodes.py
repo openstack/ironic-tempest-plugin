@@ -27,6 +27,8 @@ CONF = config.CONF
 class TestNodes(base.BaseBaremetalTest):
     """Tests for baremetal nodes."""
 
+    min_microversion = '1.34'
+
     def setUp(self):
         super(TestNodes, self).setUp()
 
@@ -157,6 +159,77 @@ class TestNodes(base.BaseBaremetalTest):
         self.client.set_console_mode(self.node['uuid'], True)
         waiters.wait_for_bm_node_status(self.client, self.node['uuid'],
                                         'console_enabled', True)
+
+    @decorators.idempotent_id('80504575-9b21-4673-92d1-143b948f9439')
+    def test_set_node_maintenance(self):
+        resp, body = self.client.set_node_maintenance(self.node['uuid'], None)
+        self.assertEqual(202, int(resp['status']))
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertEqual(True, loaded_node['maintenance'])
+
+    @decorators.idempotent_id('80504575-9b21-4673-64d1-143b948f9439')
+    def test_clear_node_maintenance(self):
+        resp,body = self.client.clear_node_maintenance(self.node['uuid'])
+        self.assertEqual(202, int(resp['status']))
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertEqual(False, loaded_node['maintenance'])
+
+    @decorators.idempotent_id('80504534-9b21-2573-64d1-143b948f9439')
+    def test_inject_node_nmi(self):
+        param= {'ipmi_address': '127.0.0.1',
+                'ipmi_username': 'admin',
+                'ipmi_password': 'password',
+                'ipmi_port': 6230}
+        patch = [{'path': '/driver_info/%s' % name,
+                  'op': 'add',
+                  'value': param[name]} for name in param]
+        self.client.update_node(self.node['uuid'], patch)
+
+        _, body = self.client.update_node(
+            self.node['uuid'], driver='ipmi')
+        resp,body = self.client.inject_node_nmi(body['uuid'])
+        self.assertEqual(204, int(resp['status']))
+
+    @decorators.idempotent_id('f63b6289-1168-4426-1234-0d5b7eb87c06')
+    def test_list_methods_by_node(self):
+        resp, body = self.client.list_methods_by_node(self.node['uuid'])
+        self.assertEqual(200,int(resp['status']))
+
+    @decorators.idempotent_id('f63b6289-1168-4426-8cfe-0d5b7eb87c06')
+    def test_call_method_by_node(self):
+        method_name = 'first_method'
+        resp, body = self.client.call_method_by_node(self.node['uuid'],method_name)
+        self.assertEqual(202,int(resp['status']))
+
+    @decorators.idempotent_id('f63b6289-1168-1234-8cfe-0d6b7eb87c06')
+    def test_agent_lookup(self):
+        resp, body = self.client.agent_lookup(self.node['uuid'])
+        self.assertEqual(200,int(resp['status']))
+
+    @decorators.idempotent_id('f63b6289-1234-1234-8cfe-0d6b7eb87c06')
+    def test_agent_heart_beat(self):
+        resp, body = self.client.agent_heart_beat(self.node['uuid'])
+        self.assertEqual(202,int(resp['status']))
+
+    @decorators.idempotent_id('f63b6289-1168-1234-8cfe-0d6b7eb83456')
+    def test_list_methods_by_driver(self):
+        driver_name='fake'
+        resp, body = self.client.list_methods_by_driver(driver_name)
+        self.assertEqual(200,int(resp['status']))
+
+    @decorators.idempotent_id('f63b6289-bcde-1234-8cfe-0d6b7eb83456')
+    def test_list_nodes_detail(self):
+        """Detailed list of all existing nodes."""
+        resp, body = self.client.list_nodes_detail()
+        self.assertIn(self.node['uuid'],
+                      [i['uuid'] for i in body['nodes']])
+        self.assertEqual(200,int(resp['status']))
+
+    @decorators.idempotent_id('f63b5678-bcde-1234-8cfe-0d6b7eb83456')
+    def test_validate_node(self):
+        """validate node"""
+        resp, body = self.client.validate_node(self.node['uuid'])
+        self.assertEqual(200,int(resp['status']))
 
     @decorators.idempotent_id('b02a4f38-5e8b-44b2-aed2-a69a36ecfd69')
     def test_get_node_by_instance_uuid(self):

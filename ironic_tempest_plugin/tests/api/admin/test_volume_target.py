@@ -58,6 +58,15 @@ class TestVolumeTarget(base.BaseBaremetalTest):
             volume_id=data_utils.rand_name('volume_id'),
             boot_index=self.volume_target['boot_index'])
 
+    @decorators.idempotent_id('da5c37d5-68cc-499f-b8ab-3048b87d3bca')
+    def test_create_volume_target(self):
+        """Create a volume target.
+
+        """
+        params={'volume_type':'iscsi','boot_index':0,'volume_id':'04452bed-5367-4202-8bf5-de4335ac56d2'}
+        resp,body=self.create_volume_target(self.node['uuid'],**params)
+        self.assertEqual(201,int(resp['status']))
+
     @decorators.idempotent_id('ea3a9b2e-8971-4830-9274-abaf0239f1ce')
     def test_delete_volume_target(self):
         """Delete a volume target."""
@@ -101,6 +110,15 @@ class TestVolumeTarget(base.BaseBaremetalTest):
         self.assertIn(self.volume_target['volume_id'],
                       [i['volume_id'] for i in body['targets']])
 
+    @decorators.idempotent_id('ae99a975-d93c-4324-9cdc-41d89e3a659f')
+    def test_list_volume_targets_by_node(self):
+        """List volume targets by node"""
+        params={'volume_type':'iscsi','boot_index':0,'volume_id':'04456bed-5367-4202-8bf5-de4335ac56d3'}
+        resp, volume_target = self.create_volume_target(self.node['uuid'],**params)
+        _,body = self.client.list_volume_targets_by_node(self.node['uuid'])
+        self.assertIn(volume_target['uuid'],
+                      [p['uuid'] for p in body['targets']])
+ 
     @decorators.idempotent_id('9da25447-0370-4b33-9c1f-d4503f5950ae')
     def test_list_with_limit(self):
         """List volume targets with limit."""
