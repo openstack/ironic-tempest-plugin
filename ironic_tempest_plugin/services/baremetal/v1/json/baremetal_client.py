@@ -104,6 +104,11 @@ class BaremetalClient(base.BaremetalClient):
         return self._list_request('drivers')
 
     @base.handle_errors
+    def list_conductors(self, **kwargs):
+        """List all registered conductors."""
+        return self._list_request('conductors', **kwargs)
+
+    @base.handle_errors
     def show_node(self, uuid, api_version=None):
         """Gets a specific node.
 
@@ -198,6 +203,14 @@ class BaremetalClient(base.BaremetalClient):
         :return: Serialized driver as a dictionary.
         """
         return self._show_request('drivers', driver_name)
+
+    def show_conductor(self, hostname):
+        """Gets a specific conductor.
+
+        :param hostname: Hostname of conductor.
+        :return: Serialized conductor as a dictionary.
+        """
+        return self._show_request('conductors', hostname)
 
     @base.handle_errors
     def create_node(self, chassis_id=None, **kwargs):

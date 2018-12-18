@@ -170,6 +170,11 @@ class TestNodes(base.BaseBaremetalTest):
         _, loaded_node = self.client.show_node(self.node['uuid'])
         self.assertNotIn('fault', loaded_node)
 
+    @decorators.idempotent_id('e5470656-bb65-4173-be83-2df3fc9aed24')
+    def test_conductor_hidden(self):
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertNotIn('conductor', loaded_node)
+
 
 class TestNodesResourceClass(base.BaseBaremetalTest):
 
@@ -944,3 +949,29 @@ class TestNodesProtectedOldApi(base.BaseBaremetalTest):
             self.client.update_node, self.node['uuid'], protected=True)
         # 400 for old ironic, 406 for new ironic with old microversion.
         self.assertIn(exc.resp.status, (400, 406))
+
+
+class TestNodeConductor(base.BaseBaremetalTest):
+    """Tests for conductor field of baremetal nodes."""
+
+    min_microversion = '1.49'
+
+    def setUp(self):
+        super(TestNodeConductor, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+    @decorators.idempotent_id('1af888b2-2a19-43da-8181-a5381d6ff536')
+    def test_conductor_exposed(self):
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertIn('conductor', loaded_node)
+
+    @decorators.idempotent_id('53bcef99-2989-4755-aa8f-c31037cd15de')
+    def test_list_nodes_by_conductor(self):
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        hostname = loaded_node['conductor']
+
+        _, nodes = self.client.list_nodes(conductor=hostname)
+        self.assertIn(self.node['uuid'],
+                      [n['uuid'] for n in nodes['nodes']])
