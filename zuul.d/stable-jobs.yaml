@@ -1,5 +1,10 @@
 ---
 - job:
+    name: ironic-dsvm-standalone-rocky
+    parent: ironic-dsvm-standalone
+    override-checkout: stable/rocky
+
+- job:
     name: ironic-dsvm-standalone-queens
     parent: ironic-dsvm-standalone
     override-checkout: stable/queens
@@ -8,6 +13,11 @@
     name: ironic-dsvm-standalone-pike
     parent: ironic-dsvm-standalone
     override-checkout: stable/pike
+
+- job:
+    name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky
+    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
+    override-checkout: stable/rocky
 
 - job:
     name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
@@ -20,9 +30,9 @@
     override-checkout: stable/pike
 
 - job:
-    name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-ocata
-    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
-    override-checkout: stable/ocata
+    name: ironic-tempest-dsvm-ironic-inspector-rocky
+    parent: ironic-tempest-dsvm-ironic-inspector
+    override-checkout: stable/rocky
 
 - job:
     name: ironic-tempest-dsvm-ironic-inspector-queens
@@ -35,9 +45,9 @@
     override-checkout: stable/pike
 
 - job:
-    name: ironic-tempest-dsvm-ironic-inspector-ocata
-    parent: ironic-tempest-dsvm-ironic-inspector
-    override-checkout: stable/ocata
+    name: ironic-inspector-tempest-dsvm-discovery-rocky
+    parent: ironic-inspector-tempest-dsvm-discovery
+    override-checkout: stable/rocky
 
 - job:
     name: ironic-inspector-tempest-dsvm-discovery-queens
@@ -48,8 +58,3 @@
     name: ironic-inspector-tempest-dsvm-discovery-pike
     parent: ironic-inspector-tempest-dsvm-discovery
     override-checkout: stable/pike
-
-- job:
-    name: ironic-inspector-tempest-dsvm-discovery-ocata
-    parent: ironic-inspector-tempest-dsvm-discovery
-    override-checkout: stable/ocata
