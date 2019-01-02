@@ -5,40 +5,45 @@
       - tempest-plugin-jobs
     check:
       jobs:
+        # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-dsvm-standalone
         - ironic-dsvm-standalone-rocky
         - ironic-dsvm-standalone-queens
-        - ironic-dsvm-standalone-pike
+        - ironic-dsvm-standalone-pike:
+            voting: false
         - ironic-tempest-dsvm-functional-python3
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
+        - ironic-tempest-dsvm-functional-python3-rocky
         - ironic-tempest-dsvm-ironic-inspector
         - ironic-tempest-dsvm-ironic-inspector-rocky
         - ironic-tempest-dsvm-ironic-inspector-queens
-        - ironic-tempest-dsvm-ironic-inspector-pike
+        - ironic-tempest-dsvm-ironic-inspector-pike:
+            voting: false
+        # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
+        # unstable, so keep them non-voting on stable branches.
+        - ironic-tempest-dsvm-ipa-wholedisk-direct-tinyipa-multinode
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky:
+            voting: false
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens:
+            voting: false
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike:
+            voting: false
         - ironic-inspector-tempest-dsvm-discovery
-        - ironic-inspector-tempest-dsvm-discovery-rocky
-        - ironic-inspector-tempest-dsvm-discovery-queens
-        - ironic-inspector-tempest-dsvm-discovery-pike
+        - ironic-inspector-tempest-dsvm-discovery-rocky:
+            voting: false
+        - ironic-inspector-tempest-dsvm-discovery-queens:
+            voting: false
+        - ironic-inspector-tempest-dsvm-discovery-pike:
+            voting: false
     gate:
       queue: ironic
       jobs:
         - ironic-dsvm-standalone
         - ironic-dsvm-standalone-rocky
         - ironic-dsvm-standalone-queens
-        - ironic-dsvm-standalone-pike
         - ironic-tempest-dsvm-functional-python3
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
+        - ironic-tempest-dsvm-functional-python3-rocky
         - ironic-tempest-dsvm-ironic-inspector
         - ironic-tempest-dsvm-ironic-inspector-rocky
         - ironic-tempest-dsvm-ironic-inspector-queens
-        - ironic-tempest-dsvm-ironic-inspector-pike
+        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
         - ironic-inspector-tempest-dsvm-discovery
-        - ironic-inspector-tempest-dsvm-discovery-rocky
-        - ironic-inspector-tempest-dsvm-discovery-queens
-        - ironic-inspector-tempest-dsvm-discovery-pike

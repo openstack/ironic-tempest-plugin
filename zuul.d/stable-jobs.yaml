@@ -15,6 +15,11 @@
     override-checkout: stable/pike
 
 - job:
+    name: ironic-tempest-dsvm-functional-python3-rocky
+    parent: ironic-tempest-dsvm-functional-python3
+    override-checkout: stable/rocky
+
+- job:
     name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky
     parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
     override-checkout: stable/rocky
