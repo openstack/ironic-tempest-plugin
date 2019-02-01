@@ -12,6 +12,7 @@
 
 from tempest.lib import decorators
 
+from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
 from ironic_tempest_plugin.tests.api.admin import base
 
 
@@ -20,6 +21,8 @@ class TestApiDiscovery(base.BaseBaremetalTest):
 
     @decorators.idempotent_id('a3c27e94-f56c-42c4-8600-d6790650b9c5')
     def test_api_versions(self):
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture(None))
         _, descr = self.client.get_api_description()
         expected_versions = ('v1',)
         versions = [version['id'] for version in descr['versions']]
@@ -29,6 +32,8 @@ class TestApiDiscovery(base.BaseBaremetalTest):
 
     @decorators.idempotent_id('896283a6-488e-4f31-af78-6614286cbe0d')
     def test_default_version(self):
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture(None))
         _, descr = self.client.get_api_description()
         default_version = descr['default_version']
         self.assertEqual('v1', default_version['id'])
