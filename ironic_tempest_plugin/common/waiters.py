@@ -110,3 +110,37 @@ def wait_node_instance_association(client, instance_uuid, timeout=None,
                '%(instance_uuid)s within the required time (%(timeout)s s).'
                % {'instance_uuid': instance_uuid, 'timeout': timeout})
         raise lib_exc.TimeoutException(msg)
+
+
+def wait_for_allocation(client, allocation_ident, timeout=15, interval=1,
+                        expect_error=False):
+    """Wait for the allocation to become active.
+
+    :param client: an instance of tempest plugin BaremetalClient.
+    :param allocation_ident: UUID or name of the allocation.
+    :param timeout: the timeout after which the allocation is considered as
+        failed. Defaults to 15 seconds.
+    :param interval: an interval between show_allocation calls.
+        Defaults to 1 second.
+    :param expect_error: if True, return successfully even in case of an error.
+    """
+    result = [None]  # a mutable object to modify in the closure
+
+    def check():
+        result[0] = client.show_allocation(allocation_ident)
+        allocation = result[0][1]
+
+        if allocation['state'] == 'error' and not expect_error:
+            raise lib_exc.TempestException(
+                "Allocation %(ident)s failed: %(error)s" %
+                {'ident': allocation_ident,
+                 'error': allocation.get('last_error')})
+        else:
+            return allocation['state'] != 'allocating'
+
+    if not test_utils.call_until_true(check, timeout, interval):
+        msg = ('Timed out waiting for the allocation %s to become active' %
+               allocation_ident)
+        raise lib_exc.TimeoutException(msg)
+
+    return result[0]

@@ -109,6 +109,11 @@ class BaremetalClient(base.BaremetalClient):
         return self._list_request('conductors', **kwargs)
 
     @base.handle_errors
+    def list_allocations(self, **kwargs):
+        """List all registered allocations."""
+        return self._list_request('allocations', **kwargs)
+
+    @base.handle_errors
     def show_node(self, uuid, api_version=None):
         """Gets a specific node.
 
@@ -212,6 +217,23 @@ class BaremetalClient(base.BaremetalClient):
         """
         return self._show_request('conductors', hostname)
 
+    def show_allocation(self, allocation_ident):
+        """Gets a specific allocation.
+
+        :param allocation_ident: UUID or name of allocation.
+        :return: Serialized allocation as a dictionary.
+        """
+        return self._show_request('allocations', allocation_ident)
+
+    def show_node_allocation(self, node_ident):
+        """Gets an allocation for the node.
+
+        :param node_ident: Node UUID or name.
+        :return: Serialized allocation as a dictionary.
+        """
+        uri = '/nodes/%s/allocation' % node_ident
+        return self._show_request('nodes', uuid=None, uri=uri)
+
     @base.handle_errors
     def create_node(self, chassis_id=None, **kwargs):
         """Create a baremetal node with the specified parameters.
@@ -226,8 +248,9 @@ class BaremetalClient(base.BaremetalClient):
 
         """
         node = {}
-        if kwargs.get('resource_class'):
-            node['resource_class'] = kwargs['resource_class']
+        for field in ('resource_class', 'name'):
+            if kwargs.get(field):
+                node[field] = kwargs[field]
 
         node.update(
             {'chassis_uuid': chassis_id,
@@ -761,3 +784,25 @@ class BaremetalClient(base.BaremetalClient):
                                           (node_uuid, trait), {})
         self.expected_success(http_client.NO_CONTENT, resp.status)
         return resp, body
+
+    @base.handle_errors
+    def create_allocation(self, resource_class, **kwargs):
+        """Create a baremetal allocation with the specified parameters.
+
+        :param resource_class: Resource class to request.
+        :param kwargs: Other fields to pass.
+        :return: A tuple with the server response and the created allocation.
+
+        """
+        kwargs['resource_class'] = resource_class
+        return self._create_request('allocations', kwargs)
+
+    @base.handle_errors
+    def delete_allocation(self, allocation_ident):
+        """Deletes an allocation.
+
+        :param allocation_ident: UUID or name of the allocation.
+        :return: A tuple with the server response and the response body.
+
+        """
+        return self._delete_request('allocations', allocation_ident)
