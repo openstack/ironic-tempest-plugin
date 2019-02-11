@@ -17,13 +17,14 @@ from tempest import config
 
 
 CONF = config.CONF
-ADMIN_CREDS = common_creds.get_configured_admin_credentials()
 
 
 class Manager(clients.Manager):
     def __init__(self,
-                 credentials=ADMIN_CREDS,
+                 credentials=None,
                  api_microversions=None):
+        if not credentials:
+            credentials = common_creds.get_configured_admin_credentials()
         super(Manager, self).__init__(credentials)
         self.introspection_client = BaremetalIntrospectionClient(
             self.auth_provider,
