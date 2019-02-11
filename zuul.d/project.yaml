@@ -6,21 +6,21 @@
     check:
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
-        - ironic-dsvm-standalone
+        - ironic-standalone
         - ironic-dsvm-standalone-rocky
         - ironic-dsvm-standalone-queens
         - ironic-dsvm-standalone-pike:
             voting: false
-        - ironic-tempest-dsvm-functional-python3
+        - ironic-tempest-functional-python3
         - ironic-tempest-dsvm-functional-python3-rocky
-        - ironic-tempest-dsvm-ironic-inspector
+        - ironic-inspector-tempest
         - ironic-tempest-dsvm-ironic-inspector-rocky
         - ironic-tempest-dsvm-ironic-inspector-queens
         - ironic-tempest-dsvm-ironic-inspector-pike:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting on stable branches.
-        - ironic-tempest-dsvm-ipa-wholedisk-direct-tinyipa-multinode
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky:
             voting: false
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens:
@@ -37,13 +37,13 @@
     gate:
       queue: ironic
       jobs:
-        - ironic-dsvm-standalone
+        - ironic-standalone
         - ironic-dsvm-standalone-rocky
         - ironic-dsvm-standalone-queens
-        - ironic-tempest-dsvm-functional-python3
+        - ironic-tempest-functional-python3
         - ironic-tempest-dsvm-functional-python3-rocky
-        - ironic-tempest-dsvm-ironic-inspector
+        - ironic-inspector-tempest
         - ironic-tempest-dsvm-ironic-inspector-rocky
         - ironic-tempest-dsvm-ironic-inspector-queens
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
         - ironic-inspector-tempest-dsvm-discovery

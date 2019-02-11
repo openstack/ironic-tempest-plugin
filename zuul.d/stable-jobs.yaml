@@ -1,52 +1,52 @@
 ---
 - job:
     name: ironic-dsvm-standalone-rocky
-    parent: ironic-dsvm-standalone
+    parent: ironic-standalone
     override-checkout: stable/rocky
 
 - job:
     name: ironic-dsvm-standalone-queens
-    parent: ironic-dsvm-standalone
+    parent: ironic-standalone
     override-checkout: stable/queens
 
 - job:
     name: ironic-dsvm-standalone-pike
-    parent: ironic-dsvm-standalone
+    parent: ironic-standalone
     override-checkout: stable/pike
 
 - job:
     name: ironic-tempest-dsvm-functional-python3-rocky
-    parent: ironic-tempest-dsvm-functional-python3
+    parent: ironic-tempest-functional-python3
     override-checkout: stable/rocky
 
 - job:
     name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky
-    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
+    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/rocky
 
 - job:
     name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens
-    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
+    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/queens
 
 - job:
     name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
-    parent: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode
+    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/pike
 
 - job:
     name: ironic-tempest-dsvm-ironic-inspector-rocky
-    parent: ironic-tempest-dsvm-ironic-inspector
+    parent: ironic-inspector-tempest
     override-checkout: stable/rocky
 
 - job:
     name: ironic-tempest-dsvm-ironic-inspector-queens
-    parent: ironic-tempest-dsvm-ironic-inspector
+    parent: ironic-inspector-tempest
     override-checkout: stable/queens
 
 - job:
     name: ironic-tempest-dsvm-ironic-inspector-pike
-    parent: ironic-tempest-dsvm-ironic-inspector
+    parent: ironic-inspector-tempest
     override-checkout: stable/pike
 
 - job:
