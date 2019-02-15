@@ -66,15 +66,15 @@ class TestDeployTemplates(base.BaseBaremetalTest):
     def test_show_deploy_template(self):
         _, template = self.client.show_deploy_template(self.template['uuid'])
         self._assertExpected(self.template, template)
-        self.assertIn('name', template)
-        self.assertIn('steps', template)
+        self.assertEqual(self.name, template['name'])
+        self.assertEqual(self.steps, template['steps'])
         self.assertIn('uuid', template)
-        self.assertIn('extra', template)
+        self.assertEqual({}, template['extra'])
 
     @decorators.idempotent_id('2fd98e9a-10ce-405a-a32c-0d6079766183')
     def test_show_deploy_template_with_links(self):
         _, template = self.client.show_deploy_template(self.template['uuid'])
-        self.assertIn('links', template.keys())
+        self.assertIn('links', template)
         self.assertEqual(2, len(template['links']))
         self.assertIn(template['uuid'], template['links'][0]['href'])
 
@@ -115,9 +115,9 @@ class TestDeployTemplates(base.BaseBaremetalTest):
             self.assertIn(uuid, templates_dict)
             template = templates_dict[uuid]
             self.assertIn('name', template)
-            self.assertIn('steps', template)
+            self.assertEqual(self.steps, template['steps'])
             self.assertIn('uuid', template)
-            self.assertIn('extra', template)
+            self.assertEqual({}, template['extra'])
             # Verify self link.
             self.validate_self_link('deploy_templates', template['uuid'],
                                     template['links'][0]['href'])
