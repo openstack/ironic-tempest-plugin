@@ -248,7 +248,7 @@ class BaremetalClient(base.BaremetalClient):
 
         """
         node = {}
-        for field in ('resource_class', 'name'):
+        for field in ('resource_class', 'name', 'description'):
             if kwargs.get(field):
                 node[field] = kwargs[field]
 
@@ -475,7 +475,8 @@ class BaremetalClient(base.BaremetalClient):
                            'protected_reason',
                            # TODO(dtantsur): maintenance is set differently
                            # in newer API versions.
-                           'maintenance')
+                           'maintenance',
+                           'description')
         if not patch:
             patch = self._make_patch(node_attributes, **kwargs)
 

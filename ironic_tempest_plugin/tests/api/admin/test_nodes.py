@@ -175,6 +175,11 @@ class TestNodes(base.BaseBaremetalTest):
         _, loaded_node = self.client.show_node(self.node['uuid'])
         self.assertNotIn('conductor', loaded_node)
 
+    @decorators.idempotent_id('5e7f4c54-8216-42d3-83cc-7bd776ffd16f')
+    def test_description_hidden(self):
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertNotIn('description', loaded_node)
+
 
 class TestNodesResourceClass(base.BaseBaremetalTest):
 
@@ -975,3 +980,35 @@ class TestNodeConductor(base.BaseBaremetalTest):
         _, nodes = self.client.list_nodes(conductor=hostname)
         self.assertIn(self.node['uuid'],
                       [n['uuid'] for n in nodes['nodes']])
+
+
+class TestNodeDescription(base.BaseBaremetalTest):
+    """Tests for the description field."""
+
+    min_microversion = '1.51'
+
+    def setUp(self):
+        super(TestNodeDescription, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+    @decorators.idempotent_id('66d0da49-e5ac-4f49-b065-9d2207d8a3af')
+    def test_description_exposed(self):
+        _, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertIn('description', loaded_node)
+
+    @decorators.idempotent_id('85b4a4b5-37e5-4b60-8dc7-f5a26dfa78a3')
+    def test_node_description_set_unset(self):
+        self.client.update_node(self.node['uuid'], description='meow')
+        _, self.node = self.client.show_node(self.node['uuid'])
+        self.assertEqual('meow', self.node['description'])
+
+        self.client.update_node(self.node['uuid'], description=None)
+        _, self.node = self.client.show_node(self.node['uuid'])
+        self.assertIsNone(self.node['description'])
+
+    @decorators.idempotent_id('3d649bb3-a58b-4b9e-8dfa-41ab634b1153')
+    def test_create_node_with_description(self):
+        _, body = self.create_node(self.chassis['uuid'], description='meow')
+        self.assertEqual('meow', body['description'])
