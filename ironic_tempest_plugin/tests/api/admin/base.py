@@ -118,6 +118,12 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                 except lib_exc.BadRequest:
                     pass
 
+            for node in cls.created_objects['node']:
+                try:
+                    cls.client.update_node(node, instance_uuid=None)
+                except lib_exc.TempestException:
+                    pass
+
             for resource in RESOURCE_TYPES:
                 uuids = cls.created_objects[resource]
                 delete_method = getattr(cls.client, 'delete_%s' % resource)
@@ -171,7 +177,7 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     @creates('node')
     def create_node(cls, chassis_id, cpu_arch='x86_64', cpus=8, local_gb=10,
-                    memory_mb=4096, resource_class=None):
+                    memory_mb=4096, **kwargs):
         """Wrapper utility for creating test baremetal nodes.
 
         :param chassis_id: The unique identifier of the chassis.
@@ -179,7 +185,7 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         :param cpus: Number of CPUs. Default: 8.
         :param local_gb: Disk size. Default: 10.
         :param memory_mb: Available RAM. Default: 4096.
-        :param resource_class: Node resource class.
+        :param kwargs: Other optional node fields.
         :return: A tuple with the server response and the created node.
 
         """
@@ -187,7 +193,7 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                                             cpus=cpus, local_gb=local_gb,
                                             memory_mb=memory_mb,
                                             driver=cls.driver,
-                                            resource_class=resource_class)
+                                            **kwargs)
 
         return resp, body
 
