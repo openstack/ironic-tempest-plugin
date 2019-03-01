@@ -133,7 +133,10 @@ class TestAllocations(base.BaseBaremetalTest):
         _, body = self.client.create_allocation(self.resource_class,
                                                 name='banana')
         _, loaded_body = self.client.show_allocation('banana')
-        self._assertExpected(body, loaded_body)
+        # The allocation will likely have been processed by this time, so do
+        # not compare the whole body.
+        for field in ('name', 'uuid', 'resource_class'):
+            self.assertEqual(body[field], loaded_body[field])
 
     @decorators.idempotent_id('4ca123c4-160d-4d8d-a3f7-15feda812263')
     def test_list_allocations(self):
