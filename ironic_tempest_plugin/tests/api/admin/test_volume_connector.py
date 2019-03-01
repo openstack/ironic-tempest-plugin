@@ -107,6 +107,12 @@ class TestVolumeConnector(base.BaseBaremetalTest):
     @decorators.idempotent_id('1d0459ad-01c0-46db-b930-7301bc2a3c98')
     def test_list_with_limit(self):
         """List volume connectors with limit."""
+        for i in range(2):
+            _, self.volume_connector = self.create_volume_connector(
+                self.node['uuid'], type='iqn',
+                connector_id=data_utils.rand_name('connector_id'),
+                extra=self.extra)
+
         _, body = self.client.list_volume_connectors(limit=3)
 
         next_marker = body['connectors'][-1]['uuid']

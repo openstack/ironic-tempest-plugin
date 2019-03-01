@@ -105,6 +105,9 @@ class TestPorts(base.BaseBaremetalTest):
 
     @decorators.idempotent_id('324a910e-2f80-4258-9087-062b5ae06240')
     def test_list_with_limit(self):
+        for i in range(2):
+            self.create_port(self.node['uuid'], data_utils.rand_mac_address())
+
         _, body = self.client.list_ports(limit=3)
 
         next_marker = body['ports'][-1]['uuid']
