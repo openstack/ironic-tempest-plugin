@@ -10,9 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import os
 import time
+
+from oslo_serialization import jsonutils as json
 
 import six
 import tempest
