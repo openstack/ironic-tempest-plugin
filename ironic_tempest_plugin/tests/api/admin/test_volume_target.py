@@ -104,6 +104,14 @@ class TestVolumeTarget(base.BaseBaremetalTest):
     @decorators.idempotent_id('9da25447-0370-4b33-9c1f-d4503f5950ae')
     def test_list_with_limit(self):
         """List volume targets with limit."""
+        for i in range(2):
+            _, self.volume_target = self.create_volume_target(
+                self.node['uuid'],
+                volume_type=data_utils.rand_name('volume_type'),
+                volume_id=data_utils.rand_name('volume_id'),
+                boot_index=11 + i,
+                extra=self.extra)
+
         _, body = self.client.list_volume_targets(limit=3)
 
         next_marker = body['targets'][-1]['uuid']
