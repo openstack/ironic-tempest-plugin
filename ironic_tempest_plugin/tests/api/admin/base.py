@@ -19,6 +19,7 @@ from tempest import test
 
 from ironic_tempest_plugin import clients
 from ironic_tempest_plugin.common import waiters
+from ironic_tempest_plugin.services.baremetal import base
 from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
 
 CONF = config.CONF
@@ -33,8 +34,8 @@ SUPPORTED_DRIVERS = ['fake', 'fake-hardware']
 
 # NOTE(jroll): resources must be deleted in a specific order, this list
 # defines the resource types to clean up, and the correct order.
-RESOURCE_TYPES = ['port', 'portgroup', 'volume_connector', 'volume_target',
-                  'node', 'chassis']
+RESOURCE_TYPES = ['port', 'portgroup', 'node', 'volume_connector',
+                  'volume_target', 'chassis', 'deploy_template']
 
 
 def creates(resource):
@@ -110,6 +111,9 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def resource_cleanup(cls):
         """Ensure that all created objects get destroyed."""
+        # Use the requested microversion for cleanup to ensure we can delete
+        # resources.
+        base.set_baremetal_api_microversion(cls.request_microversion)
         try:
             for node in cls.deployed_nodes:
                 try:
@@ -130,6 +134,7 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                 for u in uuids:
                     delete_method(u, ignore_errors=lib_exc.NotFound)
         finally:
+            base.reset_baremetal_api_microversion()
             super(BaseBaremetalTest, cls).resource_cleanup()
 
     def _assertExpected(self, expected, actual):
@@ -321,6 +326,19 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         return resp, body
 
     @classmethod
+    @creates('deploy_template')
+    def create_deploy_template(cls, name, **kwargs):
+        """Wrapper utility for creating test deploy template.
+
+        :param name: The name of the deploy template.
+        :return: A tuple with the server response and the created deploy
+            template.
+        """
+        resp, body = cls.client.create_deploy_template(name=name, **kwargs)
+
+        return resp, body
+
+    @classmethod
     def delete_chassis(cls, chassis_id):
         """Deletes a chassis having the specified UUID.
 
@@ -408,6 +426,21 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
 
         if volume_target_id in cls.created_objects['volume_target']:
             cls.created_objects['volume_target'].remove(volume_target_id)
+
+        return resp
+
+    @classmethod
+    def delete_deploy_template(cls, deploy_template_ident):
+        """Deletes a deploy template having the specified name or UUID.
+
+        :param deploy_template_ident: Name or UUID of the deploy template.
+        :return: Server response.
+        """
+        resp, body = cls.client.delete_deploy_template(deploy_template_ident)
+
+        if deploy_template_ident in cls.created_objects['deploy_template']:
+            cls.created_objects['deploy_template'].remove(
+                deploy_template_ident)
 
         return resp
 
