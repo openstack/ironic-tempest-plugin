@@ -113,7 +113,7 @@ class InspectorScenarioTest(BaremetalScenarioTest):
         self.introspection_client.purge_rules()
 
     def rule_import(self, rule_path):
-        with open(rule_path, 'r') as fp:
+        with open(rule_path, 'rb') as fp:
             rules = json.load(fp)
         self.introspection_client.create_rules(rules)
 
