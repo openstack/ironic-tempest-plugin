@@ -411,13 +411,8 @@ class BaremetalClient(base.BaremetalClient):
         :return: A tuple with the server response and the created deploy
             template.
         """
-        deploy_template = {'name': name}
-
-        for arg in ('extra', 'steps', 'uuid'):
-            if arg in kwargs:
-                deploy_template[arg] = kwargs[arg]
-
-        return self._create_request('deploy_templates', deploy_template)
+        kwargs['name'] = name
+        return self._create_request('deploy_templates', kwargs)
 
     @base.handle_errors
     def delete_node(self, uuid):
