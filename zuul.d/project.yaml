@@ -6,10 +6,7 @@
     check:
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
-        # marking ironic-standalone non voting until we can run ansible
-        # with python3 interpreter on remote machines
-        - ironic-standalone:
-            voting: false
+        - ironic-standalone
         - ironic-dsvm-standalone-rocky
         - ironic-dsvm-standalone-queens
         - ironic-dsvm-standalone-pike:
@@ -40,9 +37,7 @@
     gate:
       queue: ironic
       jobs:
-        # removing ironic-standalone from gate until we can run ansible
-        # with python3 interpreter on remote machines
-        # - ironic-standalone
+        - ironic-standalone
         - ironic-dsvm-standalone-rocky
         - ironic-dsvm-standalone-queens
         - ironic-tempest-functional-python3
