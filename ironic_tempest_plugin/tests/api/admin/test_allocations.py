@@ -10,8 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import random
-
+from oslo_utils import uuidutils
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -37,7 +36,7 @@ class TestAllocations(base.BaseBaremetalTest):
 
         # Generate a resource class to prevent parallel tests from clashing
         # with each other.
-        self.resource_class = 'x-small-%d' % random.randrange(1024)
+        self.resource_class = uuidutils.generate_uuid()
 
         _, self.chassis = self.create_chassis()
         _, self.node = self.create_node(self.chassis['uuid'],
