@@ -202,7 +202,8 @@ class TestDeployTemplatesOldAPI(base.BaseBaremetalTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e9481a0d-23e0-4757-bc11-c3c9ab9d3839')
     def test_create_deploy_template_old_api(self):
-        self.assertRaises(lib_exc.NotFound,
+        # With deploy templates support, ironic returns 404. Without, 405.
+        self.assertRaises((lib_exc.NotFound, lib_exc.UnexpectedResponseCode),
                           self.create_deploy_template,
                           name=_get_random_trait(), steps=EXAMPLE_STEPS)
 
@@ -212,14 +213,16 @@ class TestDeployTemplatesOldAPI(base.BaseBaremetalTest):
         patch = [{'path': '/name', 'op': 'replace',
                   'value': _get_random_trait()}]
 
-        self.assertRaises(lib_exc.NotFound,
+        # With deploy templates support, ironic returns 404. Without, 405.
+        self.assertRaises((lib_exc.NotFound, lib_exc.UnexpectedResponseCode),
                           self.client.update_deploy_template,
                           _get_random_trait(), patch)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1646b1e5-ab81-45a8-9ea0-30444a4dcaa2')
     def test_delete_deploy_template_old_api(self):
-        self.assertRaises(lib_exc.NotFound,
+        # With deploy templates support, ironic returns 404. Without, 405.
+        self.assertRaises((lib_exc.NotFound, lib_exc.UnexpectedResponseCode),
                           self.client.delete_deploy_template,
                           _get_random_trait())
 
