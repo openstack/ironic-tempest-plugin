@@ -199,15 +199,6 @@ class TestDeployTemplates(base.BaseBaremetalTest):
 class TestDeployTemplatesOldAPI(base.BaseBaremetalTest):
     """Negative tests for deploy templates using an old API version."""
 
-    max_microversion = '1.54'
-
-    def setUp(self):
-        super(TestDeployTemplatesOldAPI, self).setUp()
-        self.useFixture(
-            api_microversion_fixture.APIMicroversionFixture(
-                self.max_microversion)
-        )
-
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e9481a0d-23e0-4757-bc11-c3c9ab9d3839')
     def test_create_deploy_template_old_api(self):
