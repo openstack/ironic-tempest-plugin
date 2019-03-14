@@ -195,4 +195,7 @@ BaremetalIntrospectionGroup = [
                default='fake',
                help="The driver expected to be set on newly discovered nodes. "
                     "Only has effect with auto_discovery_feature is True."),
+    cfg.StrOpt('auto_discovery_target_driver',
+               help="The driver to set on the newly discovered nodes. "
+                    "Only has effect with auto_discovery_feature is True."),
 ]

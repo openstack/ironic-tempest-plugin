@@ -37,6 +37,13 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
 
         discovered_node = self._get_discovery_node()
         self.node_info = self._get_node_info(discovered_node)
+        self.default_driver = (
+            CONF.baremetal_introspection.auto_discovery_default_driver
+        )
+        self.expected_driver = (
+            CONF.baremetal_introspection.auto_discovery_target_driver
+            or CONF.baremetal_introspection.auto_discovery_default_driver
+        )
 
         rule = {
             "description": "Auto-discovery rule",
@@ -51,13 +58,25 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
                  "path": "/name",
                  "value": self.node_info['name']},
             ],
-            # This flag must be automatically set by the auto-discovery process
             "conditions": [
+                # This flag must be automatically set by the auto-discovery
+                # process.
                 {"op": "eq",
                  "field": "data://auto_discovered",
-                 "value": True}
+                 "value": True},
+                # Making sure the initial driver matches the expected.
+                {"op": "eq",
+                 "field": "node://driver",
+                 "value": self.default_driver},
             ]
         }
+
+        if self.expected_driver != self.default_driver:
+            rule['actions'].append({
+                'action': 'set-attribute',
+                'path': '/driver',
+                'value': self.expected_driver
+            })
 
         self.rule_import_from_dict(rule)
         self.addCleanup(self.rule_purge)
@@ -141,7 +160,5 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
             self.verify_node_introspection_data(inspected_node)
         self.assertEqual(ProvisionStates.ENROLL,
                          inspected_node['provision_state'])
-        self.assertEqual(
-            CONF.baremetal_introspection.auto_discovery_default_driver,
-            inspected_node['driver'])
+        self.assertEqual(self.expected_driver, inspected_node['driver'])
         self.assertEqual('yes', inspected_node['extra']['discovered'])
