@@ -21,18 +21,15 @@ from ironic_tempest_plugin.tests.api.admin import base
 CONF = config.CONF
 
 
-class TestAllocations(base.BaseBaremetalTest):
-    """Tests for baremetal allocations."""
-
-    min_microversion = '1.52'
-
-    def provide_node(self, node_id, cleaning_timeout=None):
-        super(TestAllocations, self).provide_node(node_id, cleaning_timeout)
+class Base(base.BaseBaremetalTest):
+    @classmethod
+    def provide_and_power_off_node(cls, node_id, cleaning_timeout=None):
+        cls.provide_node(node_id, cleaning_timeout)
         # Force non-empty power state, otherwise allocation API won't pick it
-        self.client.set_node_power_state(node_id, 'power off')
+        cls.client.set_node_power_state(node_id, 'power off')
 
     def setUp(self):
-        super(TestAllocations, self).setUp()
+        super(Base, self).setUp()
 
         # Generate a resource class to prevent parallel tests from clashing
         # with each other.
@@ -41,7 +38,13 @@ class TestAllocations(base.BaseBaremetalTest):
         _, self.chassis = self.create_chassis()
         _, self.node = self.create_node(self.chassis['uuid'],
                                         resource_class=self.resource_class)
-        self.provide_node(self.node['uuid'])
+        self.provide_and_power_off_node(self.node['uuid'])
+
+
+class TestAllocations(Base):
+    """Tests for baremetal allocations."""
+
+    min_microversion = '1.52'
 
     @decorators.idempotent_id('9203ea28-3c61-4108-8498-22247b654ff6')
     def test_create_show_allocation(self):
@@ -72,7 +75,7 @@ class TestAllocations(base.BaseBaremetalTest):
         _, node2 = self.create_node(self.chassis['uuid'],
                                     resource_class=self.resource_class)
         self.client.set_node_traits(node2['uuid'], ['CUSTOM_MEOW'])
-        self.provide_node(node2['uuid'])
+        self.provide_and_power_off_node(node2['uuid'])
 
         _, body = self.create_allocation(self.resource_class,
                                          traits=['CUSTOM_MEOW'])
@@ -95,7 +98,7 @@ class TestAllocations(base.BaseBaremetalTest):
         _, node2 = self.create_node(self.chassis['uuid'],
                                     resource_class=self.resource_class,
                                     name=node_name)
-        self.provide_node(node2['uuid'])
+        self.provide_and_power_off_node(node2['uuid'])
 
         _, body = self.create_allocation(self.resource_class,
                                          candidate_nodes=[node_name])
@@ -206,3 +209,49 @@ class TestAllocations(base.BaseBaremetalTest):
                                               expect_error=True)
         self.assertEqual('error', body['state'])
         self.assertTrue(body['last_error'])
+
+
+class TestBackfill(Base):
+    """Tests for backfilling baremetal allocations."""
+
+    min_microversion = '1.58'
+
+    @decorators.idempotent_id('10774c1d-6b79-453a-8e26-9bf04ab580a4')
+    def test_backfill_allocation(self):
+        self.deploy_node(self.node['uuid'])
+
+        _, body = self.client.create_allocation(self.resource_class,
+                                                node=self.node['uuid'])
+        uuid = body['uuid']
+        self.assertEqual(self.node['uuid'], body['node_uuid'])
+        self.assertEqual('active', body['state'])
+        self.assertIsNone(body['last_error'])
+
+        _, body2 = self.client.show_node_allocation(body['node_uuid'])
+        self.assertEqual(self.node['uuid'], body2['node_uuid'])
+        self.assertEqual('active', body2['state'])
+        self.assertIsNone(body2['last_error'])
+
+        _, node = self.client.show_node(self.node['uuid'])
+        self.assertEqual(uuid, node['allocation_uuid'])
+
+    @decorators.idempotent_id('c33d4b65-1232-4a3f-9aad-942e32f6f7b0')
+    def test_backfill_without_resource_class(self):
+        self.deploy_node(self.node['uuid'])
+
+        _, body = self.client.create_allocation(None, node=self.node['uuid'])
+        uuid = body['uuid']
+        self.assertEqual(self.node['uuid'], body['node_uuid'])
+        self.assertEqual('active', body['state'])
+        self.assertIsNone(body['last_error'])
+        # Resource class is copied from node
+        self.assertEqual(self.node['resource_class'], body['resource_class'])
+
+        _, body2 = self.client.show_node_allocation(body['node_uuid'])
+        self.assertEqual(self.node['uuid'], body2['node_uuid'])
+        self.assertEqual('active', body2['state'])
+        self.assertIsNone(body2['last_error'])
+        self.assertEqual(self.node['resource_class'], body2['resource_class'])
+
+        _, node = self.client.show_node(self.node['uuid'])
+        self.assertEqual(uuid, node['allocation_uuid'])

@@ -846,7 +846,8 @@ class BaremetalClient(base.BaremetalClient):
         :return: A tuple with the server response and the created allocation.
 
         """
-        kwargs['resource_class'] = resource_class
+        if resource_class:
+            kwargs['resource_class'] = resource_class
         return self._create_request('allocations', kwargs)
 
     @base.handle_errors
