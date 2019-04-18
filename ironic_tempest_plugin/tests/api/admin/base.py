@@ -104,7 +104,7 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         cls.power_timeout = CONF.baremetal.power_timeout
         cls.unprovision_timeout = CONF.baremetal.unprovision_timeout
         cls.created_objects = {}
-        for resource in RESOURCE_TYPES:
+        for resource in RESOURCE_TYPES + ['allocation']:
             cls.created_objects[resource] = set()
         cls.deployed_nodes = set()
 
@@ -120,6 +120,14 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                     cls.set_node_provision_state(node, 'deleted',
                                                  ['available', None])
                 except lib_exc.BadRequest:
+                    pass
+
+            # Delete allocations explicitly after unprovisioning instances, but
+            # before deleting nodes.
+            for allocation in cls.created_objects['allocation']:
+                try:
+                    cls.client.delete_allocation(allocation)
+                except lib_exc.NotFound:
                     pass
 
             for node in cls.created_objects['node']:
@@ -452,3 +460,15 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                         res=resource,
                         uuid=uuid)
         self.assertEqual(expected_link, link)
+
+    @classmethod
+    @creates('allocation')
+    def create_allocation(cls, resource_class, **kwargs):
+        """Wrapper utility for creating test allocations.
+
+        :param resource_class: Resource class to request.
+        :param kwargs: Other fields to pass.
+        :return: A tuple with the server response and the created allocation.
+        """
+        resp, body = cls.client.create_allocation(resource_class, **kwargs)
+        return resp, body
