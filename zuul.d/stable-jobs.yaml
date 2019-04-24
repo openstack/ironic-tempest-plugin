@@ -15,13 +15,6 @@
         EBTABLES_RACE_FIX: True
         IRONIC_USE_MOD_WSGI: True
 
-
-- job:
-    name: ironic-dsvm-standalone-pike
-    parent: ironic-standalone
-    override-branch: stable/pike
-    nodeset: openstack-single-node-xenial
-
 - job:
     name: ironic-tempest-dsvm-functional-python3-rocky
     parent: ironic-tempest-functional-python3
@@ -70,24 +63,6 @@
           OVS_BRIDGE_MAPPINGS: 'mynetwork:sub1brbm,public:br_ironic_vxlan'
 
 - job:
-    name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike
-    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
-    override-branch: stable/pike
-    nodeset: openstack-two-node-xenial
-    vars:
-      devstack_localrc:
-        IRONIC_DEFAULT_BOOT_OPTION: netboot
-        FIXED_NETWORK_SIZE: 4096
-        IRONIC_DEFAULT_RESCUE_INTERFACE: agent
-        EBTABLES_RACE_FIX: True
-        PUBLIC_BRIDGE: br_ironic_vxlan
-        OVS_BRIDGE_MAPPINGS: 'mynetwork:brbm,public:br_ironic_vxlan'
-    group-vars:
-      subnode:
-        devstack_localrc:
-          OVS_BRIDGE_MAPPINGS: 'mynetwork:sub1brbm,public:br_ironic_vxlan'
-
-- job:
     name: ironic-tempest-dsvm-ironic-inspector-rocky
     parent: ironic-inspector-tempest
     override-branch: stable/rocky
@@ -108,16 +83,6 @@
         EBTABLES_RACE_FIX: True
 
 - job:
-    name: ironic-tempest-dsvm-ironic-inspector-pike
-    parent: ironic-inspector-tempest
-    override-branch: stable/pike
-    nodeset: openstack-single-node-xenial
-    vars:
-      devstack_localrc:
-        FIXED_NETWORK_SIZE: 4096
-        EBTABLES_RACE_FIX: True
-
-- job:
     name: ironic-inspector-tempest-dsvm-discovery-rocky
     parent: ironic-inspector-tempest-discovery
     override-branch: stable/rocky
@@ -127,10 +92,4 @@
     name: ironic-inspector-tempest-dsvm-discovery-queens
     parent: ironic-inspector-tempest-discovery
     override-branch: stable/queens
-    nodeset: openstack-single-node-xenial
-
-- job:
-    name: ironic-inspector-tempest-dsvm-discovery-pike
-    parent: ironic-inspector-tempest-discovery
-    override-branch: stable/pike
     nodeset: openstack-single-node-xenial

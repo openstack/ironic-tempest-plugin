@@ -8,47 +8,36 @@
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-standalone
         - ironic-dsvm-standalone-rocky
-        # NOTE(iurygregory): we want to make voting again
         - ironic-dsvm-standalone-queens:
-            voting: false
-        - ironic-dsvm-standalone-pike:
             voting: false
         - ironic-tempest-functional-python3
         - ironic-tempest-dsvm-functional-python3-rocky
         - ironic-inspector-tempest
         - ironic-tempest-dsvm-ironic-inspector-rocky
-        - ironic-tempest-dsvm-ironic-inspector-queens
-        - ironic-tempest-dsvm-ironic-inspector-pike:
+        - ironic-tempest-dsvm-ironic-inspector-queens:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting on stable branches.
         # NOTE(iurygregory):  debug rocky and queens
-        # since before was working, pike was broken before
+        # since before was working
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky:
             voting: false
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens:
-            voting: false
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-pike:
             voting: false
         - ironic-inspector-tempest-discovery
         - ironic-inspector-tempest-dsvm-discovery-rocky:
             voting: false
         - ironic-inspector-tempest-dsvm-discovery-queens:
             voting: false
-        # NOTE(iurygregory): we may want to debug why its failling since before was green
-        - ironic-inspector-tempest-dsvm-discovery-pike:
-            voting: false
     gate:
       queue: ironic
       jobs:
-        # NOTE(iurygregory): re add ironic-dsvm-standalone-queens when is green again
         - ironic-standalone
         - ironic-dsvm-standalone-rocky
         - ironic-tempest-functional-python3
         - ironic-tempest-dsvm-functional-python3-rocky
         - ironic-inspector-tempest
         - ironic-tempest-dsvm-ironic-inspector-rocky
-        - ironic-tempest-dsvm-ironic-inspector-queens
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
         - ironic-inspector-tempest-discovery
