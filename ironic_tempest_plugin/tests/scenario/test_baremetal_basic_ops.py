@@ -107,7 +107,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         self.assertNotEqual('', device)
 
         # Validate the mount point for the device
-        cmd = "mount | grep '%s' | cut -d' ' -f3" % device
+        cmd = "mount | grep -w '%s' | cut -d' ' -f3" % device
         actual_mount = client.exec_command(cmd).rstrip('\n')
         LOG.debug("Partition mount point is %s", actual_mount)
         self.assertEqual(actual_mount, mount)
