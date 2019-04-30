@@ -101,7 +101,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         LOG.info("Looking for partition %s mounted on %s", label, mount)
 
         # Validate we have a device with the given partition label
-        cmd = "/sbin/blkid | grep '%s' | cut -d':' -f1" % label
+        cmd = "/sbin/blkid -c /dev/null -l -o device -t LABEL=%s" % label
         device = client.exec_command(cmd).rstrip('\n')
         LOG.debug("Partition device is %s", device)
         self.assertNotEqual('', device)
