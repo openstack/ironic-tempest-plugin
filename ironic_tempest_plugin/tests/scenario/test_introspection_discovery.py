@@ -156,7 +156,7 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
 
         inspected_node = self.node_show(self.node_info['name'])
         self.verify_node_flavor(inspected_node)
-        if CONF.service_available.swift:
+        if CONF.baremetal_introspection.data_store != "none":
             self.verify_node_introspection_data(inspected_node)
         self.assertEqual(ProvisionStates.ENROLL,
                          inspected_node['provision_state'])

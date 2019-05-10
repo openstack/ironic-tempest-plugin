@@ -94,7 +94,7 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
         for node_id in self.node_ids:
             node = self.node_show(node_id)
             self.assertEqual('yes', node['extra']['rule_success'])
-            if CONF.service_available.swift:
+            if CONF.baremetal_introspection.data_store != "none":
                 self.verify_node_introspection_data(node)
             self.verify_node_flavor(node)
 
