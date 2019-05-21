@@ -156,7 +156,12 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
 
         inspected_node = self.node_show(self.node_info['name'])
         self.verify_node_flavor(inspected_node)
-        if CONF.baremetal_introspection.data_store != "none":
+        data_store = CONF.baremetal_introspection.data_store
+        if data_store is None:
+            # Backward compatibility, the option is not set.
+            data_store = ('swift' if CONF.service_available.swift
+                          else 'none')
+        if data_store != 'none':
             self.verify_node_introspection_data(inspected_node)
         self.assertEqual(ProvisionStates.ENROLL,
                          inspected_node['provision_state'])

@@ -199,6 +199,5 @@ BaremetalIntrospectionGroup = [
                help="The driver to set on the newly discovered nodes. "
                     "Only has effect with auto_discovery_feature is True."),
     cfg.StrOpt('data_store',
-               default='swift',
                help="The storage backend for storing introspection data."),
 ]

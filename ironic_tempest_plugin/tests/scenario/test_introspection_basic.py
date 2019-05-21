@@ -94,7 +94,12 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
         for node_id in self.node_ids:
             node = self.node_show(node_id)
             self.assertEqual('yes', node['extra']['rule_success'])
-            if CONF.baremetal_introspection.data_store != "none":
+            data_store = CONF.baremetal_introspection.data_store
+            if data_store is None:
+                # Backward compatibility, the option is not set.
+                data_store = ('swift' if CONF.service_available.swift
+                              else 'none')
+            if data_store != 'none':
                 self.verify_node_introspection_data(node)
             self.verify_node_flavor(node)
 
