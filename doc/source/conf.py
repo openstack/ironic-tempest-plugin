@@ -40,7 +40,6 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ironic-tempest-plugin'
 copyright = u'2016, OpenStack Foundation'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
@@ -62,15 +61,15 @@ pygments_style = 'sphinx'
 html_theme = 'openstackdocs'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = '%sdoc' % project
+htmlhelp_basename = 'ironic-tempest-plugindoc'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
     ('index',
-     '%s.tex' % project,
-     u'%s Documentation' % project,
+     'doc-ironic-tempest-plugin.tex',
+     u'Ironic Tempest Plugin Documentation',
      u'OpenStack Foundation', 'manual'),
 ]
 
