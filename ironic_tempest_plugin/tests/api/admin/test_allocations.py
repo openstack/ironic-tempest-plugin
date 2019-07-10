@@ -124,15 +124,16 @@ class TestAllocations(Base):
 
     @decorators.idempotent_id('5e30452d-ee92-4342-82c1-5eea5e55c937')
     def test_delete_allocation_by_name(self):
-        _, body = self.create_allocation(self.resource_class, name='banana')
-        self.client.delete_allocation('banana')
-        self.assertRaises(lib_exc.NotFound, self.client.show_allocation,
-                          'banana')
+        name = 'alloc-%s' % uuidutils.generate_uuid()
+        _, body = self.create_allocation(self.resource_class, name=name)
+        self.client.delete_allocation(name)
+        self.assertRaises(lib_exc.NotFound, self.client.show_allocation, name)
 
     @decorators.idempotent_id('fbbc13bc-86da-438b-af01-d1bc1bab57d6')
     def test_show_by_name(self):
-        _, body = self.create_allocation(self.resource_class, name='banana')
-        _, loaded_body = self.client.show_allocation('banana')
+        name = 'alloc-%s' % uuidutils.generate_uuid()
+        _, body = self.create_allocation(self.resource_class, name=name)
+        _, loaded_body = self.client.show_allocation(name)
         # The allocation will likely have been processed by this time, so do
         # not compare the whole body.
         for field in ('name', 'uuid', 'resource_class'):
