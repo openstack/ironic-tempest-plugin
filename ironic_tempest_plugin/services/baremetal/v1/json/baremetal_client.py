@@ -277,6 +277,11 @@ class BaremetalClient(base.BaremetalClient):
         return self._create_request('nodes', node)
 
     @base.handle_errors
+    def create_node_raw(self, **kwargs):
+        """Create a baremetal node from the given body."""
+        return self._create_request('nodes', kwargs)
+
+    @base.handle_errors
     def create_chassis(self, **kwargs):
         """Create a chassis with the specified parameters.
 
@@ -307,13 +312,12 @@ class BaremetalClient(base.BaremetalClient):
         :return: A tuple with the server response and the created port.
 
         """
-        port = {'extra': kwargs.get('extra', {'foo': 'bar'}),
-                'uuid': kwargs['uuid']}
+        port = {'extra': kwargs.get('extra', {'foo': 'bar'})}
 
         if node_id is not None:
             port['node_uuid'] = node_id
 
-        for key in ('address', 'physical_network', 'portgroup_uuid'):
+        for key in ('uuid', 'address', 'physical_network', 'portgroup_uuid'):
             if kwargs.get(key) is not None:
                 port[key] = kwargs[key]
 
