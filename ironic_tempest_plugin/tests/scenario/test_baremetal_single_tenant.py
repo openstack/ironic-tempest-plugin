@@ -62,7 +62,7 @@ class BaremetalSingleTenant(baremetal_manager.BaremetalScenarioTest,
             name=data_utils.rand_name('subnet'),
             network_id=network['id'],
             tenant_id=clients.credentials.tenant_id,
-            ip_version=4,
+            ip_version=CONF.validation.ip_version_for_ssh,
             cidr=tenant_cidr)
         subnet = result['subnet']
         clients.routers_client.add_router_interface(router['id'],
