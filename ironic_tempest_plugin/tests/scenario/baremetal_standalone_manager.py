@@ -101,7 +101,7 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#create-port
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-port
 
         :returns: server response body.
         """
