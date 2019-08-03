@@ -147,6 +147,11 @@ BaremetalFeaturesGroup = [
     cfg.BoolOpt('ipxe_enabled',
                 default=True,
                 help="Defines if IPXE is enabled"),
+    cfg.BoolOpt('adoption',
+                # Defaults to False since it's a destructive operation AND it
+                # requires the plugin to be able to read ipmi_password.
+                default=False,
+                help="Defines if adoption is enabled"),
 ]
 
 BaremetalIntrospectionGroup = [
