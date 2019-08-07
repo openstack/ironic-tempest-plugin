@@ -509,6 +509,7 @@ class BaremetalClient(base.BaremetalClient):
                            'driver',
                            'bios_interface',
                            'deploy_interface',
+                           'raid_interface',
                            'rescue_interface',
                            'instance_uuid',
                            'resource_class',

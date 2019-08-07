@@ -132,6 +132,9 @@ BaremetalGroup = [
     cfg.ListOpt('enabled_boot_interfaces',
                 default=['fake', 'pxe'],
                 help="List of Ironic enabled boot interfaces."),
+    cfg.ListOpt('enabled_raid_interfaces',
+                default=['no-raid', 'agent'],
+                help="List of Ironic enabled RAID interfaces."),
     cfg.StrOpt('default_rescue_interface',
                help="Ironic default rescue interface."),
     cfg.IntOpt('adjusted_root_disk_size_gb',
@@ -152,6 +155,11 @@ BaremetalFeaturesGroup = [
                 # requires the plugin to be able to read ipmi_password.
                 default=False,
                 help="Defines if adoption is enabled"),
+    cfg.BoolOpt('software_raid',
+                default=False,
+                help="Defines if software RAID is enabled (available "
+                     "starting with Train). Requires at least two disks "
+                     "on testing nodes."),
 ]
 
 BaremetalIntrospectionGroup = [

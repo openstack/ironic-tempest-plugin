@@ -69,3 +69,66 @@ class BaremetalCleaningIpmiWholedisk(
     @utils.services('image', 'network')
     def test_manual_cleaning(self):
         self.check_manual_partition_cleaning(self.node)
+
+
+class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
+
+    driver = 'ipmi'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    deploy_interface = 'iscsi'
+    raid_interface = 'agent'
+    api_microversion = '1.31'
+
+    raid_config = {
+        "logical_disks": [
+            {
+                "size_gb": "MAX",
+                "raid_level": "1",
+                "controller": "software"
+            },
+        ]
+    }
+
+    @classmethod
+    def skip_checks(cls):
+        super(SoftwareRaidIscsi, cls).skip_checks()
+        if not CONF.baremetal_feature_enabled.software_raid:
+            raise cls.skipException("Software RAID feature is not enabled")
+
+    @decorators.idempotent_id('7ecba4f7-98b8-4ea1-b95e-3ec399f46798')
+    @utils.services('image', 'network')
+    def test_software_raid(self):
+        self.build_raid_and_verify_node()
+
+
+class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
+
+    driver = 'ipmi'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    deploy_interface = 'direct'
+    raid_interface = 'agent'
+    api_microversion = '1.31'
+
+    # TODO(dtantsur): more complex layout in this job
+    raid_config = {
+        "logical_disks": [
+            {
+                "size_gb": "MAX",
+                "raid_level": "1",
+                "controller": "software"
+            },
+        ]
+    }
+
+    @classmethod
+    def skip_checks(cls):
+        super(SoftwareRaidDirect, cls).skip_checks()
+        if not CONF.baremetal_feature_enabled.software_raid:
+            raise cls.skipException("Software RAID feature is not enabled")
+
+    @decorators.idempotent_id('125361ac-0eb3-4d79-8be2-a91936aa3f46')
+    @utils.services('image', 'network')
+    def test_software_raid(self):
+        self.build_raid_and_verify_node()

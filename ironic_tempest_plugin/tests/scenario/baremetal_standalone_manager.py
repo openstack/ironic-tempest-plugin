@@ -424,6 +424,12 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # set via a different test).
     boot_interface = None
 
+    # The raid interface to use by the HW type. The raid interface of the
+    # node used in the test will be set to this value. If set to None, the
+    # node will retain its existing raid_interface value (which may have been
+    # set via a different test).
+    raid_interface = None
+
     # Boolean value specify if image is wholedisk or not.
     wholedisk_image = None
 
@@ -476,6 +482,13 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 "in the list of enabled boot interfaces %(enabled)s" % {
                     'iface': cls.boot_interface,
                     'enabled': CONF.baremetal.enabled_boot_interfaces})
+        if (cls.raid_interface and cls.raid_interface not in
+                CONF.baremetal.enabled_raid_interfaces):
+            raise cls.skipException(
+                "RAID interface %(iface)s required by test is not "
+                "in the list of enabled RAID interfaces %(enabled)s" % {
+                    'iface': cls.raid_interface,
+                    'enabled': CONF.baremetal.enabled_raid_interfaces})
         if not cls.wholedisk_image and CONF.baremetal.use_provision_network:
             raise cls.skipException(
                 'Partitioned images are not supported with multitenancy.')
@@ -512,6 +525,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
             boot_kwargs['rescue_interface'] = cls.rescue_interface
         if cls.boot_interface:
             boot_kwargs['boot_interface'] = cls.boot_interface
+        if cls.raid_interface:
+            boot_kwargs['raid_interface'] = cls.raid_interface
 
         # just get an available node
         cls.node = cls.get_and_reserve_node()
@@ -540,3 +555,34 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         self.set_node_to_active(image_ref, image_checksum)
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=should_succeed))
+
+    def build_raid_and_verify_node(self, config=None, clean_steps=None):
+        config = config or self.raid_config
+        clean_steps = clean_steps or [
+            {
+                "interface": "raid",
+                "step": "delete_configuration"
+            },
+            # NOTE(dtantsur): software RAID building fails if any
+            # partitions exist on holder devices.
+            {
+                "interface": "deploy",
+                "step": "erase_devices_metadata"
+            },
+            {
+                "interface": "raid",
+                "step": "create_configuration"
+            }
+        ]
+
+        self.baremetal_client.set_node_raid_config(self.node['uuid'], config)
+        self.manual_cleaning(self.node, clean_steps=clean_steps)
+
+        # NOTE(dtantsur): this is not required, but it allows us to check that
+        # the RAID device was in fact created and is used for deployment.
+        patch = [{'path': '/properties/root_device',
+                  'op': 'add', 'value': {'name': '/dev/md0'}}]
+        self.update_node(self.node['uuid'], patch=patch)
+        # NOTE(dtantsur): apparently cirros cannot boot from md devices :(
+        # So we only move the node to active (verifying deployment).
+        self.set_node_to_active()
