@@ -143,7 +143,14 @@ BaremetalGroup = [
                     "as instance_info/root_gb value."),
     cfg.IntOpt('available_nodes', min=0, default=None,
                help="The number of baremetal hosts available to use for "
-                    "the tests.")
+                    "the tests."),
+    cfg.BoolOpt('partition_netboot',
+                default=True,
+                help="Treat partition images as netbooted as opposed to "
+                     "attempting to populate a boot loader. IF cirros is "
+                     "being used, this option should be set to True as "
+                     "it lacks the needed components to make it locally "
+                     "from a partition image."),
 ]
 
 BaremetalFeaturesGroup = [

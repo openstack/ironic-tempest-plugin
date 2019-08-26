@@ -37,6 +37,7 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
 
     image_ref = None
     image_checksum = None
+    boot_option = None
 
     @classmethod
     def skip_checks(cls):
@@ -221,7 +222,8 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         return nodes[0]
 
     @classmethod
-    def boot_node(cls, image_ref=None, image_checksum=None):
+    def boot_node(cls, image_ref=None, image_checksum=None,
+                  boot_option=None):
         """Boot ironic node.
 
         The following actions are executed:
@@ -234,11 +236,16 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         :param image_ref: Reference to user image to boot node with.
         :param image_checksum: md5sum of image specified in image_ref.
                                Needed only when direct HTTP link is provided.
+        :param boot_option: The defaut boot option to utilize. If not
+                            specified, the ironic deployment default shall
+                            be utilized.
         """
         if image_ref is None:
             image_ref = cls.image_ref
         if image_checksum is None:
             image_checksum = cls.image_checksum
+        if boot_option is None:
+            boot_option = cls.boot_option
 
         network, subnet, router = cls.create_networks()
         n_port = cls.create_neutron_port(network_id=network['id'])
@@ -253,6 +260,11 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         patch.append({'path': '/instance_info/root_gb',
                       'op': 'add',
                       'value': CONF.baremetal.adjusted_root_disk_size_gb})
+
+        if boot_option:
+            patch.append({'path': '/instance_info/capabilities',
+                          'op': 'add',
+                          'value': {'boot_option': boot_option}})
         # TODO(vsaienko) add testing for custom configdrive
         cls.update_node(cls.node['uuid'], patch=patch)
         cls.set_node_provision_state(cls.node['uuid'], 'active')
