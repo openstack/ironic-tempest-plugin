@@ -45,7 +45,7 @@ def _determine_and_check_timeout_interval(timeout, default_timeout,
 
 
 def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
-                            interval=None):
+                            interval=None, abort_on_error_state=False):
     """Waits for a baremetal node attribute to reach given status.
 
     :param client: an instance of tempest plugin BaremetalClient.
@@ -56,6 +56,8 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
         Defaults to client.build_timeout.
     :param interval: an interval between show_node calls for status check.
         Defaults to client.build_interval.
+    :param abort_on_error_state: whether to abort waiting if the node reaches
+        an error state.
 
     The client should have a show_node(node_id) method to get the node.
     """
@@ -69,6 +71,14 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
         node = utils.get_node(client, node_id=node_id)
         if node[attr] in status:
             return True
+        elif (abort_on_error_state
+              and node['provision_state'].endswith(' failed')):
+            raise lib_exc.TempestException(
+                'Node %(node)s reached failure state %(state)s while waiting '
+                'for %(attr)s=%(expected)s. Error: %(error)s' %
+                {'node': node_id, 'state': node['provision_state'],
+                 'attr': attr, 'expected': status,
+                 'error': node.get('last_error')})
         return False
 
     if not test_utils.call_until_true(is_attr_in_status, timeout,

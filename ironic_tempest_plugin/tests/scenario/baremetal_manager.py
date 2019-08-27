@@ -104,10 +104,12 @@ class BaremetalScenarioTest(manager.ScenarioTest):
         cls.baremetal_client.list_nodes()
 
     @classmethod
-    def wait_provisioning_state(cls, node_id, state, timeout=10, interval=1):
+    def wait_provisioning_state(cls, node_id, state, timeout=10, interval=1,
+                                abort_on_error_state=True):
         ironic_waiters.wait_for_bm_node_status(
             cls.baremetal_client, node_id=node_id, attr='provision_state',
-            status=state, timeout=timeout, interval=interval)
+            status=state, timeout=timeout, interval=interval,
+            abort_on_error_state=abort_on_error_state)
 
     @classmethod
     def wait_power_state(cls, node_id, state):
