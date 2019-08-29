@@ -85,6 +85,8 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
     deploy_interface = 'iscsi'
     raid_interface = 'agent'
     api_microversion = '1.31'
+    # Software RAID is always local boot
+    boot_option = 'local'
 
     raid_config = {
         "logical_disks": [
@@ -116,6 +118,8 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
     deploy_interface = 'direct'
     raid_interface = 'agent'
     api_microversion = '1.31'
+    # Software RAID is always local boot
+    boot_option = 'local'
 
     # TODO(dtantsur): more complex layout in this job
     raid_config = {
