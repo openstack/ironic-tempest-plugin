@@ -65,6 +65,12 @@ class BaremetalCleaningIpmiWholedisk(
     deploy_interface = 'iscsi'
     api_microversion = '1.31'
 
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalCleaningIpmiWholedisk, cls).skip_checks()
+        if CONF.baremetal_feature_enabled.software_raid:
+            raise cls.skipException("Cleaning is covered in the RAID test")
+
     @decorators.idempotent_id('065238db-1b6d-4d75-a9da-c240f8cbd956')
     @utils.services('image', 'network')
     def test_manual_cleaning(self):
