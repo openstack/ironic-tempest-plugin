@@ -205,6 +205,8 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
 
         def _try_to_associate_instance():
             n = node or cls.get_random_available_node()
+            if n is None:
+                return False
             try:
                 cls._associate_instance_with_node(n['uuid'], instance_uuid)
                 nodes.append(n)
