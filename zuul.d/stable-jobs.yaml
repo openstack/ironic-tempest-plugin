@@ -1,4 +1,9 @@
 - job:
+    name: ironic-standalone-train
+    parent: ironic-standalone
+    override-branch: stable/train
+
+- job:
     name: ironic-standalone-stein
     parent: ironic-standalone
     override-branch: stable/stein
@@ -21,6 +26,11 @@
         IRONIC_USE_MOD_WSGI: True
 
 - job:
+    name: ironic-tempest-functional-python3-train
+    parent: ironic-tempest-functional-python3
+    override-branch: stable/train
+
+- job:
     name: ironic-tempest-functional-python3-stein
     parent: ironic-tempest-functional-python3
     override-branch: stable/stein
@@ -35,6 +45,11 @@
         IRONIC_RPC_TRANSPORT: ""
       devstack_services:
         rabbit: True
+
+- job:
+    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-train
+    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
+    override-branch: stable/train
 
 - job:
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-stein
@@ -78,6 +93,15 @@
           OVS_BRIDGE_MAPPINGS: 'mynetwork:sub1brbm,public:br_ironic_vxlan'
 
 - job:
+    name: ironic-inspector-tempest-train
+    parent: ironic-inspector-tempest
+    override-branch: stable/train
+    vars:
+      devstack_localrc:
+        FIXED_NETWORK_SIZE: 4096
+        EBTABLES_RACE_FIX: True
+
+- job:
     name: ironic-inspector-tempest-stein
     parent: ironic-inspector-tempest
     override-branch: stable/stein
@@ -105,6 +129,11 @@
       devstack_localrc:
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
+
+- job:
+    name: ironic-inspector-tempest-discovery-train
+    parent: ironic-inspector-tempest-discovery
+    override-branch: stable/train
 
 - job:
     name: ironic-inspector-tempest-discovery-stein
