@@ -7,22 +7,30 @@
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-standalone
+        - ironic-standalone-train
         - ironic-standalone-stein
-        - ironic-dsvm-standalone-rocky
+        - ironic-dsvm-standalone-rocky:
+            voting: false
         - ironic-dsvm-standalone-queens:
             voting: false
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-train
         - ironic-tempest-functional-python3-stein
-        - ironic-tempest-dsvm-functional-python3-rocky
+        - ironic-tempest-dsvm-functional-python3-rocky:
+            voting: false
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-train
         - ironic-inspector-tempest-stein
-        - ironic-tempest-dsvm-ironic-inspector-rocky
+        - ironic-tempest-dsvm-ironic-inspector-rocky:
+            voting: false
         - ironic-tempest-dsvm-ironic-inspector-queens:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting on stable branches.
         # NOTE(iurygregory): debug rocky and queens since they used to pass
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-train:
+            voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-stein:
             voting: false
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky:
@@ -30,6 +38,8 @@
         - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens:
             voting: false
         - ironic-inspector-tempest-discovery
+        - ironic-inspector-tempest-discovery-train:
+            voting: false
         - ironic-inspector-tempest-discovery-stein:
             voting: false
         - ironic-inspector-tempest-dsvm-discovery-rocky:
@@ -40,13 +50,13 @@
       queue: ironic
       jobs:
         - ironic-standalone
+        - ironic-standalone-train
         - ironic-standalone-stein
-        - ironic-dsvm-standalone-rocky
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-train
         - ironic-tempest-functional-python3-stein
-        - ironic-tempest-dsvm-functional-python3-rocky
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-train
         - ironic-inspector-tempest-stein
-        - ironic-tempest-dsvm-ironic-inspector-rocky
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
         - ironic-inspector-tempest-discovery
