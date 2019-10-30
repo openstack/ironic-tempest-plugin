@@ -2,17 +2,26 @@
     name: ironic-standalone-train
     parent: ironic-standalone
     override-branch: stable/train
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-standalone-stein
     parent: ironic-standalone
     override-branch: stable/stein
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-dsvm-standalone-rocky
     parent: ironic-standalone
     override-branch: stable/rocky
     nodeset: openstack-single-node-xenial
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-dsvm-standalone-queens
@@ -24,6 +33,7 @@
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
         IRONIC_USE_MOD_WSGI: True
+        USE_PYTHON3: False
 
 - job:
     name: ironic-tempest-functional-python3-train
@@ -50,11 +60,17 @@
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-train
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-branch: stable/train
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-stein
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-branch: stable/stein
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky
@@ -69,6 +85,7 @@
         EBTABLES_RACE_FIX: True
         PUBLIC_BRIDGE: br_ironic_vxlan
         OVS_BRIDGE_MAPPINGS: 'mynetwork:brbm,public:br_ironic_vxlan'
+        USE_PYTHON3: False
     group-vars:
       subnode:
         devstack_localrc:
@@ -87,6 +104,7 @@
         EBTABLES_RACE_FIX: True
         PUBLIC_BRIDGE: br_ironic_vxlan
         OVS_BRIDGE_MAPPINGS: 'mynetwork:brbm,public:br_ironic_vxlan'
+        USE_PYTHON3: False
     group-vars:
       subnode:
         devstack_localrc:
@@ -100,6 +118,7 @@
       devstack_localrc:
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
+        USE_PYTHON3: False
 
 - job:
     name: ironic-inspector-tempest-stein
@@ -109,6 +128,7 @@
       devstack_localrc:
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
+        USE_PYTHON3: False
 
 - job:
     name: ironic-tempest-dsvm-ironic-inspector-rocky
@@ -119,6 +139,7 @@
       devstack_localrc:
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
+        USE_PYTHON3: False
 
 - job:
     name: ironic-tempest-dsvm-ironic-inspector-queens
@@ -129,25 +150,38 @@
       devstack_localrc:
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
+        USE_PYTHON3: False
 
 - job:
     name: ironic-inspector-tempest-discovery-train
     parent: ironic-inspector-tempest-discovery
     override-branch: stable/train
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-inspector-tempest-discovery-stein
     parent: ironic-inspector-tempest-discovery
     override-branch: stable/stein
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-inspector-tempest-dsvm-discovery-rocky
     parent: ironic-inspector-tempest-discovery
     override-branch: stable/rocky
     nodeset: openstack-single-node-xenial
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
 
 - job:
     name: ironic-inspector-tempest-dsvm-discovery-queens
     parent: ironic-inspector-tempest-discovery
     override-branch: stable/queens
     nodeset: openstack-single-node-xenial
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
