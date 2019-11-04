@@ -177,11 +177,24 @@ class InspectorScenarioTest(BaremetalScenarioTest):
             node_ids = [node_ids]
         start = int(time.time())
         not_introspected = {node_id for node_id in node_ids}
+        introspection_start_timeout = (
+            CONF.baremetal_introspection.introspection_start_timeout)
 
         while not_introspected:
             time.sleep(CONF.baremetal_introspection.introspection_sleep)
             for node_id in node_ids:
-                status = self.introspection_status(node_id)
+                try:
+                    status = self.introspection_status(node_id)
+                except lib_exc.NotFound as exc:
+                    if int(time.time()) - start >= introspection_start_timeout:
+                        message = ('Node %(node_id)s did not appear in the '
+                                   'baremetal introspection API after '
+                                   '%(timeout)d seconds: %(error)s' %
+                                   {'node_id': node_id, 'error': exc,
+                                    'timeout': introspection_start_timeout})
+                        raise exceptions.IntrospectionFailed(message)
+                    else:
+                        continue
                 if status['finished']:
                     if status['error']:
                         message = ('Node %(node_id)s introspection failed '

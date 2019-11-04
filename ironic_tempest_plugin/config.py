@@ -178,6 +178,9 @@ BaremetalIntrospectionGroup = [
     cfg.IntOpt('introspection_timeout',
                default=600,
                help="Introspection time out"),
+    cfg.IntOpt('introspection_start_timeout',
+               default=90,
+               help="Timeout to start introspection"),
     cfg.IntOpt('hypervisor_update_sleep',
                default=60,
                help="Time to wait until nova becomes aware of "
