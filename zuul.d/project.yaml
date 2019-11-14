@@ -26,9 +26,9 @@
         - ironic-tempest-dsvm-ironic-inspector-queens:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
-        # unstable, so keep them non-voting on stable branches.
-        # NOTE(iurygregory): debug rocky and queens since they used to pass
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
+        # unstable, so keep them non-voting.
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
+            voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-train:
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-stein:
@@ -58,5 +58,4 @@
         - ironic-inspector-tempest
         - ironic-inspector-tempest-train
         - ironic-inspector-tempest-stein
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
         - ironic-inspector-tempest-discovery
