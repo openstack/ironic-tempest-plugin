@@ -148,6 +148,7 @@ class BaremetalIpmiIscsiPartitioned(bsm.BaremetalStandaloneScenarioTest):
     deploy_interface = 'iscsi'
     image_ref = CONF.baremetal.partition_image_ref
     wholedisk_image = False
+    boot_option = 'netboot' if CONF.baremetal.partition_netboot else 'local'
 
     @decorators.idempotent_id('7d0b205e-edbc-4e2d-9f6d-95cd74eefecb')
     @utils.services('image', 'network')
@@ -162,6 +163,7 @@ class BaremetalIpmiDirectPartitioned(bsm.BaremetalStandaloneScenarioTest):
     deploy_interface = 'direct'
     image_ref = CONF.baremetal.partition_image_ref
     wholedisk_image = False
+    boot_option = 'netboot' if CONF.baremetal.partition_netboot else 'local'
 
     @decorators.idempotent_id('7b4b2dcd-2bbb-44f5-991f-0964300af6b7')
     @utils.services('image', 'network')
@@ -219,6 +221,7 @@ class BaremetalIpmiRescuePartitioned(bsm.BaremetalStandaloneScenarioTest):
     rescue_interface = 'agent'
     image_ref = CONF.baremetal.partition_image_ref
     wholedisk_image = False
+    boot_option = 'netboot' if CONF.baremetal.partition_netboot else 'local'
 
     # NOTE(jroll) the ansible deploy interface doesn't support partition images
     # with netboot mode. Since that's what is happening here, explicitly choose
