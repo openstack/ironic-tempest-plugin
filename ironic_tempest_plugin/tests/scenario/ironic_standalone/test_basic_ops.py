@@ -204,13 +204,7 @@ class BaremetalIpmiRescueWholedisk(bsm.BaremetalStandaloneScenarioTest):
     @utils.services('image', 'network')
     def test_rescue_mode(self):
         self.set_node_to_active(self.image_ref)
-        self.rescue_node(self.node['uuid'], 'abc123')
-        self.assertTrue(self.ping_ip_address(self.node_ip,
-                                             should_succeed=True))
-
-        self.unrescue_node(self.node['uuid'])
-        self.assertTrue(self.ping_ip_address(self.node_ip,
-                                             should_succeed=True))
+        self.rescue_unrescue()
 
 
 class BaremetalIpmiRescuePartitioned(bsm.BaremetalStandaloneScenarioTest):
@@ -233,13 +227,7 @@ class BaremetalIpmiRescuePartitioned(bsm.BaremetalStandaloneScenarioTest):
     @utils.services('image', 'network')
     def test_rescue_mode(self):
         self.set_node_to_active(self.image_ref)
-        self.rescue_node(self.node['uuid'], 'abc123')
-        self.assertTrue(self.ping_ip_address(self.node_ip,
-                                             should_succeed=True))
-
-        self.unrescue_node(self.node['uuid'])
-        self.assertTrue(self.ping_ip_address(self.node_ip,
-                                             should_succeed=True))
+        self.rescue_unrescue()
 
 
 class BaremetalIloDirectWholediskHttpLink(

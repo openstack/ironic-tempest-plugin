@@ -17,6 +17,7 @@ import random
 
 from oslo_utils import uuidutils
 from tempest import config
+from tempest.lib.common.utils.linux import remote_client
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
@@ -600,3 +601,21 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         # NOTE(dtantsur): apparently cirros cannot boot from md devices :(
         # So we only move the node to active (verifying deployment).
         self.set_node_to_active()
+
+    def rescue_unrescue(self):
+        rescue_password = uuidutils.generate_uuid()
+        self.rescue_node(self.node['uuid'], rescue_password)
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
+
+        # Open ssh connection to server
+        linux_client = remote_client.RemoteClient(
+            self.node_ip,
+            'rescue',
+            password=rescue_password,
+            ssh_timeout=CONF.baremetal.rescue_timeout)
+        linux_client.validate_authentication()
+
+        self.unrescue_node(self.node['uuid'])
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=True))
