@@ -34,14 +34,13 @@ def retry_on_conflict(func):
     def inner(*args, **kwargs):
         # TODO(vsaienko): make number of retries and delay between
         # them configurable in future.
-        e = None
         for att in range(10):
             try:
                 return func(*args, **kwargs)
-            except lib_exc.Conflict as e:
+            except lib_exc.Conflict:
+                if att == 9:
+                    raise
                 time.sleep(1)
-        raise lib_exc.Conflict(e)
-
     return inner
 
 
