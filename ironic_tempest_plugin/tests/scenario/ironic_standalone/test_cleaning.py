@@ -106,6 +106,10 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
     @utils.services('image', 'network')
     def test_software_raid(self):
         self.build_raid_and_verify_node()
+        # NOTE(TheJulia): tearing down/terminating the instance does not
+        # remove the root device hint, so it is best for us to go ahead
+        # and remove it before exiting the test.
+        self.remove_root_device_hint()
 
 
 class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
@@ -138,3 +142,7 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
     @utils.services('image', 'network')
     def test_software_raid(self):
         self.build_raid_and_verify_node()
+        # NOTE(TheJulia): tearing down/terminating the instance does not
+        # remove the root device hint, so it is best for us to go ahead
+        # and remove it before exiting the test.
+        self.remove_root_device_hint()
