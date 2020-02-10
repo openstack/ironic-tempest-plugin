@@ -110,6 +110,11 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
         # remove the root device hint, so it is best for us to go ahead
         # and remove it before exiting the test.
         self.remove_root_device_hint()
+        # Removes RAID configuration
+        # TODO(TheJulia): We _should_ tear the raid configuration down
+        # however bouncing neutron ports with known DHCP reload bugs
+        # is not a super great idea for tempest tests.
+        self.remove_raid_configuration()
 
 
 class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
@@ -146,3 +151,8 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
         # remove the root device hint, so it is best for us to go ahead
         # and remove it before exiting the test.
         self.remove_root_device_hint()
+        # Removes RAID configuration
+        # TODO(TheJulia): We _should_ tear the raid configuration down
+        # however bouncing neutron ports with known DHCP reload bugs
+        # is not a super great idea for tempest tests.
+        self.remove_raid_configuration()

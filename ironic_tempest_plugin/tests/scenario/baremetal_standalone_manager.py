@@ -607,6 +607,9 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                   'op': 'remove'}]
         self.update_node(self.node['uuid'], patch=patch)
 
+    def remove_raid_configuration(self):
+        self.baremetal_client.set_node_raid_config(self.node['uuid'], {})
+
     def rescue_unrescue(self):
         rescue_password = uuidutils.generate_uuid()
         self.rescue_node(self.node['uuid'], rescue_password)
