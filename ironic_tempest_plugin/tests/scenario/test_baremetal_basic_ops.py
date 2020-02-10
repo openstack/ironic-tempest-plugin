@@ -27,7 +27,7 @@ CONF = config.CONF
 
 
 class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
-    """This smoke test tests the pxe_ssh Ironic driver.
+    """This smoke test tests an Ironic driver.
 
     It follows this basic set of operations:
         * Creates a keypair
