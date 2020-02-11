@@ -9,22 +9,12 @@
         - ironic-standalone
         - ironic-standalone-train
         - ironic-standalone-stein
-        - ironic-dsvm-standalone-rocky:
-            voting: false
-        - ironic-dsvm-standalone-queens:
-            voting: false
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-train
         - ironic-tempest-functional-python3-stein
-        - ironic-tempest-dsvm-functional-python3-rocky:
-            voting: false
         - ironic-inspector-tempest
         - ironic-inspector-tempest-train
         - ironic-inspector-tempest-stein
-        - ironic-tempest-dsvm-ironic-inspector-rocky:
-            voting: false
-        - ironic-tempest-dsvm-ironic-inspector-queens:
-            voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
@@ -33,18 +23,10 @@
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-stein:
             voting: false
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-rocky:
-            voting: false
-        - ironic-tempest-dsvm-ipa-wholedisk-agent_ipmitool-tinyipa-multinode-queens:
-            voting: false
         - ironic-inspector-tempest-discovery
         - ironic-inspector-tempest-discovery-train:
             voting: false
         - ironic-inspector-tempest-discovery-stein:
-            voting: false
-        - ironic-inspector-tempest-dsvm-discovery-rocky:
-            voting: false
-        - ironic-inspector-tempest-dsvm-discovery-queens:
             voting: false
     gate:
       queue: ironic
