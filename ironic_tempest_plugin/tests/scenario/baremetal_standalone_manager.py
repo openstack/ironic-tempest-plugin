@@ -602,6 +602,11 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         # So we only move the node to active (verifying deployment).
         self.set_node_to_active()
 
+    def remove_root_device_hint(self):
+        patch = [{'path': '/properties/root_device',
+                  'op': 'remove'}]
+        self.update_node(self.node['uuid'], patch=patch)
+
     def rescue_unrescue(self):
         rescue_password = uuidutils.generate_uuid()
         self.rescue_node(self.node['uuid'], rescue_password)
