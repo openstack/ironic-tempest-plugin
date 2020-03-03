@@ -133,16 +133,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
 
     def validate_ports(self):
         node_uuid = self.node['uuid']
-        vifs = []
-        # TODO(vsaienko) switch to get_node_vifs() when all stable releases
-        # supports Ironic API 1.28
-        if self._is_version_supported('1.28'):
-            vifs = self.get_node_vifs(node_uuid)
-        else:
-            for port in self.get_ports(self.node['uuid']):
-                vif = port['extra'].get('vif_port_id')
-                if vif:
-                    vifs.append({'id': vif})
+        vifs = self.get_node_vifs(node_uuid)
 
         ir_ports = self.get_ports(node_uuid)
         ir_ports_addresses = [x['address'] for x in ir_ports]
