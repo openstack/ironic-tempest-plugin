@@ -79,7 +79,10 @@ class BaremetalCleaningIpmiWholedisk(
 
 class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
 
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
     deploy_interface = 'iscsi'
@@ -101,6 +104,8 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(SoftwareRaidIscsi, cls).skip_checks()
+        if cls.driver == 'ipmi':
+            raise cls.skipException("Testing with redfish driver")
         if not CONF.baremetal_feature_enabled.software_raid:
             raise cls.skipException("Software RAID feature is not enabled")
 
@@ -121,7 +126,10 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
 
 class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
 
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
     deploy_interface = 'direct'
@@ -144,6 +152,8 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(SoftwareRaidDirect, cls).skip_checks()
+        if cls.driver == 'redfish':
+            raise cls.skipException("Testing with ipmi driver")
         if not CONF.baremetal_feature_enabled.software_raid:
             raise cls.skipException("Software RAID feature is not enabled")
 

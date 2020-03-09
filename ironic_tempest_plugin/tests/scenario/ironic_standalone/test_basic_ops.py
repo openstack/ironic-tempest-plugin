@@ -113,13 +113,24 @@ class BaremetalPxeIpmitoolPartitioned(bsm.BaremetalStandaloneScenarioTest):
         self.boot_and_verify_node()
 
 
-class BaremetalIpmiIscsiWholedisk(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalDriverIscsiWholedisk(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
+
     deploy_interface = 'iscsi'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalDriverIscsiWholedisk, cls).skip_checks()
+        if cls.driver == 'redfish':
+            skip_msg = ("Test covered when using ipmi")
+            raise cls.skipException(skip_msg)
 
     @decorators.idempotent_id('f25b71df-2150-45d7-a780-7f5b07124808')
     @utils.services('image', 'network')
@@ -127,13 +138,23 @@ class BaremetalIpmiIscsiWholedisk(bsm.BaremetalStandaloneScenarioTest):
         self.boot_and_verify_node()
 
 
-class BaremetalIpmiDirectWholedisk(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalDriverDirectWholedisk(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
     deploy_interface = 'direct'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalDriverDirectWholedisk, cls).skip_checks()
+        if cls.driver == 'ipmi':
+            skip_msg = ("Test covered when using redfish")
+            raise cls.skipException(skip_msg)
 
     @decorators.idempotent_id('c2db24e7-07dc-4a20-8f93-d4efae2bfd4e')
     @utils.services('image', 'network')
@@ -141,14 +162,24 @@ class BaremetalIpmiDirectWholedisk(bsm.BaremetalStandaloneScenarioTest):
         self.boot_and_verify_node()
 
 
-class BaremetalIpmiIscsiPartitioned(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalDriverIscsiPartitioned(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
     deploy_interface = 'iscsi'
     image_ref = CONF.baremetal.partition_image_ref
     wholedisk_image = False
     boot_option = 'netboot' if CONF.baremetal.partition_netboot else 'local'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalDriverIscsiPartitioned, cls).skip_checks()
+        if cls.driver == 'ipmi':
+            skip_msg = ("Test covered when using redfish")
+            raise cls.skipException(skip_msg)
 
     @decorators.idempotent_id('7d0b205e-edbc-4e2d-9f6d-95cd74eefecb')
     @utils.services('image', 'network')
@@ -156,14 +187,24 @@ class BaremetalIpmiIscsiPartitioned(bsm.BaremetalStandaloneScenarioTest):
         self.boot_and_verify_node()
 
 
-class BaremetalIpmiDirectPartitioned(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalDriverDirectPartitioned(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
     deploy_interface = 'direct'
     image_ref = CONF.baremetal.partition_image_ref
     wholedisk_image = False
     boot_option = 'netboot' if CONF.baremetal.partition_netboot else 'local'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalDriverDirectPartitioned, cls).skip_checks()
+        if cls.driver == 'redfish':
+            skip_msg = ("Test covered when using ipmi")
+            raise cls.skipException(skip_msg)
 
     @decorators.idempotent_id('7b4b2dcd-2bbb-44f5-991f-0964300af6b7')
     @utils.services('image', 'network')
@@ -171,10 +212,13 @@ class BaremetalIpmiDirectPartitioned(bsm.BaremetalStandaloneScenarioTest):
         self.boot_and_verify_node()
 
 
-class BaremetalIpmiAnsibleWholedisk(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalDriverAnsibleWholedisk(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
     deploy_interface = 'ansible'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
