@@ -9,14 +9,14 @@ Update your `Tempest configuration`_ to enable support for ironic:
 
 .. code-block:: ini
 
-    [service_enabled]
+    [service_available]
     ironic = True
 
 If introspection tests are needed, also enable support for ironic-inspector:
 
 .. code-block:: ini
 
-    [service_enabled]
+    [service_available]
     ironic_inspector = True
 
 See the following example configurations for more details:
