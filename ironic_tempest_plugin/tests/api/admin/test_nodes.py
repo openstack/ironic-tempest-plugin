@@ -95,6 +95,18 @@ class TestNodes(base.BaseBaremetalTest):
         self.assertIn(port['uuid'],
                       [p['uuid'] for p in body['ports']])
 
+    @decorators.idempotent_id('78c4ebd8-f83a-4df7-9653-9fb33a329730')
+    def test_node_ports_detail(self):
+        _, port = self.create_port(self.node['uuid'],
+                                   data_utils.rand_mac_address())
+        _, body = self.client.list_node_ports_detail(self.node['uuid'])
+        self.assertIn(port['uuid'],
+                      [p['uuid'] for p in body['ports']])
+        self.assertIn(port['node_uuid'],
+                      [p['node_uuid'] for p in body['ports']])
+        self.assertIn(port['address'],
+                      [p['address'] for p in body['ports']])
+
     @decorators.idempotent_id('72591acb-f215-49db-8395-710d14eb86ab')
     def test_node_port_list_no_ports(self):
         _, node = self.create_node(self.chassis['uuid'])
