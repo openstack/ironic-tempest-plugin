@@ -324,3 +324,54 @@ class BaremetalIloPxePartitioned(bsm.BaremetalStandaloneScenarioTest):
     @utils.services('image', 'network')
     def test_ip_access_to_server(self):
         self.boot_and_verify_node()
+
+
+class BaremetalIloIPxeWholediskHttpLink(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo'
+    deploy_interface = 'direct'
+    boot_interface = 'ilo-ipxe'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    @decorators.idempotent_id('d926c683-1a32-edbc-07dc-95cd74eefecb')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalRedfishDirectWholediskHttpLink(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'redfish'
+    deploy_interface = 'direct'
+    boot_interface = 'redfish-virtual-media'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    @decorators.idempotent_id('113acd0a-9872-4631-b3ee-54da7e3bb262')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalRedfishIPxeWholediskHttpLink(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'redfish'
+    deploy_interface = 'direct'
+    boot_interface = 'ipxe'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    @decorators.idempotent_id('113acd0a-9872-4631-b3ee-54da7e3bb262')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
