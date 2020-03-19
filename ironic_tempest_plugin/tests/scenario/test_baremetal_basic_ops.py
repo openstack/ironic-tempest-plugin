@@ -151,21 +151,8 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         those set on the node. Does not assume that resource classes and traits
         are in use.
         """
-        # Try to get a node with resource class (1.21) and traits (1.37).
-        # TODO(mgoddard): Remove this when all stable releases support these
-        # API versions.
-        for version in ('1.37', '1.21'):
-            if self._is_version_supported(version):
-                node = self.get_node(instance_id=self.instance['id'],
-                                     api_version=version)
-                break
-        else:
-            # Neither API is supported - cannot test.
-            LOG.warning("Cannot validate resource class and trait based "
-                        "scheduling as these require API version 1.21 and "
-                        "1.37 respectively")
-            return
-
+        node = self.get_node(instance_id=self.instance['id'],
+                             api_version='1.37')
         f_id = self.instance['flavor']['id']
         extra_specs = self.flavors_client.list_flavor_extra_specs(f_id)
         extra_specs = extra_specs['extra_specs']
