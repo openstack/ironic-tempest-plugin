@@ -459,8 +459,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     @classmethod
     def skip_checks(cls):
         super(BaremetalStandaloneScenarioTest, cls).skip_checks()
-        if (cls.driver not in CONF.baremetal.enabled_drivers +
-                CONF.baremetal.enabled_hardware_types):
+        if (cls.driver not in CONF.baremetal.enabled_drivers
+                + CONF.baremetal.enabled_hardware_types):
             raise cls.skipException(
                 'The driver: %(driver)s used in test is not in the list of '
                 'enabled_drivers %(enabled_drivers)s or '

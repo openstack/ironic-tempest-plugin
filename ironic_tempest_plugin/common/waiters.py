@@ -28,9 +28,9 @@ def _determine_and_check_timeout_interval(timeout, default_timeout,
         timeout = default_timeout
     if interval is None:
         interval = default_interval
-    if (not isinstance(timeout, six.integer_types) or
-            not isinstance(interval, six.integer_types) or
-            timeout < 0 or interval < 0):
+    if (not isinstance(timeout, six.integer_types)
+            or not isinstance(interval, six.integer_types)
+            or timeout < 0 or interval < 0):
         raise AssertionError(
             'timeout and interval should be >= 0 or None, current values are: '
             '%(timeout)s, %(interval)s respectively. If timeout and/or '
