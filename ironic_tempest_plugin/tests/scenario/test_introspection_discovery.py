@@ -92,9 +92,9 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
 
         discovered_node = None
         for node in nodes:
-            if (node['provision_state'] == ProvisionStates.AVAILABLE or
-                    node['provision_state'] == ProvisionStates.ENROLL or
-                    node['provision_state'] is ProvisionStates.NOSTATE):
+            if (node['provision_state'] == ProvisionStates.AVAILABLE
+                    or node['provision_state'] == ProvisionStates.ENROLL
+                    or node['provision_state'] is ProvisionStates.NOSTATE):
                 discovered_node = node['uuid']
                 break
 

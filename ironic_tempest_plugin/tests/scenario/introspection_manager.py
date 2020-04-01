@@ -64,10 +64,10 @@ class InspectorScenarioTest(BaremetalScenarioTest):
         # microversion
         self.useFixture(IronicMicroversionFixture(self.ironic_api_version))
         self.flavor = self.baremetal_flavor()
-        self.node_ids = {node['uuid'] for node in
-                         self.node_filter(filter=lambda node:
-                                          node['provision_state'] ==
-                                          BaremetalProvisionStates.AVAILABLE)}
+        self.node_ids = {
+            node['uuid'] for node in self.node_filter(
+                filter=lambda node:
+                node['provision_state'] == BaremetalProvisionStates.AVAILABLE)}
         self.rule_purge()
 
     def item_filter(self, list_method, show_method,
@@ -204,8 +204,8 @@ class InspectorScenarioTest(BaremetalScenarioTest):
                         raise exceptions.IntrospectionFailed(message)
                     not_introspected = not_introspected - {node_id}
 
-            if (int(time.time()) - start >=
-                    CONF.baremetal_introspection.introspection_timeout):
+            if (int(time.time()) - start
+                    >= CONF.baremetal_introspection.introspection_timeout):
                 message = ('Introspection timed out for nodes: %s' %
                            not_introspected)
                 raise exceptions.IntrospectionTimeout(message)
@@ -228,8 +228,8 @@ class InspectorScenarioTest(BaremetalScenarioTest):
                 raise exceptions.HypervisorUpdateTimeout(message)
 
     def node_cleanup(self, node_id):
-        if (self.node_show(node_id)['provision_state'] ==
-           BaremetalProvisionStates.AVAILABLE):
+        if (self.node_show(node_id)['provision_state']
+                == BaremetalProvisionStates.AVAILABLE):
             return
         # in case when introspection failed we need set provision state
         # to 'manage' to make it possible transit into 'provide' state

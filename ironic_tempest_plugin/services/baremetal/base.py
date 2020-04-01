@@ -67,8 +67,9 @@ class BaremetalClient(rest_client.RestClient):
 
     def request(self, *args, **kwargs):
         resp, resp_body = super(BaremetalClient, self).request(*args, **kwargs)
-        if (BAREMETAL_MICROVERSION and
-            BAREMETAL_MICROVERSION != api_version_utils.LATEST_MICROVERSION):
+        latest_microversion = api_version_utils.LATEST_MICROVERSION
+        if (BAREMETAL_MICROVERSION
+                and BAREMETAL_MICROVERSION != latest_microversion):
             api_version_utils.assert_version_header_matches_request(
                 self.api_microversion_header_name,
                 BAREMETAL_MICROVERSION,
