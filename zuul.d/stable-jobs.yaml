@@ -20,6 +20,27 @@
         USE_PYTHON3: True
 
 - job:
+    name: ironic-standalone-redfish-ussuri
+    parent: ironic-standalone-redfish
+    override-checkout: stable/ussuri
+
+- job:
+    name: ironic-standalone-redfish-train
+    parent: ironic-standalone-redfish
+    override-checkout: stable/train
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: True
+
+- job:
+    name: ironic-standalone-redfish-stein
+    parent: ironic-standalone-redfish
+    override-checkout: stable/stein
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: True
+
+- job:
     name: ironic-tempest-functional-python3-ussuri
     parent: ironic-tempest-functional-python3
     override-checkout: stable/ussuri
