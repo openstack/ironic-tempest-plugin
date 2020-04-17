@@ -40,18 +40,19 @@ can be used with ``--regex`` option to only run bare metal tests:
     all bare metal tests
 ``ironic_tempest_plugin.tests.api``
     only API tests using fake hardware, without other OpenStack services (these
-    tests are run by jobs starting with ``tempest-dsvm-ironic-functional``)
+    tests are run by jobs starting with ``ironic-tempest-functional-python3``)
 ``ironic_tempest_plugin.tests.scenario``
     all integration tests, excluding the API tests with fake hardware (these
     tests are run by most of the jobs)
 ``ironic_standalone``
     standalone bare metal tests that do not use the Compute service
-    (these tests are run by the job ``ironic-dsvm-standalone``)
+    (these tests are run by the jobs ``ironic-standalone`` and
+    ``ironic-standalone-redfish``)
 ``InspectorBasicTest``
     basic introspection tests (these tests are run by most of the jobs with
     ``ironic-inspector`` in their name)
 ``InspectorDiscoveryTest``
     introspection auto-discovery tests (these tests are run by the job
-    ``ironic-inspector-tempest-dsvm-discovery`` and require additional set up)
+    ``ironic-inspector-tempest-discovery`` and require additional set up)
 
 .. _Tempest documentation: https://docs.openstack.org/tempest/latest/run.html

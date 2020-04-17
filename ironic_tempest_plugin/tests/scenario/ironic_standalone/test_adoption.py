@@ -25,10 +25,13 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class BaremetalAdoptionIpmiWholedisk(
+class BaremetalAdoptionDriverWholedisk(
         bsm.BaremetalStandaloneScenarioTest):
 
-    driver = 'ipmi'
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
     deploy_interface = 'iscsi'
@@ -37,7 +40,10 @@ class BaremetalAdoptionIpmiWholedisk(
 
     @classmethod
     def skip_checks(cls):
-        super(BaremetalAdoptionIpmiWholedisk, cls).skip_checks()
+        super(BaremetalAdoptionDriverWholedisk, cls).skip_checks()
+        if cls.driver == 'ipmi':
+            skip_msg = ("Adoption feature is covered by redfish driver")
+            raise cls.skipException(skip_msg)
         if not CONF.baremetal_feature_enabled.adoption:
             skip_msg = ("Adoption feature is not enabled")
             raise cls.skipException(skip_msg)
@@ -50,10 +56,10 @@ class BaremetalAdoptionIpmiWholedisk(
                 'instance_info': cls.node['instance_info'],
                 'driver': cls.node['driver'],
                 'properties': cls.node['properties']}
-        if set(body['driver_info'].get('ipmi_password')) == {'*'}:
+        if set(body['driver_info'].get('redfish_password')) == {'*'}:
             # A hack to enable devstack testing without showing secrets
             # secrets. Use the hardcoded devstack value.
-            body['driver_info']['ipmi_password'] = 'password'
+            body['driver_info']['redfish_password'] = 'password'
         # configdrive is hidden and anyway should be supplied on rebuild
         body['instance_info'].pop('configdrive', None)
         for key, value in cls.node.items():
