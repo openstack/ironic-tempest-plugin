@@ -12,12 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log
 import six
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 
 from ironic_tempest_plugin.common import utils
+
+LOG = log.getLogger(__name__)
 
 CONF = config.CONF
 
@@ -73,12 +76,14 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
             return True
         elif (abort_on_error_state
               and node['provision_state'].endswith(' failed')):
-            raise lib_exc.TempestException(
-                'Node %(node)s reached failure state %(state)s while waiting '
-                'for %(attr)s=%(expected)s. Error: %(error)s' %
-                {'node': node_id, 'state': node['provision_state'],
-                 'attr': attr, 'expected': status,
-                 'error': node.get('last_error')})
+            msg = ('Node %(node)s reached failure state %(state)s while '
+                   'waiting for %(attr)s=%(expected)s. '
+                   'Error: %(error)s' %
+                   {'node': node_id, 'state': node['provision_state'],
+                    'attr': attr, 'expected': status,
+                    'error': node.get('last_error')})
+            LOG.debug(msg)
+            raise lib_exc.TempestException(msg)
         return False
 
     if not test_utils.call_until_true(is_attr_in_status, timeout,
@@ -92,6 +97,7 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
         caller = test_utils.find_test_caller()
         if caller:
             message = '(%s) %s' % (caller, message)
+        LOG.debug(message)
         raise lib_exc.TimeoutException(message)
 
 
