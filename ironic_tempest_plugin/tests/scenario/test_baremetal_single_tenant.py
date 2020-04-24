@@ -58,12 +58,18 @@ class BaremetalSingleTenant(baremetal_manager.BaremetalScenarioTest,
             client=clients.routers_client,
             tenant_id=clients.credentials.tenant_id)
 
+        extra_subnet_args = {}
+        if CONF.validation.ip_version_for_ssh == 6:
+            extra_subnet_args['ipv6_address_mode'] = 'dhcpv6-stateless'
+            extra_subnet_args['ipv6_ra_mode'] = 'dhcpv6-stateless'
+            extra_subnet_args['gateway_ip'] = 'fd00:33::1'
+
         result = clients.subnets_client.create_subnet(
             name=data_utils.rand_name('subnet'),
             network_id=network['id'],
             tenant_id=clients.credentials.tenant_id,
             ip_version=CONF.validation.ip_version_for_ssh,
-            cidr=tenant_cidr)
+            cidr=tenant_cidr, **extra_subnet_args)
         subnet = result['subnet']
         clients.routers_client.add_router_interface(router['id'],
                                                     subnet_id=subnet['id'])
@@ -88,7 +94,11 @@ class BaremetalSingleTenant(baremetal_manager.BaremetalScenarioTest,
 
     def tenancy_check(self, use_vm=False):
 
+        ip_version = CONF.validation.ip_version_for_ssh
+
         tenant_cidr = '10.0.100.0/24'
+        if ip_version == 6:
+            tenant_cidr = 'fd00:33::/64'
 
         keypair = self.create_keypair()
         network, subnet, router = self.create_tenant_network(
@@ -101,9 +111,12 @@ class BaremetalSingleTenant(baremetal_manager.BaremetalScenarioTest,
         )
 
         fixed_ip1 = instance1['addresses'][network['name']][0]['addr']
-        floating_ip1 = self.create_floating_ip(
-            instance1,
-        )['floating_ip_address']
+        if ip_version == 6:
+            floating_ip1 = fixed_ip1
+        else:
+            floating_ip1 = self.create_floating_ip(
+                instance1,
+            )['floating_ip_address']
         self.check_vm_connectivity(ip_address=floating_ip1,
                                    private_key=keypair['private_key'])
 
@@ -124,10 +137,13 @@ class BaremetalSingleTenant(baremetal_manager.BaremetalScenarioTest,
             )
         fixed_ip2 = \
             instance2['addresses'][network['name']][0]['addr']
-        floating_ip2 = self.create_floating_ip(
-            instance2,
-            client=self.os_primary.floating_ips_client
-        )['floating_ip_address']
+        if ip_version == 6:
+            floating_ip2 = fixed_ip2
+        else:
+            floating_ip2 = self.create_floating_ip(
+                instance2,
+                client=self.os_primary.floating_ips_client
+            )['floating_ip_address']
         self.check_vm_connectivity(
             ip_address=floating_ip2,
             private_key=keypair['private_key'])
