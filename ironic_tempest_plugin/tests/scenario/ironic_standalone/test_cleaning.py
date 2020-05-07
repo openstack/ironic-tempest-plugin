@@ -87,7 +87,7 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
     wholedisk_image = True
     deploy_interface = 'iscsi'
     raid_interface = 'agent'
-    api_microversion = '1.31'
+    api_microversion = '1.55'
     # Software RAID is always local boot
     boot_option = 'local'
 
@@ -112,7 +112,8 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
     @decorators.idempotent_id('7ecba4f7-98b8-4ea1-b95e-3ec399f46798')
     @utils.services('image', 'network')
     def test_software_raid(self):
-        self.build_raid_and_verify_node()
+        self.build_raid_and_verify_node(
+            deploy_time=CONF.baremetal_feature_enabled.deploy_time_raid)
         # NOTE(TheJulia): tearing down/terminating the instance does not
         # remove the root device hint, so it is best for us to go ahead
         # and remove it before exiting the test.
@@ -134,7 +135,7 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
     wholedisk_image = True
     deploy_interface = 'direct'
     raid_interface = 'agent'
-    api_microversion = '1.31'
+    api_microversion = '1.55'
     # Software RAID is always local boot
     boot_option = 'local'
 
@@ -160,7 +161,8 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
     @decorators.idempotent_id('125361ac-0eb3-4d79-8be2-a91936aa3f46')
     @utils.services('image', 'network')
     def test_software_raid(self):
-        self.build_raid_and_verify_node()
+        self.build_raid_and_verify_node(
+            deploy_time=CONF.baremetal_feature_enabled.deploy_time_raid)
         # NOTE(TheJulia): tearing down/terminating the instance does not
         # remove the root device hint, so it is best for us to go ahead
         # and remove it before exiting the test.
