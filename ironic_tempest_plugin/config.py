@@ -150,6 +150,10 @@ BaremetalGroup = [
                      "being used, this option should be set to True as "
                      "it lacks the needed components to make it locally "
                      "from a partition image."),
+    cfg.StrOpt('boot_mode',
+               default='bios',
+               choices=['bios', 'uefi'],
+               help="The desired boot_mode to be used on testing nodes."),
 ]
 
 BaremetalFeaturesGroup = [

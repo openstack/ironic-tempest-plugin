@@ -45,7 +45,11 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
           expected state transitions
     """
 
+    credentials = ['primary', 'admin']
+
     TEST_RESCUE_MODE = False
+    image_ref = None
+    wholedisk_image = None
 
     @classmethod
     def skip_checks(cls):
@@ -183,9 +187,15 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             # Flavor traits should be a subset of node traits.
             self.assertTrue(traits.issubset(set(node['traits'])))
 
-    @decorators.idempotent_id('549173a5-38ec-42bb-b0e2-c8b9f4a08943')
-    @utils.services('compute', 'image', 'network')
-    def test_baremetal_server_ops(self):
+    def validate_uefi(self, client):
+        efi_dir = '/sys/firmware/efi'
+        success_string = "Found " + efi_dir
+        cmd = 'test -d {dir} && echo "Found {dir}" ||'\
+              ' echo "{dir} not found"'.format(dir=efi_dir)
+        output = client.exec_command(cmd).rstrip()
+        self.assertEqual(success_string, output)
+
+    def baremetal_server_ops(self):
         self.add_keypair()
         self.instance, self.node = self.boot_instance()
         self.validate_ports()
@@ -202,12 +212,29 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             self.create_timestamp(
                 ip_address, private_key=self.keypair['private_key'])
 
+        if CONF.baremetal.boot_mode == "uefi":
+            self.validate_uefi(vm_client)
+
         # Test rescue mode
         if self.TEST_RESCUE_MODE:
             self.rescue_instance(self.instance, self.node, ip_address)
             self.unrescue_instance(self.instance, self.node, ip_address)
 
         self.terminate_instance(self.instance)
+
+    @decorators.idempotent_id('549173a5-38ec-42bb-b0e2-c8b9f4a08943')
+    @utils.services('compute', 'image', 'network')
+    def test_baremetal_server_ops_partition_image(self):
+        self.image_ref = CONF.baremetal.partition_image_ref
+        self.wholedisk_image = False
+        self.baremetal_server_ops()
+
+    @decorators.idempotent_id('d7d48aa1-0395-4f31-a908-60969adc4322')
+    @utils.services('compute', 'image', 'network')
+    def test_baremetal_server_ops_wholedisk_image(self):
+        self.image_ref = CONF.baremetal.whole_disk_image_ref
+        self.wholedisk_image = True
+        self.baremetal_server_ops()
 
 
 class BaremetalBasicOpsAndRescue(BaremetalBasicOps):
