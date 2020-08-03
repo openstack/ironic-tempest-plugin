@@ -216,8 +216,9 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
                 return False
             return True
 
-        if (not test_utils.call_until_true(_try_to_associate_instance,
-            duration=CONF.baremetal.association_timeout, sleep_for=1)):
+        if (not test_utils.call_until_true(
+                _try_to_associate_instance,
+                duration=CONF.baremetal.association_timeout, sleep_for=1)):
             msg = ('Timed out waiting to associate instance to ironic node '
                    'uuid %s' % instance_uuid)
             raise lib_exc.TimeoutException(msg)
