@@ -649,3 +649,58 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         self.unrescue_node(self.node['uuid'])
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=True))
+
+    @classmethod
+    def boot_node_ramdisk(cls, ramdisk_ref, iso=False):
+        """Boot ironic using a ramdisk node.
+
+        The following actions are executed:
+          * Create/Pick networks to boot node in.
+          * Create Neutron port and attach it to node.
+          * Update node image_source.
+          * Deploy node.
+          * Wait until node is deployed.
+
+        :param ramdisk_ref: Reference to user image or ramdisk to boot
+                            the node with.
+        :param iso: Boolean, default False, to indicate if the image ref
+                    us actually an ISO image.
+        """
+        if ramdisk_ref is None:
+            ramdisk_ref = cls.image_ref
+
+        network, subnet, router = cls.create_networks()
+        n_port = cls.create_neutron_port(network_id=network['id'])
+        cls.vif_attach(node_id=cls.node['uuid'], vif_id=n_port['id'])
+        if iso:
+            patch_path = '/instance_info/boot_iso'
+        else:
+            # NOTE(TheJulia): The non ISO ramdisk path supports this
+            # and it being here makes it VERY easy for us to add a test
+            # of just a kernel/ramdisk loading from glance at some point.
+            patch_path = '/instance_info/image_source'
+        patch = [{'path': patch_path,
+                  'op': 'add',
+                  'value': ramdisk_ref}]
+        cls.update_node(cls.node['uuid'], patch=patch)
+        cls.set_node_provision_state(cls.node['uuid'], 'active')
+        if CONF.validation.connect_method == 'floating':
+            cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
+        elif CONF.validation.connect_method == 'fixed':
+            cls.node_ip = cls.get_server_ip(cls.node['uuid'])
+        else:
+            m = ('Configuration option "[validation]/connect_method" '
+                 'must be set.')
+            raise lib_exc.InvalidConfiguration(m)
+        cls.wait_power_state(cls.node['uuid'],
+                             bm.BaremetalPowerStates.POWER_ON)
+        cls.wait_provisioning_state(cls.node['uuid'],
+                                    bm.BaremetalProvisionStates.ACTIVE,
+                                    timeout=CONF.baremetal.active_timeout,
+                                    interval=30)
+
+    def boot_and_verify_ramdisk_node(self, ramdisk_ref=None, iso=False,
+                                     should_succeed=True):
+        self.boot_node_ramdisk(ramdisk_ref, iso)
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=should_succeed))

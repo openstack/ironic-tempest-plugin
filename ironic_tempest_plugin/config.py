@@ -113,6 +113,9 @@ BaremetalGroup = [
                help="An MD5 checksum of the image."),
     cfg.StrOpt('partition_image_ref',
                help="UUID of the partitioned image to use in the tests."),
+    cfg.StrOpt('ramdisk_iso_image_ref',
+               help=("UUID (or url) of an ISO image for the ramdisk boot "
+                     "tests.")),
     cfg.ListOpt('enabled_drivers',
                 default=['fake', 'pxe_ipmitool', 'agent_ipmitool'],
                 help="List of Ironic enabled drivers."),
