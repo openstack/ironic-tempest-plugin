@@ -21,16 +21,15 @@
         - ironic-inspector-tempest-train
         - ironic-inspector-tempest-stein:
             voting: false
-        # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
-        # unstable, so keep them non-voting.
-        - ironic-standalone-redfish:
-            voting: false
+        - ironic-standalone-redfish
         - ironic-standalone-redfish-ussuri:
             voting: false
         - ironic-standalone-redfish-train:
             voting: false
         - ironic-standalone-redfish-stein:
             voting: false
+        # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
+        # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-ussuri:
@@ -58,4 +57,5 @@
         - ironic-inspector-tempest
         - ironic-inspector-tempest-ussuri
         - ironic-inspector-tempest-train
+        - ironic-standalone-redfish
         - ironic-inspector-tempest-discovery

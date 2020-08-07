@@ -170,6 +170,10 @@ BaremetalFeaturesGroup = [
                 help="Defines if software RAID is enabled (available "
                      "starting with Train). Requires at least two disks "
                      "on testing nodes."),
+    cfg.BoolOpt('deploy_time_raid',
+                default=False,
+                help="Defines if in-band RAID can be built in deploy time "
+                     "(possible starting with Victoria)."),
 ]
 
 BaremetalIntrospectionGroup = [

@@ -572,32 +572,53 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=should_succeed))
 
-    def build_raid_and_verify_node(self, config=None, clean_steps=None):
+    def build_raid_and_verify_node(self, config=None, deploy_time=False):
         config = config or self.raid_config
-        clean_steps = clean_steps or [
-            {
-                "interface": "raid",
-                "step": "delete_configuration"
-            },
-            # NOTE(dtantsur): software RAID building fails if any
-            # partitions exist on holder devices.
-            {
-                "interface": "deploy",
-                "step": "erase_devices_metadata"
-            },
-            {
-                "interface": "raid",
-                "step": "create_configuration"
-            }
-        ]
-
-        self.baremetal_client.set_node_raid_config(self.node['uuid'], config)
-        self.manual_cleaning(self.node, clean_steps=clean_steps)
+        if deploy_time:
+            steps = [
+                {
+                    "interface": "deploy",
+                    "step": "erase_devices_metadata",
+                    "priority": 98,
+                    "args": {},
+                },
+                {
+                    "interface": "raid",
+                    "step": "apply_configuration",
+                    "priority": 97,
+                    "args": {"raid_config": config},
+                }
+            ]
+            self.baremetal_client.create_deploy_template(
+                'CUSTOM_RAID', steps=steps)
+            self.baremetal_client.add_node_trait(self.node['uuid'],
+                                                 'CUSTOM_RAID')
+        else:
+            steps = [
+                {
+                    "interface": "raid",
+                    "step": "delete_configuration"
+                },
+                {
+                    "interface": "deploy",
+                    "step": "erase_devices_metadata",
+                },
+                {
+                    "interface": "raid",
+                    "step": "create_configuration",
+                }
+            ]
+            self.baremetal_client.set_node_raid_config(self.node['uuid'],
+                                                       config)
+            self.manual_cleaning(self.node, clean_steps=steps)
 
         # NOTE(dtantsur): this is not required, but it allows us to check that
         # the RAID device was in fact created and is used for deployment.
         patch = [{'path': '/properties/root_device',
                   'op': 'add', 'value': {'name': '/dev/md0'}}]
+        if deploy_time:
+            patch.append({'path': '/instance_info/traits',
+                          'op': 'add', 'value': ['CUSTOM_RAID']})
         self.update_node(self.node['uuid'], patch=patch)
         # NOTE(dtantsur): apparently cirros cannot boot from md devices :(
         # So we only move the node to active (verifying deployment).
