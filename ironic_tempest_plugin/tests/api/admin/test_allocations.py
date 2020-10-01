@@ -27,6 +27,8 @@ class Base(base.BaseBaremetalTest):
         cls.provide_node(node_id, cleaning_timeout)
         # Force non-empty power state, otherwise allocation API won't pick it
         cls.client.set_node_power_state(node_id, 'power off')
+        waiters.wait_for_bm_node_status(cls.client, node_id,
+                                        'power_state', 'power off')
 
     def setUp(self):
         super(Base, self).setUp()
