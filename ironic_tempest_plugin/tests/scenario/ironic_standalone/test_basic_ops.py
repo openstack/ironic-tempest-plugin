@@ -387,6 +387,23 @@ class BaremetalIloIPxeWholediskHttpLink(
         self.boot_and_verify_node()
 
 
+class BaremetalIlo5UefiHTTPSWholediskHttpsLink(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ilo5'
+    deploy_interface = 'direct'
+    boot_interface = 'ilo-uefi-https'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    @decorators.idempotent_id('d926c683-1a32-edbc-07dc-95cd74eefecb')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
 class BaremetalRedfishDirectWholediskHttpLink(
         bsm.BaremetalStandaloneScenarioTest):
 
