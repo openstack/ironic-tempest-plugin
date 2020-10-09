@@ -172,7 +172,7 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
 
     @classmethod
     @bm.retry_on_conflict
-    def detach_all_vifs_from_node(cls, node_id):
+    def detach_all_vifs_from_node(cls, node_id, force_delete=False):
         """Detach all VIFs from a given node.
 
         :param node_id: Name or UUID of the node.
@@ -180,6 +180,11 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         vifs = cls.get_node_vifs(node_id)
         for vif in vifs:
             cls.baremetal_client.vif_detach(node_id, vif)
+            if force_delete:
+                try:
+                    cls.ports_client.delete_port(vif)
+                except lib_exc.NotFound:
+                    pass
 
     @classmethod
     @bm.retry_on_conflict
@@ -280,7 +285,7 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
                                     interval=30)
 
     @classmethod
-    def terminate_node(cls, node_id):
+    def terminate_node(cls, node_id, force_delete=False):
         """Terminate active ironic node.
 
         The following actions are executed:
@@ -290,9 +295,9 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
 
         :param node_id: Name or UUID for the node.
         """
-        cls.detach_all_vifs_from_node(node_id)
+        cls.detach_all_vifs_from_node(node_id, force_delete=force_delete)
 
-        if cls.delete_node:
+        if cls.delete_node or force_delete:
             cls.set_node_provision_state(node_id, 'deleted')
             # NOTE(vsaienko) We expect here fast switching from deleted to
             # available as automated cleaning is disabled so poll status
@@ -593,6 +598,7 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 'CUSTOM_RAID', steps=steps)
             self.baremetal_client.add_node_trait(self.node['uuid'],
                                                  'CUSTOM_RAID')
+
         else:
             steps = [
                 {
@@ -612,6 +618,11 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                                                        config)
             self.manual_cleaning(self.node, clean_steps=steps)
 
+        # The node has been changed, anything at this point, we need to back
+        # out the raid configuration.
+        if not deploy_time:
+            self.addCleanup(self.remove_raid_configuration, self.node)
+
         # NOTE(dtantsur): this is not required, but it allows us to check that
         # the RAID device was in fact created and is used for deployment.
         patch = [{'path': '/properties/root_device',
@@ -623,14 +634,27 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         # NOTE(dtantsur): apparently cirros cannot boot from md devices :(
         # So we only move the node to active (verifying deployment).
         self.set_node_to_active()
+        if deploy_time:
+            self.addCleanup(self.remove_raid_configuration, self.node)
 
     def remove_root_device_hint(self):
         patch = [{'path': '/properties/root_device',
                   'op': 'remove'}]
         self.update_node(self.node['uuid'], patch=patch)
 
-    def remove_raid_configuration(self):
-        self.baremetal_client.set_node_raid_config(self.node['uuid'], {})
+    def remove_raid_configuration(self, node):
+        self.baremetal_client.set_node_raid_config(node['uuid'], {})
+        steps = [
+            {
+                "interface": "raid",
+                "step": "delete_configuration",
+            },
+            {
+                "interface": "deploy",
+                "step": "erase_devices_metadata",
+            }
+        ]
+        self.manual_cleaning(node, clean_steps=steps)
 
     def rescue_unrescue(self):
         rescue_password = uuidutils.generate_uuid()
