@@ -1,4 +1,9 @@
 - job:
+    name: ironic-standalone-victoria
+    parent: ironic-standalone
+    override-checkout: stable/victoria
+
+- job:
     name: ironic-standalone-ussuri
     parent: ironic-standalone
     override-checkout: stable/ussuri
@@ -12,12 +17,9 @@
         USE_PYTHON3: True
 
 - job:
-    name: ironic-standalone-stein
-    parent: ironic-standalone
-    override-checkout: stable/stein
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: True
+    name: ironic-standalone-redfish-victoria
+    parent: ironic-standalone-redfish
+    override-checkout: stable/victoria
 
 - job:
     name: ironic-standalone-redfish-ussuri
@@ -33,12 +35,9 @@
         USE_PYTHON3: True
 
 - job:
-    name: ironic-standalone-redfish-stein
-    parent: ironic-standalone-redfish
-    override-checkout: stable/stein
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: True
+    name: ironic-tempest-functional-python3-victoria
+    parent: ironic-tempest-functional-python3
+    override-checkout: stable/victoria
 
 - job:
     name: ironic-tempest-functional-python3-ussuri
@@ -51,9 +50,9 @@
     override-checkout: stable/train
 
 - job:
-    name: ironic-tempest-functional-python3-stein
-    parent: ironic-tempest-functional-python3
-    override-checkout: stable/stein
+    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-victoria
+    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
+    override-checkout: stable/victoria
 
 - job:
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-ussuri
@@ -69,12 +68,13 @@
         USE_PYTHON3: True
 
 - job:
-    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-stein
-    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
-    override-checkout: stable/stein
+    name: ironic-inspector-tempest-victoria
+    parent: ironic-inspector-tempest
+    override-checkout: stable/victoria
     vars:
       devstack_localrc:
-        USE_PYTHON3: True
+        FIXED_NETWORK_SIZE: 4096
+        EBTABLES_RACE_FIX: True
 
 - job:
     name: ironic-inspector-tempest-ussuri
@@ -96,14 +96,9 @@
         USE_PYTHON3: True
 
 - job:
-    name: ironic-inspector-tempest-stein
-    parent: ironic-inspector-tempest
-    override-checkout: stable/stein
-    vars:
-      devstack_localrc:
-        FIXED_NETWORK_SIZE: 4096
-        EBTABLES_RACE_FIX: True
-        USE_PYTHON3: True
+    name: ironic-inspector-tempest-discovery-victoria
+    parent: ironic-inspector-tempest-discovery
+    override-checkout: stable/victoria
 
 - job:
     name: ironic-inspector-tempest-discovery-ussuri
@@ -114,14 +109,6 @@
     name: ironic-inspector-tempest-discovery-train
     parent: ironic-inspector-tempest-discovery
     override-checkout: stable/train
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: True
-
-- job:
-    name: ironic-inspector-tempest-discovery-stein
-    parent: ironic-inspector-tempest-discovery
-    override-checkout: stable/stein
     vars:
       devstack_localrc:
         USE_PYTHON3: True
