@@ -90,6 +90,7 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
     api_microversion = '1.55'
     # Software RAID is always local boot
     boot_option = 'local'
+    delete_node = False
 
     raid_config = {
         "logical_disks": [
@@ -118,11 +119,7 @@ class SoftwareRaidIscsi(bsm.BaremetalStandaloneScenarioTest):
         # remove the root device hint, so it is best for us to go ahead
         # and remove it before exiting the test.
         self.remove_root_device_hint()
-        # Removes RAID configuration
-        # TODO(TheJulia): We _should_ tear the raid configuration down
-        # however bouncing neutron ports with known DHCP reload bugs
-        # is not a super great idea for tempest tests.
-        self.remove_raid_configuration()
+        self.terminate_node(self.node['uuid'], force_delete=True)
 
 
 class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
@@ -138,6 +135,7 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
     api_microversion = '1.55'
     # Software RAID is always local boot
     boot_option = 'local'
+    delete_node = False
 
     # TODO(dtantsur): more complex layout in this job
     raid_config = {
@@ -167,8 +165,4 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
         # remove the root device hint, so it is best for us to go ahead
         # and remove it before exiting the test.
         self.remove_root_device_hint()
-        # Removes RAID configuration
-        # TODO(TheJulia): We _should_ tear the raid configuration down
-        # however bouncing neutron ports with known DHCP reload bugs
-        # is not a super great idea for tempest tests.
-        self.remove_raid_configuration()
+        self.terminate_node(self.node['uuid'], force_delete=True)
