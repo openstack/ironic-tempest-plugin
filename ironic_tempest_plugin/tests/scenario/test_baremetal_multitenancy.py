@@ -78,7 +78,7 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
         remote.validate_authentication()
 
         cmd = 'ping %s -c4 -w4 || exit 0' % destination_ip
-        success_substring = "64 bytes from %s" % destination_ip
+        success_substring = " bytes from %s" % destination_ip
         output = remote.exec_command(cmd)
         if conn_expected:
             self.assertIn(success_substring, output)
