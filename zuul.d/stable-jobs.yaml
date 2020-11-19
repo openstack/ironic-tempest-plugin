@@ -19,6 +19,7 @@
 - job:
     name: ironic-standalone-redfish-victoria
     parent: ironic-standalone-redfish
+    nodeset: openstack-single-node-focal
     override-checkout: stable/victoria
 
 - job:
