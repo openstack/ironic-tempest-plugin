@@ -400,16 +400,12 @@ class TestNodesVif(base.BaseBaremetalTest):
         self.assertNotIn('tenant_vif_port_id', portgroup['internal_info'])
 
     @decorators.idempotent_id('a3d319d0-cacb-4e55-a3dc-3fa8b74880f2')
-    def test_vif_already_set_on_extra(self):
+    def test_vif_already_set(self):
         self.useFixture(
             api_microversion_fixture.APIMicroversionFixture('1.28'))
         _, self.port = self.create_port(self.node['uuid'],
                                         data_utils.rand_mac_address())
-        patch = [{'path': '/extra/vif_port_id',
-                  'op': 'add',
-                  'value': self.nport_id}]
-        self.client.update_port(self.port['uuid'], patch)
-
+        self.client.vif_attach(self.node['uuid'], self.nport_id)
         _, body = self.client.vif_list(self.node['uuid'])
         self.assertEqual({'vifs': [{'id': self.nport_id}]}, body)
 
