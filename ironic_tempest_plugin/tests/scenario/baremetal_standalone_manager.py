@@ -31,7 +31,7 @@ CONF = config.CONF
 class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
                                  manager.NetworkScenarioTest):
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'system_admin']
     # NOTE(vsaienko): Standalone tests are using v1/node/<node_ident>/vifs to
     # attach VIF to a node.
     min_microversion = '1.28'

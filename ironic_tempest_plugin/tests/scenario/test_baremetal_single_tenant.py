@@ -36,7 +36,7 @@ class BaremetalSingleTenant(baremetal_manager.BaremetalScenarioTest,
     * Delete both instances
     """
 
-    credentials = ['primary', 'alt', 'admin']
+    credentials = ['primary', 'alt', 'admin', 'system_admin']
 
     @classmethod
     def skip_checks(cls):

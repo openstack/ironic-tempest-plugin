@@ -43,8 +43,43 @@ class IronicTempestPlugin(plugins.TempestPlugin):
                           group='service_available')
         conf.register_opt(project_config.inspector_service_option,
                           group='service_available')
+        conf.register_opt(project_config.ironic_scope_enforcement,
+                          group='enforce_scope')
+        conf.register_opt(project_config.inspector_scope_enforcement,
+                          group='enforce_scope')
         for group, option in _opts:
             config.register_opt_group(conf, group, option)
 
     def get_opt_lists(self):
         return [(group.name, option) for group, option in _opts]
+
+    def get_service_clients(self):
+        ironic_config = config.service_client_config(
+            project_config.baremetal_group.name
+        )
+        baremetal_client = {
+            'name': 'baremetal',
+            'service_version': 'baremetal.v1',
+            'module_path': 'ironic_tempest_plugin.services.baremetal.v1.'
+                           'json.baremetal_client',
+            'client_names': [
+                'BaremetalClient',
+            ],
+        }
+        baremetal_client.update(ironic_config)
+
+        inspector_config = config.service_client_config(
+            project_config.baremetal_introspection_group.name
+        )
+        inspector_client = {
+            'name': 'introspection',
+            'service_version': 'baremetal_introspection.v1',
+            'module_path': 'ironic_tempest_plugin.services.'
+                           'introspection_client',
+            'client_names': [
+                'BaremetalIntrospectionClient',
+            ],
+        }
+        inspector_client.update(inspector_config)
+
+        return [baremetal_client, inspector_client]

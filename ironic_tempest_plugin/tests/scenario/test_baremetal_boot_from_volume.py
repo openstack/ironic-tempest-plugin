@@ -34,7 +34,7 @@ class BaremetalBFV(baremetal_manager.BaremetalScenarioTest):
     * Delete instance
     """
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'system_admin']
 
     min_microversion = '1.32'
 

@@ -42,7 +42,7 @@ LOG = log.getLogger(__name__)
 class ScenarioTest(tempest.test.BaseTestCase):
     """Base class for scenario tests. Uses tempest own clients. """
 
-    credentials = ['primary']
+    credentials = ['primary', 'admin', 'system_admin']
 
     @classmethod
     def setup_clients(cls):
@@ -92,7 +92,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def _create_port(self, network_id, client=None, namestart='port-quotatest',
                      **kwargs):
         if not client:
-            client = self.ports_client
+            client = self.os_primary.ports_client
         name = data_utils.rand_name(namestart)
         result = client.create_port(
             name=name,
@@ -106,7 +106,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_keypair(self, client=None):
         if not client:
-            client = self.keypairs_client
+            client = self.os_primary.keypairs_client
         name = data_utils.rand_name(self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
         body = client.create_keypair(name=name)
@@ -254,12 +254,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if not CONF.compute_feature_enabled.console_output:
             LOG.debug('Console output not supported, cannot log')
             return
+        client = self.os_primary.servers_client
         if not servers:
-            servers = self.servers_client.list_servers()
+            servers = client.list_servers()
             servers = servers['servers']
         for server in servers:
             try:
-                console_output = self.servers_client.get_console_output(
+                console_output = client.get_console_output(
                     server['id'])['output']
                 LOG.debug('Console output for %s\nbody=\n%s',
                           server['id'], console_output)
@@ -277,12 +278,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         LOG.debug("Rebuilding server (id: %s, image: %s, preserve eph: %s)",
                   server_id, image, preserve_ephemeral)
-        self.servers_client.rebuild_server(
+        self.os_primary.servers_client.rebuild_server(
             server_id=server_id, image_ref=image,
             preserve_ephemeral=preserve_ephemeral,
             **rebuild_kwargs)
         if wait:
-            waiters.wait_for_server_status(self.servers_client,
+            waiters.wait_for_server_status(self.os_primary.servers_client,
                                            server_id, 'ACTIVE')
 
     def ping_ip_address(self, ip_address, should_succeed=True,
@@ -357,12 +358,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         if not pool_name:
             pool_name = CONF.network.floating_network_name
-        floating_ip = (self.compute_floating_ips_client.
+        client = self.os_primary.compute_floating_ips_client
+        floating_ip = (client.
                        create_floating_ip(pool=pool_name)['floating_ip'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.compute_floating_ips_client.delete_floating_ip,
+                        client.delete_floating_ip,
                         floating_ip['id'])
-        self.compute_floating_ips_client.associate_floating_ip_to_server(
+        client.associate_floating_ip_to_server(
             floating_ip['ip'], thing['id'])
         return floating_ip
 
@@ -423,7 +425,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         routes traffic to the public network.
         """
         if not client:
-            client = self.routers_client
+            client = self.os_primary.routers_client
         if not tenant_id:
             tenant_id = client.tenant_id
         router_id = CONF.network.public_router_id
@@ -443,7 +445,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def _create_router(self, client=None, tenant_id=None,
                        namestart='router-smoke'):
         if not client:
-            client = self.routers_client
+            client = self.os_primary.routers_client
         if not tenant_id:
             tenant_id = client.tenant_id
         name = data_utils.rand_name(namestart)
@@ -470,7 +472,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     """
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'system_admin']
 
     @classmethod
     def skip_checks(cls):
@@ -483,9 +485,9 @@ class NetworkScenarioTest(ScenarioTest):
                         namestart='network-smoke-',
                         port_security_enabled=True):
         if not networks_client:
-            networks_client = self.networks_client
+            networks_client = self.os_primary.networks_client
         if not tenant_id:
-            tenant_id = networks_client.tenant_id
+            tenant_id = self.os_primary.networks_client.tenant_id
         name = data_utils.rand_name(namestart)
         network_kwargs = dict(name=name, tenant_id=tenant_id)
         # Neutron disables port security by default so we have to check the
@@ -542,7 +544,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not external_network_id:
             external_network_id = CONF.network.public_network_id
         if not client:
-            client = self.floating_ips_client
+            client = self.os_primary.floating_ips_client
         if not port_id:
             port_id, ip4 = self._get_server_port_id_and_ip4(thing)
         else:

@@ -22,7 +22,6 @@ from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils.linux import remote_client
 from tempest.lib import exceptions as lib_exc
 
-from ironic_tempest_plugin import clients
 from ironic_tempest_plugin.common import utils
 from ironic_tempest_plugin.common import waiters as ironic_waiters
 from ironic_tempest_plugin import manager
@@ -74,7 +73,7 @@ class BaremetalProvisionStates(object):
 
 class BaremetalScenarioTest(manager.ScenarioTest):
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'system_admin']
     min_microversion = None
     max_microversion = api_version_utils.LATEST_MICROVERSION
 
@@ -93,8 +92,11 @@ class BaremetalScenarioTest(manager.ScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(BaremetalScenarioTest, cls).setup_clients()
-
-        cls.baremetal_client = clients.Manager().baremetal_client
+        if CONF.enforce_scope.ironic:
+            client = cls.os_system_admin.baremetal.BaremetalClient()
+        else:
+            client = cls.os_admin.baremetal.BaremetalClient()
+        cls.baremetal_client = client
 
     @classmethod
     def resource_setup(cls):
@@ -172,7 +174,7 @@ class BaremetalScenarioTest(manager.ScenarioTest):
     def boot_instance(self, clients=None, keypair=None,
                       net_id=None, fixed_ip=None, **create_kwargs):
         if clients is None:
-            servers_client = self.servers_client
+            servers_client = self.os_primary.servers_client
         else:
             servers_client = clients.servers_client
         if keypair is None:
@@ -222,7 +224,7 @@ class BaremetalScenarioTest(manager.ScenarioTest):
 
     def terminate_instance(self, instance, servers_client=None):
         if servers_client is None:
-            servers_client = self.servers_client
+            servers_client = self.os_primary.servers_client
 
         node = self.get_node(instance_id=instance['id'])
         servers_client.delete_server(instance['id'])
@@ -239,7 +241,7 @@ class BaremetalScenarioTest(manager.ScenarioTest):
                         servers_client=None):
         """Rescue the instance, verify we can ping and SSH."""
         if servers_client is None:
-            servers_client = self.servers_client
+            servers_client = self.os_primary.servers_client
 
         rescuing_instance = servers_client.rescue_server(instance['id'])
         rescue_password = rescuing_instance['adminPass']
@@ -265,8 +267,8 @@ class BaremetalScenarioTest(manager.ScenarioTest):
     def unrescue_instance(self, instance, node, server_ip,
                           servers_client=None):
         if servers_client is None:
-            servers_client = self.servers_client
-        self.servers_client.unrescue_server(instance['id'])
+            servers_client = self.os_primary.servers_client
+        self.os_primary.servers_client.unrescue_server(instance['id'])
         self.wait_provisioning_state(
             node['uuid'],
             BaremetalProvisionStates.ACTIVE,

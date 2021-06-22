@@ -18,6 +18,8 @@ from oslo_config import cfg
 from tempest import config  # noqa
 
 
+# NOTE(TheJulia): The following options are loaded into a tempest
+# plugin configuration option via plugin.py.
 ironic_service_option = cfg.BoolOpt('ironic',
                                     default=False,
                                     help='Whether or not ironic is expected '
@@ -28,6 +30,18 @@ inspector_service_option = cfg.BoolOpt("ironic_inspector",
                                        help="Whether or not ironic-inspector "
                                        "is expected to be available")
 
+ironic_scope_enforcement = cfg.BoolOpt('ironic',
+                                       default=False,
+                                       help='Wheter or not ironic is '
+                                            'exepcted to enforce auth '
+                                            'scope.')
+
+inspector_scope_enforcement = cfg.BoolOpt('ironic_inspector',
+                                          default=False,
+                                          help='Whether or not '
+                                               'ironic-inspector is expected '
+                                               'to enforce auth scope.')
+
 baremetal_group = cfg.OptGroup(name='baremetal',
                                title='Baremetal provisioning service options',
                                help='When enabling baremetal tests, Nova '
@@ -37,6 +51,8 @@ baremetal_group = cfg.OptGroup(name='baremetal',
                                     'console_output, interface_attach, '
                                     'live_migration, pause, rescue, resize, '
                                     'shelve, snapshot, and suspend')
+
+# The bulk of the embedded configuration is below.
 
 baremetal_introspection_group = cfg.OptGroup(
     name="baremetal_introspection",
