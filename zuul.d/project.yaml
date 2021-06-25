@@ -7,21 +7,26 @@
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-standalone
+        - ironic-standalone-wallaby
         - ironic-standalone-victoria
         - ironic-standalone-ussuri
         - ironic-standalone-train:
             voting: false
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-wallaby
         - ironic-tempest-functional-python3-victoria
         - ironic-tempest-functional-python3-ussuri
         - ironic-tempest-functional-python3-train:
             voting: false
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-wallaby
         - ironic-inspector-tempest-victoria
         - ironic-inspector-tempest-ussuri
         - ironic-inspector-tempest-train:
             voting: false
         - ironic-standalone-redfish
+        - ironic-standalone-redfish-wallaby:
+            voting: false
         - ironic-standalone-redfish-victoria:
             voting: false
         - ironic-standalone-redfish-ussuri:
@@ -32,6 +37,8 @@
         # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
             voting: false
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-wallaby:
+            voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-victoria:
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-ussuri:
@@ -39,6 +46,8 @@
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-train:
             voting: false
         - ironic-inspector-tempest-discovery
+        - ironic-inspector-tempest-discovery-wallaby:
+            voting: false
         - ironic-inspector-tempest-discovery-victoria:
             voting: false
         - ironic-inspector-tempest-discovery-ussuri:
@@ -49,12 +58,13 @@
       queue: ironic
       jobs:
         - ironic-standalone
+        - ironic-standalone-wallaby
         - ironic-standalone-victoria
-        - ironic-standalone-ussuri
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-wallaby
         - ironic-tempest-functional-python3-victoria
-        - ironic-tempest-functional-python3-ussuri
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-wallaby
         - ironic-inspector-tempest-victoria
         - ironic-inspector-tempest-ussuri
         - ironic-standalone-redfish
