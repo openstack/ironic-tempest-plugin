@@ -9,20 +9,17 @@
         - ironic-standalone
         - ironic-standalone-wallaby
         - ironic-standalone-victoria
-        - ironic-standalone-ussuri
-        - ironic-standalone-train:
+        - ironic-standalone-ussuri:
             voting: false
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-wallaby
         - ironic-tempest-functional-python3-victoria
-        - ironic-tempest-functional-python3-ussuri
-        - ironic-tempest-functional-python3-train:
+        - ironic-tempest-functional-python3-ussuri:
             voting: false
         - ironic-inspector-tempest
         - ironic-inspector-tempest-wallaby
         - ironic-inspector-tempest-victoria
-        - ironic-inspector-tempest-ussuri
-        - ironic-inspector-tempest-train:
+        - ironic-inspector-tempest-ussuri:
             voting: false
         - ironic-standalone-redfish
         - ironic-standalone-redfish-wallaby:
@@ -30,8 +27,6 @@
         - ironic-standalone-redfish-victoria:
             voting: false
         - ironic-standalone-redfish-ussuri:
-            voting: false
-        - ironic-standalone-redfish-train:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting.
@@ -43,16 +38,12 @@
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-ussuri:
             voting: false
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-train:
-            voting: false
         - ironic-inspector-tempest-discovery
         - ironic-inspector-tempest-discovery-wallaby:
             voting: false
         - ironic-inspector-tempest-discovery-victoria:
             voting: false
         - ironic-inspector-tempest-discovery-ussuri:
-            voting: false
-        - ironic-inspector-tempest-discovery-train:
             voting: false
     gate:
       queue: ironic
