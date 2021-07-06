@@ -93,10 +93,6 @@
     name: ironic-inspector-tempest-wallaby
     parent: ironic-inspector-tempest
     override-checkout: stable/wallaby
-    vars:
-      devstack_localrc:
-        FIXED_NETWORK_SIZE: 4096
-        EBTABLES_RACE_FIX: True
 
 - job:
     name: ironic-inspector-tempest-victoria
@@ -105,7 +101,6 @@
     vars:
       devstack_localrc:
         FIXED_NETWORK_SIZE: 4096
-        EBTABLES_RACE_FIX: True
 
 - job:
     name: ironic-inspector-tempest-ussuri
