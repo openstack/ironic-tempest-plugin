@@ -23,7 +23,6 @@ from tempest.lib import exceptions as lib_exc
 
 import ironic_tempest_plugin
 from ironic_tempest_plugin import exceptions
-from ironic_tempest_plugin.services import introspection_client
 from ironic_tempest_plugin.tests.api.admin.api_microversion_fixture import \
     APIMicroversionFixture as IronicMicroversionFixture
 from ironic_tempest_plugin.tests.scenario.baremetal_manager import \
@@ -40,7 +39,7 @@ class InspectorScenarioTest(BaremetalScenarioTest):
 
     wait_provisioning_state_interval = 15
 
-    credentials = ['primary', 'admin']
+    credentials = ['admin', 'system_admin', 'primary']
 
     ironic_api_version = LATEST_MICROVERSION
 
@@ -53,8 +52,11 @@ class InspectorScenarioTest(BaremetalScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(InspectorScenarioTest, cls).setup_clients()
-        inspector_manager = introspection_client.Manager()
-        cls.introspection_client = inspector_manager.introspection_client
+        if CONF.enforce_scope.ironic_inspector:
+            oscli = cls.os_system_admin.introspection
+        else:
+            oscli = cls.os_admin.introspection
+        cls.introspection_client = oscli.BaremetalIntrospectionClient()
 
     def setUp(self):
         super(InspectorScenarioTest, self).setUp()

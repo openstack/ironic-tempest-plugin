@@ -45,7 +45,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
           expected state transitions
     """
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'system_admin']
 
     TEST_RESCUE_MODE = False
     image_ref = None

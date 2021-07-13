@@ -17,7 +17,6 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
-from ironic_tempest_plugin import clients
 from ironic_tempest_plugin.common import waiters
 from ironic_tempest_plugin.services.baremetal import base
 from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
@@ -58,7 +57,7 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                         test.BaseTestCase):
     """Base class for Baremetal API tests."""
 
-    credentials = ['admin']
+    credentials = ['admin', 'system_admin']
 
     @classmethod
     def skip_checks(cls):
@@ -86,12 +85,16 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                 CONF.baremetal.min_microversion))
         cls.services_microversion = {
             CONF.baremetal.catalog_type: cls.request_microversion}
+
         super(BaseBaremetalTest, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):
         super(BaseBaremetalTest, cls).setup_clients()
-        cls.client = clients.Manager().baremetal_client
+        if CONF.enforce_scope.ironic:
+            cls.client = cls.os_system_admin.baremetal.BaremetalClient()
+        else:
+            cls.client = cls.os_admin.baremetal.BaremetalClient()
 
     @classmethod
     def resource_setup(cls):
