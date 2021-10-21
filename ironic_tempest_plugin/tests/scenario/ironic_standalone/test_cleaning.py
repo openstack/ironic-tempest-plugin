@@ -166,3 +166,28 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
         # and remove it before exiting the test.
         self.remove_root_device_hint()
         self.terminate_node(self.node['uuid'], force_delete=True)
+
+
+class BaremetalCleaningIdracWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    #if 'redfish' in CONF.baremetal.enabled_hardware_types:
+    #    driver = 'redfish'
+    #else:
+    driver = 'idrac'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    delete_node = False
+    api_microversion = '1.28'
+
+    @utils.services('image', 'network')
+    def test_reset_idrac(self):
+        self.check_management_cleaning_wholedisk(self.node, 'reset_idrac')
+
+    @utils.services('image', 'network')
+    def test_clear_job_queue(self):
+        self.check_management_cleaning_wholedisk(self.node, 'clear_job_queue')
+
+    @utils.services('image', 'network')
+    def test_known_good_state(self):
+        self.check_management_cleaning_wholedisk(self.node, 'known_good_state')
