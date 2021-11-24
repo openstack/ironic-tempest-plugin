@@ -18,7 +18,7 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
-from ironic_tempest_plugin.tests.api.admin import base
+from ironic_tempest_plugin.tests.api import base
 
 
 class TestVolumeConnector(base.BaseBaremetalTest):

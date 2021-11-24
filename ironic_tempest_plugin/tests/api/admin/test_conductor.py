@@ -13,7 +13,7 @@
 from tempest import config
 from tempest.lib import decorators
 
-from ironic_tempest_plugin.tests.api.admin import base
+from ironic_tempest_plugin.tests.api import base
 
 CONF = config.CONF
 
