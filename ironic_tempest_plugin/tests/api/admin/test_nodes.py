@@ -19,7 +19,7 @@ from tempest.lib import exceptions as lib_exc
 
 from ironic_tempest_plugin.common import waiters
 from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
-from ironic_tempest_plugin.tests.api.admin import base
+from ironic_tempest_plugin.tests.api import base
 
 CONF = config.CONF
 
