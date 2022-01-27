@@ -1,6 +1,8 @@
 #
 # Copyright 2017 Mirantis Inc.
 #
+# Copyright (c) 2022 Dell Inc. or its subsidiaries.
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -166,3 +168,62 @@ class SoftwareRaidDirect(bsm.BaremetalStandaloneScenarioTest):
         # and remove it before exiting the test.
         self.remove_root_device_hint()
         self.terminate_node(self.node['uuid'], force_delete=True)
+
+
+class BaremetalIdracManagementCleaning(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver', 'management_interface',
+                      'power_interface']
+
+    driver = 'idrac'
+    delete_node = False
+    # Minimum version for manual cleaning is 1.15 (# v1.15: Add ability to
+    # do manual cleaning of nodes). The test cases clean up at the end by
+    # detaching the VIF. Support for VIFs was introduced by version 1.28
+    # (# v1.28: Add vifs subcontroller to node).
+    api_microversion = '1.28'
+
+    @decorators.idempotent_id('d085ff72-abef-4931-a5b0-06efd5f9a037')
+    def test_reset_idrac(self):
+        clean_steps = [
+            {
+                "interface": "management",
+                "step": "reset_idrac"
+            }
+        ]
+        self.manual_cleaning(self.node, clean_steps=clean_steps)
+
+    @decorators.idempotent_id('9252ec6f-6b5b-447e-a323-c52775b88b4e')
+    def test_clear_job_queue(self):
+        clean_steps = [
+            {
+                "interface": "management",
+                "step": "clear_job_queue"
+            }
+        ]
+        self.manual_cleaning(self.node, clean_steps=clean_steps)
+
+    @decorators.idempotent_id('7baeff52-7d6e-4dea-a48f-a85a6bfc9f62')
+    def test_known_good_state(self):
+        clean_steps = [
+            {
+                "interface": "management",
+                "step": "known_good_state"
+            }
+        ]
+        self.manual_cleaning(self.node, clean_steps=clean_steps)
+
+
+class BaremetalIdracRedfishManagementCleaning(
+        BaremetalIdracManagementCleaning):
+
+    management_interface = 'idrac-redfish'
+    power_interface = 'idrac-redfish'
+
+
+class BaremetalIdracWSManManagementCleaning(
+        BaremetalIdracManagementCleaning):
+
+    management_interface = 'idrac-wsman'
+    power_interface = 'idrac-wsman'

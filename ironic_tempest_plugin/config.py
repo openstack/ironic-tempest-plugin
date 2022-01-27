@@ -1,6 +1,8 @@
 # Copyright 2015 NEC Corporation
 # All Rights Reserved.
 #
+# Copyright (c) 2022 Dell Inc. or its subsidiaries.
+#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -153,6 +155,12 @@ BaremetalGroup = [
     cfg.ListOpt('enabled_raid_interfaces',
                 default=['no-raid', 'agent'],
                 help="List of Ironic enabled RAID interfaces."),
+    cfg.ListOpt('enabled_management_interfaces',
+                default=['fake', 'ipmitool', 'noop'],
+                help="List of Ironic enabled management interfaces."),
+    cfg.ListOpt('enabled_power_interfaces',
+                default=['fake', 'ipmitool'],
+                help="List of Ironic enabled power interfaces."),
     cfg.StrOpt('default_rescue_interface',
                help="Ironic default rescue interface."),
     cfg.IntOpt('adjusted_root_disk_size_gb',
