@@ -173,6 +173,9 @@ BaremetalGroup = [
                default='bios',
                choices=['bios', 'uefi'],
                help="The desired boot_mode to be used on testing nodes."),
+    cfg.StrOpt('default_boot_option',
+               # No good default here, we need to actually set it.
+               help="The default boot option the testing nodes are using."),
 ]
 
 BaremetalFeaturesGroup = [

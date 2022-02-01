@@ -187,6 +187,19 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             # Flavor traits should be a subset of node traits.
             self.assertTrue(traits.issubset(set(node['traits'])))
 
+    def validate_image(self):
+        iinfo = self.node['instance_info']
+        if self.wholedisk_image:
+            self.assertNotIn('kernel', iinfo)
+            self.assertNotIn('ramdisk', iinfo)
+        else:
+            if 'image_type' in iinfo:
+                self.assertEqual('partition', iinfo['image_type'])
+            else:
+                self.assertTrue(iinfo['kernel'])
+                self.assertTrue(iinfo['ramdisk'])
+            self.assertGreater(int(iinfo['root_gb']), 0)
+
     def validate_uefi(self, client):
         efi_dir = '/sys/firmware/efi'
         success_string = "Found " + efi_dir
@@ -197,7 +210,8 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
 
     def baremetal_server_ops(self):
         self.add_keypair()
-        self.instance, self.node = self.boot_instance()
+        self.instance, self.node = self.boot_instance(image_id=self.image_ref)
+        self.validate_image()
         self.validate_ports()
         self.validate_scheduling()
         ip_address = self.get_server_ip(self.instance)
@@ -206,7 +220,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         # We expect the ephemeral partition to be mounted on /mnt and to have
         # the same size as our flavor definition.
         eph_size = self.get_flavor_ephemeral_size()
-        if eph_size:
+        if eph_size and not self.wholedisk_image:
             self.verify_partition(vm_client, 'ephemeral0', '/mnt', eph_size)
             # Create the test file
             self.create_timestamp(
@@ -225,6 +239,13 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
     @decorators.idempotent_id('549173a5-38ec-42bb-b0e2-c8b9f4a08943')
     @utils.services('compute', 'image', 'network')
     def test_baremetal_server_ops_partition_image(self):
+        # NOTE(dtantsur): cirros partition images don't have grub, we cannot
+        # use local boot on BIOS with them.
+        if (CONF.baremetal.partition_netboot
+                and CONF.baremetal.default_boot_option == 'local'):
+            raise self.skipException(
+                "Cannot test partition images with local boot on cirros")
+
         self.image_ref = CONF.baremetal.partition_image_ref
         self.wholedisk_image = False
         self.baremetal_server_ops()
