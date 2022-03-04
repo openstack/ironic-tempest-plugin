@@ -24,24 +24,15 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
         data = self.introspection_data(node['uuid'])
         self.assertEqual(data['cpu_arch'],
                          self.flavor['properties']['cpu_arch'])
-        self.assertEqual(int(data['memory_mb']),
-                         int(self.flavor['ram']))
-        self.assertEqual(int(data['cpus']), int(self.flavor['vcpus']))
+        self.assertGreater(int(data['memory_mb']), 0)
+        self.assertGreater(int(data['cpus']), 0)
 
     def verify_node_flavor(self, node):
-        expected_cpus = self.flavor['vcpus']
-        expected_memory_mb = self.flavor['ram']
         expected_cpu_arch = self.flavor['properties']['cpu_arch']
-        disk_size = self.flavor['disk']
-        ephemeral_size = self.flavor['OS-FLV-EXT-DATA:ephemeral']
-        expected_local_gb = disk_size + ephemeral_size
 
-        self.assertEqual(expected_cpus,
-                         int(node['properties']['cpus']))
-        self.assertEqual(expected_memory_mb,
-                         int(node['properties']['memory_mb']))
-        self.assertEqual(expected_local_gb,
-                         int(node['properties']['local_gb']))
+        self.assertGreater(int(node['properties']['cpus']), 0)
+        self.assertGreater(int(node['properties']['memory_mb']), 0)
+        self.assertGreater(int(node['properties']['local_gb']), 0)
         self.assertEqual(expected_cpu_arch,
                          node['properties']['cpu_arch'])
 
