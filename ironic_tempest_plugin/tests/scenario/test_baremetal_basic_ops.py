@@ -223,8 +223,9 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         if eph_size and not self.wholedisk_image:
             self.verify_partition(vm_client, 'ephemeral0', '/mnt', eph_size)
             # Create the test file
-            self.create_timestamp(
-                ip_address, private_key=self.keypair['private_key'])
+            self.create_timestamp(ip_address,
+                                  private_key=self.keypair['private_key'],
+                                  server=self.instance)
 
         if CONF.baremetal.boot_mode == "uefi":
             self.validate_uefi(vm_client)
