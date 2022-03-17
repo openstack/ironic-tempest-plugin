@@ -54,9 +54,9 @@ class BaremetalSingleTenant(baremetal_manager.BaremetalScenarioTest,
         network = self._create_network(
             networks_client=clients.networks_client,
             tenant_id=clients.credentials.tenant_id)
-        router = self._get_router(
+        router = self.get_router(
             client=clients.routers_client,
-            tenant_id=clients.credentials.tenant_id)
+            project_id=clients.credentials.tenant_id)
 
         extra_subnet_args = {}
         if CONF.validation.ip_version_for_ssh == 6:
