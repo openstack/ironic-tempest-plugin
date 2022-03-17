@@ -84,17 +84,6 @@ class ScenarioTest(tempest.scenario.manager.ScenarioTest):
     # The create_[resource] functions only return body and discard the
     # resp part which is not used in scenario tests
 
-    def create_server(self, name=None, image_id=None, flavor=None,
-                      validatable=False, wait_until='ACTIVE',
-                      clients=None, **kwargs):
-        return super().create_server(name=name,
-                                     image_id=image_id,
-                                     flavor=flavor,
-                                     validatable=validatable,
-                                     wait_until=wait_until,
-                                     clients=clients,
-                                     **kwargs)
-
     def get_remote_client(self, ip_address, username=None, private_key=None):
         """Get a SSH client to a remote server
 
