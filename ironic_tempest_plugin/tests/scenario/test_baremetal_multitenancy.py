@@ -104,7 +104,8 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
             instance1,
         )['floating_ip_address']
         self.check_vm_connectivity(ip_address=floating_ip1,
-                                   private_key=keypair['private_key'])
+                                   private_key=keypair['private_key'],
+                                   server=instance1)
         if use_vm:
             # Create VM on compute node
             alt_instance = self.create_server(
@@ -127,7 +128,8 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
         )['floating_ip_address']
         self.check_vm_connectivity(
             ip_address=alt_floating_ip,
-            private_key=alt_keypair['private_key'])
+            private_key=alt_keypair['private_key'],
+            server=alt_instance)
         self.verify_l3_connectivity(
             alt_floating_ip,
             alt_keypair['private_key'],

@@ -215,7 +215,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         self.validate_ports()
         self.validate_scheduling()
         ip_address = self.get_server_ip(self.instance)
-        vm_client = self.get_remote_client(ip_address)
+        vm_client = self.get_remote_client(ip_address, server=self.instance)
 
         # We expect the ephemeral partition to be mounted on /mnt and to have
         # the same size as our flavor definition.

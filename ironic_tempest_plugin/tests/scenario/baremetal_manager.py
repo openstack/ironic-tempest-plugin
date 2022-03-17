@@ -276,4 +276,4 @@ class BaremetalScenarioTest(manager.ScenarioTest):
         waiters.wait_for_server_status(servers_client,
                                        instance['id'], 'ACTIVE')
         # Verify server connection
-        self.get_remote_client(server_ip)
+        self.get_remote_client(server_ip, server=instance)

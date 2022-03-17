@@ -147,6 +147,7 @@ class BaremetalBFV(baremetal_manager.BaremetalScenarioTest):
 
         # Get server ip and validate authentication
         ip_address = self.get_server_ip(self.instance)
-        self.get_remote_client(ip_address).validate_authentication()
+        self.get_remote_client(ip_address,
+                               server=self.instance).validate_authentication()
 
         self.terminate_instance(instance=self.instance)
