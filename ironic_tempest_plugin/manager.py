@@ -22,18 +22,17 @@
 from oslo_log import log
 from oslo_utils import netutils
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
-import tempest.test
+from tempest.scenario import manager
 
 CONF = config.CONF
 
 LOG = log.getLogger(__name__)
 
 
-class ScenarioTest(tempest.scenario.manager.ScenarioTest):
+class ScenarioTest(manager.ScenarioTest):
     """Base class for scenario tests. Uses tempest own clients. """
 
     credentials = ['primary', 'admin', 'system_admin']
@@ -83,52 +82,6 @@ class ScenarioTest(tempest.scenario.manager.ScenarioTest):
     # The create_[resource] functions only return body and discard the
     # resp part which is not used in scenario tests
 
-    def create_floating_ip(self, thing, pool_name=None):
-        """Create a floating IP and associates to a server on Nova"""
-
-        if not pool_name:
-            pool_name = CONF.network.floating_network_name
-        client = self.os_primary.compute_floating_ips_client
-        floating_ip = (client.
-                       create_floating_ip(pool=pool_name)['floating_ip'])
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        client.delete_floating_ip,
-                        floating_ip['id'])
-        client.associate_floating_ip_to_server(
-            floating_ip['ip'], thing['id'])
-        return floating_ip
-
-    def get_server_ip(self, server):
-        """Get the server fixed or floating IP.
-
-        Based on the configuration we're in, return a correct ip
-        address for validating that a guest is up.
-        """
-        if CONF.validation.connect_method == 'floating':
-            # The tests calling this method don't have a floating IP
-            # and can't make use of the validation resources. So the
-            # method is creating the floating IP there.
-            return self.create_floating_ip(server)['ip']
-        elif CONF.validation.connect_method == 'fixed':
-            # Determine the network name to look for based on config or creds
-            # provider network resources.
-            if CONF.validation.network_for_ssh:
-                addresses = server['addresses'][
-                    CONF.validation.network_for_ssh]
-            else:
-                creds_provider = self._get_credentials_provider()
-                net_creds = creds_provider.get_primary_creds()
-                network = getattr(net_creds, 'network', None)
-                addresses = (server['addresses'][network['name']]
-                             if network else [])
-            for address in addresses:
-                if (address['version'] == CONF.validation.ip_version_for_ssh
-                        and address['OS-EXT-IPS:type'] == 'fixed'):
-                    return address['addr']
-            raise exceptions.ServerUnreachable(server_id=server['id'])
-        else:
-            raise lib_exc.InvalidConfiguration()
-
     def _get_router(self, client=None, tenant_id=None):
         """Retrieve a router for the given tenant id.
 
@@ -174,7 +127,7 @@ class ScenarioTest(tempest.scenario.manager.ScenarioTest):
         return router
 
 
-class NetworkScenarioTest(ScenarioTest):
+class NetworkScenarioTest(manager.NetworkScenarioTest):
     """Base class for network scenario tests.
 
     This class provide helpers for network scenario tests, using the neutron
@@ -251,26 +204,3 @@ class NetworkScenarioTest(ScenarioTest):
                          "Unable to determine which port to target."
                          % port_map)
         return port_map[0]
-
-    def create_floating_ip(self, thing, external_network_id=None,
-                           port_id=None, client=None):
-        """Create a floating IP and associates to a resource/port on Neutron"""
-        if not external_network_id:
-            external_network_id = CONF.network.public_network_id
-        if not client:
-            client = self.os_primary.floating_ips_client
-        if not port_id:
-            port_id, ip4 = self._get_server_port_id_and_ip4(thing)
-        else:
-            ip4 = None
-        result = client.create_floatingip(
-            floating_network_id=external_network_id,
-            port_id=port_id,
-            tenant_id=thing['tenant_id'],
-            fixed_ip_address=ip4
-        )
-        floating_ip = result['floatingip']
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        client.delete_floatingip,
-                        floating_ip['id'])
-        return floating_ip
