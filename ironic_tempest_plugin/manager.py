@@ -20,10 +20,7 @@
 # openstack/tempest commit: 82a278e88c9e9f9ba49f81c1f8dba0bca7943daf
 
 from oslo_log import log
-from oslo_utils import netutils
 from tempest import config
-from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
 
@@ -102,61 +99,3 @@ class NetworkScenarioTest(manager.NetworkScenarioTest):
         super(NetworkScenarioTest, cls).skip_checks()
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron not available')
-
-    def _create_network(self, networks_client=None,
-                        tenant_id=None,
-                        namestart='network-smoke-',
-                        port_security_enabled=True):
-        if not networks_client:
-            networks_client = self.os_primary.networks_client
-        if not tenant_id:
-            tenant_id = self.os_primary.networks_client.tenant_id
-        name = data_utils.rand_name(namestart)
-        network_kwargs = dict(name=name, tenant_id=tenant_id)
-        # Neutron disables port security by default so we have to check the
-        # config before trying to create the network with port_security_enabled
-        if CONF.network_feature_enabled.port_security:
-            network_kwargs['port_security_enabled'] = port_security_enabled
-        result = networks_client.create_network(**network_kwargs)
-        network = result['network']
-
-        self.assertEqual(network['name'], name)
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        networks_client.delete_network,
-                        network['id'])
-        return network
-
-    def _get_server_port_id_and_ip4(self, server, ip_addr=None):
-        if ip_addr:
-            ports = self.os_admin.ports_client.list_ports(
-                device_id=server['id'],
-                fixed_ips='ip_address=%s' % ip_addr)['ports']
-        else:
-            ports = self.os_admin.ports_client.list_ports(
-                device_id=server['id'])['ports']
-        # A port can have more than one IP address in some cases.
-        # If the network is dual-stack (IPv4 + IPv6), this port is associated
-        # with 2 subnets
-        p_status = ['ACTIVE']
-        # NOTE(vsaienko) With Ironic, instances live on separate hardware
-        # servers. Neutron does not bind ports for Ironic instances, as a
-        # result the port remains in the DOWN state.
-        # TODO(vsaienko) remove once bug: #1599836 is resolved.
-        if getattr(CONF.service_available, 'ironic', False):
-            p_status.append('DOWN')
-        port_map = [(p["id"], fxip["ip_address"])
-                    for p in ports
-                    for fxip in p["fixed_ips"]
-                    if netutils.is_valid_ipv4(fxip["ip_address"])
-                    and p['status'] in p_status]
-        inactive = [p for p in ports if p['status'] != 'ACTIVE']
-        if inactive:
-            LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
-
-        self.assertNotEqual(0, len(port_map),
-                            "No IPv4 addresses found in: %s" % ports)
-        self.assertEqual(len(port_map), 1,
-                         "Found multiple IPv4 addresses: %s. "
-                         "Unable to determine which port to target."
-                         % port_map)
-        return port_map[0]

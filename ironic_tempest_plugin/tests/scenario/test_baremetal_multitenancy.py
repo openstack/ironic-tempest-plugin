@@ -51,9 +51,9 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
             raise cls.skipException(msg)
 
     def create_tenant_network(self, clients, tenant_cidr):
-        network = self._create_network(
+        network = self.create_network(
             networks_client=clients.networks_client,
-            tenant_id=clients.credentials.tenant_id)
+            project_id=clients.credentials.project_id)
         router = self.get_router(
             client=clients.routers_client,
             project_id=clients.credentials.tenant_id)
