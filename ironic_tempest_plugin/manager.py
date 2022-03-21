@@ -21,7 +21,6 @@
 
 from oslo_log import log
 from tempest import config
-from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
 
 CONF = config.CONF
@@ -33,46 +32,6 @@ class ScenarioTest(manager.ScenarioTest):
     """Base class for scenario tests. Uses tempest own clients. """
 
     credentials = ['primary', 'admin', 'system_admin']
-
-    @classmethod
-    def setup_clients(cls):
-        super(ScenarioTest, cls).setup_clients()
-        # Clients (in alphabetical order)
-        cls.flavors_client = cls.os_primary.flavors_client
-        cls.compute_floating_ips_client = (
-            cls.os_primary.compute_floating_ips_client)
-        if CONF.service_available.glance:
-            # Check if glance v1 is available to determine which client to use.
-            if CONF.image_feature_enabled.api_v1:
-                cls.image_client = cls.os_primary.image_client
-            elif CONF.image_feature_enabled.api_v2:
-                cls.image_client = cls.os_primary.image_client_v2
-            else:
-                raise lib_exc.InvalidConfiguration(
-                    'Either api_v1 or api_v2 must be True in '
-                    '[image-feature-enabled].')
-        # Compute image client
-        cls.compute_images_client = cls.os_primary.compute_images_client
-        cls.keypairs_client = cls.os_primary.keypairs_client
-        # Nova security groups client
-        cls.compute_security_groups_client = (
-            cls.os_primary.compute_security_groups_client)
-        cls.compute_security_group_rules_client = (
-            cls.os_primary.compute_security_group_rules_client)
-        cls.servers_client = cls.os_primary.servers_client
-        cls.interface_client = cls.os_primary.interfaces_client
-        # Neutron network client
-        cls.networks_client = cls.os_primary.networks_client
-        cls.ports_client = cls.os_primary.ports_client
-        cls.routers_client = cls.os_primary.routers_client
-        cls.subnets_client = cls.os_primary.subnets_client
-        cls.floating_ips_client = cls.os_primary.floating_ips_client
-        cls.security_groups_client = cls.os_primary.security_groups_client
-        cls.security_group_rules_client = (
-            cls.os_primary.security_group_rules_client)
-
-        cls.volumes_client = cls.os_primary.volumes_client_latest
-        cls.snapshots_client = cls.os_primary.snapshots_client_latest
 
     # ## Test functions library
     #
