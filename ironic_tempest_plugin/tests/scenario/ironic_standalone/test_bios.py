@@ -1,6 +1,8 @@
 #
 # Copyright 2018 Red Hat Inc.
 #
+# Copyright (c) 2022 Dell Inc. or its subsidiaries.
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -49,3 +51,82 @@ class BaremetalFakeBios(
         ]
 
         self.check_bios_apply_and_reset_configuration(self.node, settings)
+
+
+class BaremetalIdracBiosCleaning(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver', 'bios_interface']
+
+    credentials = ['primary', 'admin']
+    driver = 'idrac'
+    delete_node = False
+    api_microversion = '1.40'
+
+    def _get_bios_setting_to_update(self):
+        _, bios_settings = self.baremetal_client.\
+            list_node_bios_settings(self.node['uuid'])
+
+        for attr_name in bios_settings['bios']:
+            if attr_name['name'] == "ProcVirtualization":
+                if attr_name['value'] == 'Disabled':
+                    new_attr_value = "Enabled"
+                else:
+                    new_attr_value = "Disabled"
+        setting_to_update = [
+            {
+                "name": "ProcVirtualization",
+                "value": new_attr_value
+            }
+        ]
+
+        return setting_to_update
+
+    def _verify_bios_settings(self, bios_settings_to_verify):
+        _, current_bios_settings = self.baremetal_client.\
+            list_node_bios_settings(self.node['uuid'])
+
+        for setting in bios_settings_to_verify:
+            found_setting = None
+            for i in current_bios_settings['bios']:
+                if i['name'] == setting['name']:
+                    found_setting = i
+                    break
+            self.assertIsNotNone(found_setting)
+            self.assertEqual(setting['value'], found_setting['value'])
+
+    @decorators.idempotent_id('6ded82ab-b444-436b-bb78-06fa5957d6c3')
+    def test_bios_apply_configuration(self):
+        setting = self._get_bios_setting_to_update()
+        clean_steps = [
+            {
+                "interface": "bios",
+                "step": "apply_configuration",
+                "args": {"settings": setting}
+            }
+        ]
+
+        self.manual_cleaning(self.node, clean_steps=clean_steps)
+        self._verify_bios_settings(setting)
+
+        restore_setting = self._get_bios_setting_to_update()
+        clean_steps_restore = [
+            {
+                "interface": "bios",
+                "step": "apply_configuration",
+                "args": {"settings": restore_setting}
+            }
+        ]
+
+        self.manual_cleaning(self.node, clean_steps=clean_steps_restore)
+        self._verify_bios_settings(restore_setting)
+
+
+class BaremetalIdracRedfishBios(
+        BaremetalIdracBiosCleaning):
+    bios_interface = 'idrac-redfish'
+
+
+class BaremetalIdracWSManBios(
+        BaremetalIdracBiosCleaning):
+    bios_interface = 'idrac-wsman'
