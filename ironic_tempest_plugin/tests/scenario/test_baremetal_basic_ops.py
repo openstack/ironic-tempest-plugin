@@ -189,7 +189,9 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
 
     def validate_image(self):
         iinfo = self.node['instance_info']
-        if self.wholedisk_image:
+        if self.wholedisk_image is not None and self.wholedisk_image:
+            # If None, we have nothing to do here. If False, we don't
+            # want to fall into this either.
             self.assertNotIn('kernel', iinfo)
             self.assertNotIn('ramdisk', iinfo)
         else:

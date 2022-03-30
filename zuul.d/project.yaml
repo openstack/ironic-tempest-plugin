@@ -21,6 +21,7 @@
         - ironic-inspector-tempest-xena
         - ironic-inspector-tempest-wallaby:
             voting: false
+        - ironic-standalone-anaconda
         - ironic-standalone-redfish
         - ironic-standalone-redfish-yoga:
             voting: false

@@ -503,7 +503,7 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # If we need to set provision state 'deleted' for the node  after test
     delete_node = True
 
-    mandatory_attr = ['driver', 'image_ref', 'wholedisk_image']
+    mandatory_attr = ['driver', 'image_ref']
 
     node = None
     node_ip = None
@@ -570,7 +570,11 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 "in the list of enabled power interfaces %(enabled)s" % {
                     'iface': cls.power_interface,
                     'enabled': CONF.baremetal.enabled_power_interfaces})
-        if not cls.wholedisk_image and CONF.baremetal.use_provision_network:
+        if (cls.wholedisk_image is not None
+                and not cls.wholedisk_image
+                and CONF.baremetal.use_provision_network):
+            # We only want to enter here if cls.wholedisk_image is set to
+            # a value. If None, skip, if True/False go from there.
             raise cls.skipException(
                 'Partitioned images are not supported with multitenancy.')
 
@@ -794,5 +798,81 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     def boot_and_verify_ramdisk_node(self, ramdisk_ref=None, iso=False,
                                      should_succeed=True):
         self.boot_node_ramdisk(ramdisk_ref, iso)
+        self.assertTrue(self.ping_ip_address(self.node_ip,
+                                             should_succeed=should_succeed))
+
+    @classmethod
+    def boot_node_anaconda(cls, image_ref, kernel_ref, ramdisk_ref,
+                           stage2_ref=None):
+        """Boot ironic using a ramdisk node.
+
+        The following actions are executed:
+          * Create/Pick networks to boot node in.
+          * Create Neutron port and attach it to node.
+          * Update node image_source.
+          * Deploy node.
+          * Wait until node is deployed.
+
+        :param ramdisk_ref: Reference to user image or ramdisk to boot
+                            the node with.
+        :param iso: Boolean, default False, to indicate if the image ref
+                    us actually an ISO image.
+        """
+        if image_ref is None or kernel_ref is None or ramdisk_ref is None:
+            raise cls.skipException('Skipping anaconda tests as an image ref '
+                                    'was not supplied')
+
+        network, subnet, router = cls.create_networks()
+        n_port = cls.create_neutron_port(network_id=network['id'])
+        cls.vif_attach(node_id=cls.node['uuid'], vif_id=n_port['id'])
+        p_root = '/instance_info/'
+        patch = [{'path': p_root + 'image_source',
+                  'op': 'add',
+                  'value': image_ref},
+                 {'path': p_root + 'kernel',
+                  'op': 'add',
+                  'value': kernel_ref},
+                 {'path': p_root + 'ramdisk',
+                  'op': 'add',
+                  'value': ramdisk_ref}]
+        if stage2_ref:
+            patch.append(
+                {
+                    'path': p_root + 'stage2',
+                    'op': 'add',
+                    'value': stage2_ref,
+                }
+            )
+        cls.update_node(cls.node['uuid'], patch=patch)
+        cls.set_node_provision_state(cls.node['uuid'], 'active')
+        if CONF.validation.connect_method == 'floating':
+            cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
+        elif CONF.validation.connect_method == 'fixed':
+            cls.node_ip = cls.get_server_ip(cls.node['uuid'])
+        else:
+            m = ('Configuration option "[validation]/connect_method" '
+                 'must be set.')
+            raise lib_exc.InvalidConfiguration(m)
+        cls.wait_power_state(cls.node['uuid'],
+                             bm.BaremetalPowerStates.POWER_ON)
+
+        if CONF.baremetal.anaconda_exit_test_at == 'heartbeat':
+            cls.wait_for_agent_heartbeat(
+                cls.node['uuid'],
+                timeout=CONF.baremetal.anaconda_active_timeout)
+        elif CONF.baremetal.anaconda_exit_test_at == 'active':
+            cls.wait_provisioning_state(
+                cls.node['uuid'],
+                bm.BaremetalProvisionStates.ACTIVE,
+                timeout=CONF.baremetal.anaconda_active_timeout,
+                interval=30)
+
+    def boot_and_verify_anaconda_node(self,
+                                      image_ref=None,
+                                      kernel_ref=None,
+                                      ramdisk_ref=None,
+                                      stage2_ref=None,
+                                      should_succeed=True):
+        self.boot_node_anaconda(image_ref, kernel_ref, ramdisk_ref)
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=should_succeed))

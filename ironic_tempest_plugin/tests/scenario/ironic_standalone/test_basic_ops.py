@@ -654,3 +654,49 @@ class BaremetalIdracSyncBootModeDirectWholedisk(
         self.wait_provisioning_state(self.node['uuid'], 'active',
                                      timeout=CONF.baremetal.active_timeout,
                                      interval=30)
+
+
+class BaremetalRedfishIPxeAnacondaNoGlance(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.78'  # to set the deploy_interface
+    driver = 'redfish'
+    deploy_interface = 'anaconda'
+    boot_interface = 'ipxe'
+    image_ref = CONF.baremetal.anaconda_image_ref
+    wholedisk_image = None
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalRedfishIPxeAnacondaNoGlance, cls).skip_checks()
+        if 'anaconda' not in CONF.baremetal.enabled_deploy_interfaces:
+            skip_msg = ("Skipping the test case since anaconda is not "
+                        "enabled.")
+            raise cls.skipException(skip_msg)
+
+    def test_ip_access_to_server_without_stage2(self):
+        # Tests deploy from a URL, or a pre-existing anaconda reference in
+        # glance.
+        if CONF.baremetal.anaconda_stage2_ramdisk_ref is not None:
+            skip_msg = ("Skipping the test case as an anaconda stage2 "
+                        "ramdisk has been defined, and that test can "
+                        "run instead.")
+            raise self.skipException(skip_msg)
+
+        self.boot_and_verify_anaconda_node(
+            image_ref=self.image_ref,
+            kernel_ref=CONF.baremetal.anaconda_kernel_ref,
+            ramdisk_ref=CONF.baremetal.anaconda_initial_ramdisk_ref)
+
+    def test_ip_access_to_server_using_stage2(self):
+        # Tests anaconda with a second stage ramdisk
+        if CONF.baremetal.anaconda_stage2_ramdisk_ref is None:
+            skip_msg = ("Skipping as stage2 ramdisk ref pointer has "
+                        "not been configured.")
+            raise self.skipException(skip_msg)
+
+        self.boot_and_verify_anaconda_node(
+            image_ref=self.image_ref,
+            kernel_ref=CONF.baremetal.anaconda_kernel_ref,
+            ramdisk_ref=CONF.baremetal.anaconda_initial_ramdisk_ref,
+            stage2_ref=CONF.baremetal.anaconda_stage2_ramdisk_ref)

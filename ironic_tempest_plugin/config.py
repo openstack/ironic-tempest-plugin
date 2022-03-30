@@ -89,6 +89,10 @@ BaremetalGroup = [
     cfg.IntOpt('active_timeout',
                default=300,
                help="Timeout for Ironic node to completely provision"),
+    cfg.IntOpt('anaconda_active_timeout',
+               default=3600,
+               help="Timeout for Ironic node to completely provision "
+                    "when using the anaconda deployment interface."),
     cfg.IntOpt('association_timeout',
                default=30,
                help="Timeout for association of Nova instance and Ironic "
@@ -146,6 +150,28 @@ BaremetalGroup = [
     cfg.StrOpt('rollback_import_location',
                help="Rollback import config location for configuration "
                     "molds. Optional. If not provided, rollback is skipped."),
+    # TODO(TheJulia): For now, anaconda can be url based and we can move in
+    # to being tested with glance as soon as we get a public stage2 image.
+    cfg.StrOpt('anaconda_image_ref',
+               help="URL of an anaconda repository to set as image_source"),
+    cfg.StrOpt('anaconda_kernel_ref',
+               help="URL of the kernel to utilize for anaconda deploys."),
+    cfg.StrOpt('anaconda_initial_ramdisk_ref',
+               help="URL of the initial ramdisk to utilize for anaconda "
+                    "deploy operations."),
+    cfg.StrOpt('anaconda_stage2_ramdisk_ref',
+               help="URL of the anaconda second stage ramdisk. Presence of "
+                    "this setting will also determine if a stage2 specific "
+                    "anaconda test is run, or not."),
+    cfg.StrOpt('anaconda_exit_test_at',
+               default='heartbeat',
+               choices=['heartbeat', 'active'],
+               help='When to end the anaconda test job at. Due to '
+                    'the use model of the anaconda driver, as well '
+                    'as the performance profile, the anaconda test is '
+                    'normally only executed until we observe a heartbeat '
+                    'operation indicating that anaconda *has* booted and '
+                    'successfully parsed the URL.'),
     cfg.ListOpt('enabled_drivers',
                 default=['fake', 'pxe_ipmitool', 'agent_ipmitool'],
                 help="List of Ironic enabled drivers."),

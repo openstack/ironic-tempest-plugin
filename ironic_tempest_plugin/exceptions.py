@@ -27,3 +27,8 @@ class HypervisorUpdateTimeout(exceptions.TempestException):
 
 class RaidCleaningInventoryValidationFailed(exceptions.TempestException):
     message = "RAID cleaning storage inventory validation failed"
+
+
+class InsufficientAPIAccess(exceptions.TempestException):
+    message = ("Insufficent Access to the API exists. Please use a user "
+               "with an elevated level of access to execute this test.")

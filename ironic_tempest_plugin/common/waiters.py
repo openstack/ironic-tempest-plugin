@@ -74,7 +74,8 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
         if node[attr] in status:
             return True
         elif (abort_on_error_state
-              and node['provision_state'].endswith(' failed')):
+              and (node['provision_state'].endswith(' failed')
+                   or node['provision_state'] == 'error')):
             msg = ('Node %(node)s reached failure state %(state)s while '
                    'waiting for %(attr)s=%(expected)s. '
                    'Error: %(error)s' %
@@ -159,3 +160,35 @@ def wait_for_allocation(client, allocation_ident, timeout=15, interval=1,
         raise lib_exc.TimeoutException(msg)
 
     return result[0]
+
+
+def wait_node_value_in_field(client, node_id, field, value,
+                             raise_if_insufficent_access=True,
+                             timeout=None, interval=None):
+    """Waits for a node to have a field value appear.
+
+    :param client: an instance of tempest plugin BaremetalClient.
+    :param node_id: the UUID of the node
+    :param field: the field in the node object to examine
+    :param value: the value/key with-in the field to look for.
+    :param timeout: the timeout after which the check is considered as failed.
+    :param interval: an interval between show_node calls for status check.
+    """
+
+    def is_field_updated():
+        node = utils.get_node(client, node_id=node_id)
+        field_value = node[field]
+        if raise_if_insufficent_access and '** Redacted' in field_value:
+            msg = ('Unable to see contents of redacted field '
+                   'indicating insufficent access to execute this test.')
+            raise lib_exc.InsufficientAPIAccess(msg)
+        return value in field_value
+
+    if not test_utils.call_until_true(is_field_updated, timeout,
+                                      interval):
+        msg = ('Timed out waiting to get Ironic node by node_id '
+               '%(node_id)s within the required time (%(timeout)s s). '
+               'Field value %(value) did not appear in field %(field)s.'
+               % {'node_id': node_id, 'timeout': timeout,
+                  'field': field, 'value': value})
+        raise lib_exc.TimeoutException(msg)
