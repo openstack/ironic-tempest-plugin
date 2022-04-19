@@ -123,6 +123,16 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         return body
 
     @classmethod
+    def _disassociate_instance_with_node(cls, node_id):
+        """Disassociate instance_uuid from attached node.
+
+        :param node_id: Name or UUID of the node.
+        """
+        cls.update_node(node_id, [{'op': 'replace',
+                                   'path': '/instance_uuid',
+                                   'value': None}])
+
+    @classmethod
     def get_node_vifs(cls, node_id):
         """Return a list of VIFs for a given node.
 
@@ -229,6 +239,28 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
             raise lib_exc.TimeoutException(msg)
 
         return nodes[0]
+
+    @classmethod
+    def unreserve_node(cls, node):
+        """Unreserves node by disassociating instance_uuid attached to node.
+
+        :param node: Ironic node to disassociate instance_uuid from.
+        """
+
+        def _try_to_disassociate_instance():
+            _, node_prop = cls.baremetal_client.show_node(node['uuid'])
+            if node_prop['instance_uuid']:
+                try:
+                    cls._disassociate_instance_with_node(node['uuid'])
+                except lib_exc.Conflict:
+                    return False
+            return True
+        if (not test_utils.call_until_true(
+                _try_to_disassociate_instance,
+                duration=CONF.baremetal.association_timeout, sleep_for=1)):
+            msg = ('Timed out waiting to disassociate instance from '
+                   'ironic node uuid %s' % node['instance_uuid'])
+            raise lib_exc.TimeoutException(msg)
 
     @classmethod
     def boot_node(cls, image_ref=None, image_checksum=None,
@@ -568,6 +600,7 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
             except lib_exc.NotFound:
                 pass
         cls.terminate_node(cls.node['uuid'])
+        cls.unreserve_node(cls.node)
         base.reset_baremetal_api_microversion()
         super(BaremetalStandaloneManager, cls).resource_cleanup()
 
