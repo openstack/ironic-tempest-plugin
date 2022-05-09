@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six.moves import http_client
+from http import client as http_client
 
 from ironic_tempest_plugin.services.baremetal import base
 

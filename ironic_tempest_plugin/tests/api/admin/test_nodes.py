@@ -11,7 +11,6 @@
 #    under the License.
 
 from oslo_utils import uuidutils
-import six
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -136,7 +135,7 @@ class TestNodes(base.BaseBaremetalTest):
         body = self.client.get_node_boot_device(self.node['uuid'])
         self.assertIn('boot_device', body)
         self.assertIn('persistent', body)
-        self.assertIsInstance(body['boot_device'], six.string_types)
+        self.assertIsInstance(body['boot_device'], str)
         self.assertIsInstance(body['persistent'], bool)
 
     @decorators.idempotent_id('3622bc6f-3589-4bc2-89f3-50419c66b133')

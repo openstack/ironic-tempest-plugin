@@ -14,7 +14,6 @@ import os
 import time
 
 from oslo_serialization import jsonutils as json
-import six
 import tempest
 from tempest import config
 from tempest.lib.common.api_version_utils import LATEST_MICROVERSION
@@ -173,7 +172,7 @@ class InspectorScenarioTest(BaremetalScenarioTest):
         """Waits for introspection of baremetal nodes to finish.
 
         """
-        if isinstance(node_ids, six.text_type):
+        if isinstance(node_ids, str):
             node_ids = [node_ids]
         start = int(time.time())
         not_introspected = {node_id for node_id in node_ids}
