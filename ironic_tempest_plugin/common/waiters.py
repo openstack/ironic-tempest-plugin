@@ -13,7 +13,6 @@
 #    under the License.
 
 from oslo_log import log
-import six
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
@@ -31,8 +30,8 @@ def _determine_and_check_timeout_interval(timeout, default_timeout,
         timeout = default_timeout
     if interval is None:
         interval = default_interval
-    if (not isinstance(timeout, six.integer_types)
-            or not isinstance(interval, six.integer_types)
+    if (not isinstance(timeout, int)
+            or not isinstance(interval, int)
             or timeout < 0 or interval < 0):
         raise AssertionError(
             'timeout and interval should be >= 0 or None, current values are: '
