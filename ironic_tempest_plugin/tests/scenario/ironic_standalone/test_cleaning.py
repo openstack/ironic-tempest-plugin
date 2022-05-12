@@ -15,11 +15,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
+import os
+
+import jsonschema
+from jsonschema import exceptions as json_schema_exc
 from oslo_log import log as logging
 from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 
+from ironic_tempest_plugin import exceptions
 from ironic_tempest_plugin.tests.scenario import \
     baremetal_standalone_manager as bsm
 
@@ -227,3 +233,122 @@ class BaremetalIdracWSManManagementCleaning(
 
     management_interface = 'idrac-wsman'
     power_interface = 'idrac-wsman'
+
+
+class BaremetalIdracRaidCleaning(bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver', 'raid_interface']
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    storage_inventory_info = None
+    driver = 'idrac'
+    api_microversion = '1.31'  # to set raid_interface
+    delete_node = False
+
+    @classmethod
+    def skip_checks(cls):
+        """Validates the storage information passed in file using JSON schema.
+
+        :raises: skipException if,
+            1) storage inventory path is not provided in tempest execution
+            file.
+            2) storage inventory file is not found on given path.
+        :raises: RaidCleaningInventoryValidationFailed if,
+            validation of the storage inventory fails.
+        """
+        super(BaremetalIdracRaidCleaning, cls).skip_checks()
+        storage_inventory = CONF.baremetal.storage_inventory_file
+        if not storage_inventory:
+            raise cls.skipException("Storage inventory file path missing "
+                                    "in tempest configuration file. "
+                                    "Skipping Test case.")
+        try:
+            with open(storage_inventory, 'r') as storage_invent_fobj:
+                cls.storage_inventory_info = json.load(storage_invent_fobj)
+        except IOError:
+            msg = ("Storage Inventory file %(inventory)s is not found. "
+                   "Skipping Test Case." %
+                   {'inventory': storage_inventory})
+            raise cls.skipException(msg)
+        storage_inventory_schema = os.path.join(os.path.dirname(
+            __file__), 'storage_inventory_schema.json')
+        with open(storage_inventory_schema, 'r') as storage_schema_fobj:
+            schema = json.load(storage_schema_fobj)
+        try:
+            jsonschema.validate(cls.storage_inventory_info, schema)
+        except json_schema_exc.ValidationError as e:
+            error_msg = ("Storage Inventory validation error: %(error)s " %
+                         {'error': e})
+            raise exceptions.RaidCleaningInventoryValidationFailed(error_msg)
+
+    def _validate_raid_type_and_drives_count(self, raid_type,
+                                             minimum_drives_required):
+        for controller in (self.storage_inventory_info[
+                           'storage_inventory']['controllers']):
+            supported_raid_types = controller['supported_raid_types']
+            physical_disks = [pdisk['id'] for pdisk in (
+                controller['drives'])]
+            if raid_type in supported_raid_types and (
+                    minimum_drives_required <= len(physical_disks)):
+                return controller
+        error_msg = ("No Controller present in storage inventory which "
+                     "supports RAID type %(raid_type)s "
+                     "and has at least %(disk_count)s drives." %
+                     {'raid_type': raid_type,
+                      'disk_count': minimum_drives_required})
+        raise exceptions.RaidCleaningInventoryValidationFailed(error_msg)
+
+    @decorators.idempotent_id('8a908a3c-f2af-48fb-8553-9163715aa403')
+    @utils.services('image', 'network')
+    def test_hardware_raid(self):
+        controller = self._validate_raid_type_and_drives_count(
+            raid_type='1', minimum_drives_required=2)
+        raid_config = {
+            "logical_disks": [
+                {
+                    "size_gb": 40,
+                    "raid_level": "1",
+                    "controller": controller['id']
+                }
+            ]
+        }
+        self.build_raid_and_verify_node(
+            config=raid_config,
+            deploy_time=CONF.baremetal_feature_enabled.deploy_time_raid,
+            erase_device_metadata=False)
+        self.remove_root_device_hint()
+        self.terminate_node(self.node['uuid'], force_delete=True)
+
+    @decorators.idempotent_id('92fe534d-77f1-422d-84e4-e30fe9e3d928')
+    @utils.services('image', 'network')
+    def test_raid_cleaning_max_size_raid_10(self):
+        controller = self._validate_raid_type_and_drives_count(
+            raid_type='1+0', minimum_drives_required=4)
+        physical_disks = [pdisk['id'] for pdisk in (
+            controller['drives'])]
+        raid_config = {
+            "logical_disks": [
+                {
+                    "size_gb": "MAX",
+                    "raid_level": "1+0",
+                    "controller": controller['id'],
+                    "physical_disks": physical_disks
+                }
+            ]
+        }
+        self.build_raid_and_verify_node(
+            config=raid_config,
+            deploy_time=CONF.baremetal_feature_enabled.deploy_time_raid,
+            erase_device_metadata=False)
+        self.remove_root_device_hint()
+        self.terminate_node(self.node['uuid'], force_delete=True)
+
+
+class BaremetalIdracRedfishRaidCleaning(
+        BaremetalIdracRaidCleaning):
+    raid_interface = 'idrac-redfish'
+
+
+class BaremetalIdracWSManRaidCleaning(
+        BaremetalIdracRaidCleaning):
+    raid_interface = 'idrac-wsman'

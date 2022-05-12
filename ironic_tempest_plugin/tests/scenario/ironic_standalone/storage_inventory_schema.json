@@ -1,0 +1,101 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Storage inventory JSON schema",
+    "type": "object",
+    "properties": {
+        "storage_inventory": {
+            "type": "object",
+            "properties": {
+                "controllers": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The unique identifier for this storage controller.",
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "serial_number": {
+                                "description": "The serial number for this storage controller.",
+                                "type": ["string", "null"]
+                            },
+                            "manufacturer": {
+                                "description": "The manufacturer of this storage controller.",
+                                "type": ["string", "null"]
+                            },
+                            "model": {
+                                "description": "The model of the storage controller.",
+                                "type": ["string", "null"]
+                            },
+                            "supported_device_protocols": {
+                                "description": "The protocols that the storage controller can use to communicate with attached devices.",
+                                "type": ["array", "null"],
+                                "items": {
+                                    "type": "string",
+                                    "enum": ["sas", "sata", "scsi"]
+                                },
+                                "minItems": 1
+                            },
+                            "supported_raid_types": {
+                                "description": "The set of RAID types supported by the storage controller.",
+                                "type": ["array", "null"],
+                                "items": {
+                                    "type": "string",
+                                    "enum": ["JBOD", "0", "1", "2", "5", "6", "1+0", "5+0", "6+0"]
+                                },
+                                "minItems": 1
+                            },
+                            "drives": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "description": "The unique identifier for the physical drive.",
+                                            "type": "string",
+                                            "minLength": 1
+                                        },
+                                        "size_gb": {
+                                            "description": "The size in GiB of the physical drive.",
+                                            "type": ["number", "null"],
+                                            "minimum": 0
+                                        },
+                                        "model": {
+                                            "description": "The model for the physical drive.",
+                                            "type": ["string", "null"]
+                                        },
+                                        "media_type": {
+                                            "description": "The media type for the physical drive.",
+                                            "enum": ["hdd", "ssd", null]
+                                        },
+                                        "serial_number": {
+                                            "description": "The serial number for the physical drive.",
+                                            "type": ["string", "null"]
+                                        },
+                                        "protocol": {
+                                            "description": "The protocol that this drive currently uses to communicate to the storage controller.",
+                                            "enum": ["sas", "sata", "scsi", null]
+                                        }
+                                    },
+                                    "required": ["id", "size_gb", "model", "media_type", "serial_number", "protocol"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "required": ["id", "serial_number", "manufacturer", "model", "supported_device_protocols", "supported_raid_types"],
+                        "additionalProperties": false,
+                        "dependencies": {
+                            "drives": ["id"]
+                        }
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["controllers"],
+            "additionalProperties": false
+        }
+    },
+    "required": ["storage_inventory"],
+    "additionalProperties": false
+}

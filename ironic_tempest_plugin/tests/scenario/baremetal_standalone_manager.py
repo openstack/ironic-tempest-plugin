@@ -642,7 +642,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=should_succeed))
 
-    def build_raid_and_verify_node(self, config=None, deploy_time=False):
+    def build_raid_and_verify_node(self, config=None, deploy_time=False,
+                                   erase_device_metadata=True):
         config = config or self.raid_config
         if deploy_time:
             steps = [
@@ -671,14 +672,14 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                     "step": "delete_configuration"
                 },
                 {
-                    "interface": "deploy",
-                    "step": "erase_devices_metadata",
-                },
-                {
                     "interface": "raid",
                     "step": "create_configuration",
                 }
             ]
+            if erase_device_metadata:
+                steps.insert(1, {
+                    "interface": "deploy",
+                    "step": "erase_devices_metadata"})
             self.baremetal_client.set_node_raid_config(self.node['uuid'],
                                                        config)
             self.manual_cleaning(self.node, clean_steps=steps)
@@ -686,12 +687,14 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         # The node has been changed, anything at this point, we need to back
         # out the raid configuration.
         if not deploy_time:
-            self.addCleanup(self.remove_raid_configuration, self.node)
+            self.addCleanup(self.remove_raid_configuration, self.node,
+                            erase_device_metadata=erase_device_metadata)
 
         # NOTE(dtantsur): this is not required, but it allows us to check that
         # the RAID device was in fact created and is used for deployment.
         patch = [{'path': '/properties/root_device',
-                  'op': 'add', 'value': {'name': '/dev/md0'}}]
+                  'op': 'add', 'value': {
+                      'name': CONF.baremetal.root_device_name}}]
         if deploy_time:
             patch.append({'path': '/instance_info/traits',
                           'op': 'add', 'value': ['CUSTOM_RAID']})
@@ -707,18 +710,18 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                   'op': 'remove'}]
         self.update_node(self.node['uuid'], patch=patch)
 
-    def remove_raid_configuration(self, node):
+    def remove_raid_configuration(self, node, erase_device_metadata=True):
         self.baremetal_client.set_node_raid_config(node['uuid'], {})
         steps = [
             {
                 "interface": "raid",
                 "step": "delete_configuration",
-            },
-            {
-                "interface": "deploy",
-                "step": "erase_devices_metadata",
             }
         ]
+        if erase_device_metadata:
+            steps.append({
+                "interface": "deploy",
+                "step": "erase_devices_metadata"})
         self.manual_cleaning(node, clean_steps=steps)
 
     def rescue_unrescue(self):
