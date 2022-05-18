@@ -602,6 +602,19 @@ class BaremetalClient(base.BaremetalClient):
                                  target)
 
     @base.handle_errors
+    def set_node_state(self, node_uuid, state, target):
+        """Set state for the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+        :param state: The desired state to set.
+        :param target: The target state
+
+        """
+        target = {'target': target}
+        return self._put_request('nodes/%s/states/%s' % (node_uuid, state),
+                                 target)
+
+    @base.handle_errors
     def set_node_provision_state(self, node_uuid, state, configdrive=None,
                                  clean_steps=None, rescue_password=None):
         """Set provision state of the specified node.
@@ -676,6 +689,38 @@ class BaremetalClient(base.BaremetalClient):
 
         """
         path = 'nodes/%s/management/boot_device' % node_uuid
+        resp, body = self._list_request(path)
+        self.expected_success(http_client.OK, resp.status)
+        return body
+
+    @base.handle_errors
+    def set_node_indicator_state(self, node_uuid, component, ind_ident, state):
+        """Get the current indicator state
+
+        :param node_uuid: The unique identifier of the node.
+        :param component: The Bare Metal node component.
+        :param ind_ident: The indicator of a Bare Metal component.
+        :param state: The state of an indicator of the component of the node.
+                        Possible values are: OFF, ON, BLINKING or UNKNOWN.
+
+        """
+        resp, body = self._put_request('nodes/%s/management/indicators/%s/%s'
+                                       % (node_uuid, component, ind_ident),
+                                       state)
+        self.expected_success(http_client.OK, resp.status)
+        return body
+
+    @base.handle_errors
+    def get_node_indicator_state(self, node_uuid, component, ind_ident):
+        """Get the current indicator state
+
+        :param node_uuid: The unique identifier of the node.
+        :param component: The Bare Metal node component.
+        :param ind_ident: The indicator of a Bare Metal component.
+
+        """
+        path = 'nodes/%s/management/indicators/%s/%s' % (node_uuid, component,
+                                                         ind_ident)
         resp, body = self._list_request(path)
         self.expected_success(http_client.OK, resp.status)
         return body
@@ -864,3 +909,39 @@ class BaremetalClient(base.BaremetalClient):
 
         """
         return self._delete_request('allocations', allocation_ident)
+
+    @base.handle_errors
+    def list_node_history(self, node_uuid):
+        """List history entries for a node.
+
+        :param node_uuid: The unique identifier of the node.
+        """
+        return self._list_request('/nodes/%s/history' % node_uuid)
+
+    @base.handle_errors
+    def list_vendor_passthru_methods(self, node_uuid):
+        """List vendor-specific extensions (passthru) methods for a node
+
+        :param node_uuid: The unique identifier of the node.
+        """
+        return self._list_request('/nodes/%s/vendor_passthru/methods'
+                                  % node_uuid)
+
+    @base.handle_errors
+    def ipa_heartbeat(self, node_uuid, callback_url, agent_token,
+                      agent_version):
+        """Create a IPA heartbeat from the given body.
+
+        :param node_uuid: The unique identifier of the node.
+        :param callback_url: The URL of an active ironic-python-agent ramdisk
+        :param agent_token: The token of the ironic-python-agent ramdisk
+        :param agent_version: The version of the ironic-python-agent ramdisk
+        """
+        kwargs = {
+            'node_ident': node_uuid,
+            'callback_url': callback_url,
+            'agent_version': agent_version,
+            'agent_token': agent_token,
+        }
+
+        return self._create_request_no_response_body('heartbeat', kwargs)
