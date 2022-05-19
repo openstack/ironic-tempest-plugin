@@ -46,7 +46,6 @@
         - ironic-inspector-tempest-discovery-victoria:
             voting: false
     gate:
-      queue: ironic
       jobs:
         - ironic-standalone
         - ironic-standalone-xena
