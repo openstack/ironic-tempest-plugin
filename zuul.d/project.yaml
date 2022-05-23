@@ -7,54 +7,54 @@
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-standalone
+        - ironic-standalone-yoga
         - ironic-standalone-xena
-        - ironic-standalone-wallaby
-        - ironic-standalone-victoria:
+        - ironic-standalone-wallaby:
             voting: false
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-yoga
         - ironic-tempest-functional-python3-xena
-        - ironic-tempest-functional-python3-wallaby
-        - ironic-tempest-functional-python3-victoria:
+        - ironic-tempest-functional-python3-wallaby:
             voting: false
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-yoga
         - ironic-inspector-tempest-xena
-        - ironic-inspector-tempest-wallaby
-        - ironic-inspector-tempest-victoria:
+        - ironic-inspector-tempest-wallaby:
             voting: false
         - ironic-standalone-redfish
+        - ironic-standalone-redfish-yoga:
+            voting: false
         - ironic-standalone-redfish-xena:
             voting: false
         - ironic-standalone-redfish-wallaby:
-            voting: false
-        - ironic-standalone-redfish-victoria:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
             voting: false
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-yoga:
+            voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-xena:
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-wallaby:
             voting: false
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-victoria:
-            voting: false
         - ironic-inspector-tempest-discovery
+        - ironic-inspector-tempest-discovery-yoga:
+            voting: false
         - ironic-inspector-tempest-discovery-xena:
             voting: false
         - ironic-inspector-tempest-discovery-wallaby:
             voting: false
-        - ironic-inspector-tempest-discovery-victoria:
-            voting: false
     gate:
       jobs:
         - ironic-standalone
+        - ironic-standalone-yoga
         - ironic-standalone-xena
-        - ironic-standalone-wallaby
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-yoga
         - ironic-tempest-functional-python3-xena
-        - ironic-tempest-functional-python3-wallaby
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-yoga
         - ironic-inspector-tempest-xena
-        - ironic-inspector-tempest-wallaby
         - ironic-standalone-redfish
         - ironic-inspector-tempest-discovery
