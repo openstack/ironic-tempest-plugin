@@ -436,3 +436,149 @@ class BaremetalRedfishIPxeWholediskHttpLink(
     @utils.services('network')
     def test_ip_access_to_server(self):
         self.boot_and_verify_node()
+
+
+class BaremetalRedfishDirectPxeWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver']
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'redfish'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    boot_interface = 'pxe'
+    deploy_interface = 'direct'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalRedfishDirectPxeWholedisk, cls).skip_checks()
+        if CONF.baremetal_feature_enabled.ipxe_enabled:
+            skip_msg = ("Skipping the test case since ipxe is enabled")
+            raise cls.skipException(skip_msg)
+
+    @utils.services('image', 'network')
+    @decorators.idempotent_id('2bf34541-5514-4ea7-b073-7707d408ce99')
+    def test_deploy_node(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIdracDirectIPxeWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver']
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'idrac'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    boot_interface = 'ipxe'
+    deploy_interface = 'direct'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalIdracDirectIPxeWholedisk, cls).skip_checks()
+        if not CONF.baremetal_feature_enabled.ipxe_enabled:
+            skip_msg = ("Skipping the test case since ipxe is disabled")
+            raise cls.skipException(skip_msg)
+
+    @utils.services('image', 'network')
+    @decorators.idempotent_id('b467889b-aba4-4696-9e6f-4ef60a3f78a4')
+    def test_deploy_node(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIdracDirectPxeWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver']
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'idrac'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    boot_interface = 'pxe'
+    deploy_interface = 'direct'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalIdracDirectPxeWholedisk, cls).skip_checks()
+        if CONF.baremetal_feature_enabled.ipxe_enabled:
+            skip_msg = ("Skipping the test case since ipxe is enabled")
+            raise cls.skipException(skip_msg)
+
+    @utils.services('image', 'network')
+    @decorators.idempotent_id('20c0f2f4-723b-4d1e-a4f2-bea11ffb1513')
+    def test_deploy_node(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIdracWSManDirectIPxeWholedisk(
+        BaremetalIdracDirectIPxeWholedisk):
+    power_interface = 'idrac-wsman'
+    management_interface = 'idrac-wsman'
+
+
+class BaremetalIdracWSManDirectPxeWholedisk(
+        BaremetalIdracDirectPxeWholedisk):
+    power_interface = 'idrac-wsman'
+    management_interface = 'idrac-wsman'
+
+
+class BaremetalIdracRedfishDirectIPxeWholedisk(
+        BaremetalIdracDirectIPxeWholedisk):
+
+    power_interface = 'idrac-redfish'
+    management_interface = 'idrac-redfish'
+
+
+class BaremetalIdracRedfishDirectPxeWholedisk(
+        BaremetalIdracDirectPxeWholedisk):
+
+    power_interface = 'idrac-redfish'
+    management_interface = 'idrac-redfish'
+
+
+class BaremetalIpmiDirectIPxeWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver']
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ipmi'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    boot_interface = 'ipxe'
+    deploy_interface = 'direct'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalIpmiDirectIPxeWholedisk, cls).skip_checks()
+        if not CONF.baremetal_feature_enabled.ipxe_enabled:
+            skip_msg = ("Skipping the test case since ipxe is disabled")
+            raise cls.skipException(skip_msg)
+
+    @utils.services('image', 'network')
+    @decorators.idempotent_id('9cd5a47b-ef96-4d64-9118-be467b24d1bf')
+    def test_deploy_node(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIpmiDirectPxeWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver']
+    api_microversion = '1.31'  # to set the deploy_interface
+    driver = 'ipmi'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    boot_interface = 'pxe'
+    deploy_interface = 'direct'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalIpmiDirectPxeWholedisk, cls).skip_checks()
+        if CONF.baremetal_feature_enabled.ipxe_enabled:
+            skip_msg = ("Skipping the test case since ipxe is enabled")
+            raise cls.skipException(skip_msg)
+
+    @utils.services('image', 'network')
+    @decorators.idempotent_id('d68a38aa-b731-403a-9d40-b3b49ea75e9b')
+    def test_deploy_node(self):
+        self.boot_and_verify_node()
