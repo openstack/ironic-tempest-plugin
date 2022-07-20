@@ -911,13 +911,13 @@ class TestNodeProtected(base.BaseBaremetalTest):
         self.deploy_node(self.node['uuid'])
         self.client.update_node(self.node['uuid'], protected=True,
                                 maintenance=True)
-
+        # undo maintenance because we can't teardown something
+        # in maintenance.
+        self.addCleanup(self.client.update_node, self.node['uuid'],
+                        maintenance=False)
         self.assertRaises(lib_exc.Forbidden,
                           self.client.delete_node,
                           self.node['uuid'])
-        # undo maintenance because we can't teardown something
-        # in maintenance.
-        self.client.update_node(self.node['uuid'], maintenance=False)
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('1c819f4c-6c1d-4150-ba4a-3b0dcb3c8694')
