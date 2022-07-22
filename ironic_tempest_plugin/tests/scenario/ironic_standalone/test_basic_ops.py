@@ -1,6 +1,8 @@
 #
 # Copyright 2017 Mirantis Inc.
 #
+# Copyright (c) 2022 Dell Inc. or its subsidiaries.
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -581,4 +583,21 @@ class BaremetalIpmiDirectPxeWholedisk(
     @utils.services('image', 'network')
     @decorators.idempotent_id('d68a38aa-b731-403a-9d40-b3b49ea75e9b')
     def test_deploy_node(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIdracVirtualMediaWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver', 'boot_interface']
+    api_microversion = '1.31'   # to set the deploy_interface
+    driver = 'idrac'
+    boot_interface = 'idrac-redfish-virtual-media'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    deploy_interface = 'direct'
+
+    @decorators.idempotent_id('b0bc87a5-4324-4134-bd5f-4bb1cf549e5c')
+    @utils.services('image', 'network')
+    def test_deploy_virtual_media_boot(self):
         self.boot_and_verify_node()
