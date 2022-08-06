@@ -41,7 +41,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'2016, OpenStack Foundation'
+copyright = '2016, OpenStack Foundation'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
@@ -70,8 +70,8 @@ htmlhelp_basename = 'ironic-tempest-plugindoc'
 latex_documents = [
     ('index',
      'doc-ironic-tempest-plugin.tex',
-     u'Ironic Tempest Plugin Documentation',
-     u'OpenStack Foundation', 'manual'),
+     'Ironic Tempest Plugin Documentation',
+     'OpenStack Foundation', 'manual'),
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
