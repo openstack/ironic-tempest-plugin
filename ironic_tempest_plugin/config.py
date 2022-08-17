@@ -79,6 +79,9 @@ BaremetalGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the baremetal provisioning"
                     " service"),
+    cfg.StrOpt('root_device_name',
+               default='/dev/md0',
+               help="Root device name to be used for node deployment"),
     cfg.IntOpt('deploywait_timeout',
                default=15,
                help="Timeout for Ironic node to reach the "
@@ -134,6 +137,8 @@ BaremetalGroup = [
     cfg.StrOpt('ramdisk_iso_image_ref',
                help=("UUID (or url) of an ISO image for the ramdisk boot "
                      "tests.")),
+    cfg.StrOpt('storage_inventory_file',
+               help="Path to storage inventory file for RAID cleaning tests."),
     cfg.ListOpt('enabled_drivers',
                 default=['fake', 'pxe_ipmitool', 'agent_ipmitool'],
                 help="List of Ironic enabled drivers."),
