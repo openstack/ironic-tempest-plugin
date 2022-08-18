@@ -168,6 +168,18 @@ BaremetalGroup = [
                 help="List of Ironic enabled power interfaces."),
     cfg.StrOpt('default_rescue_interface',
                help="Ironic default rescue interface."),
+    cfg.StrOpt('firmware_image_url',
+               help="Image URL of firmware image file supported by "
+                    "update_firmware clean step."),
+    cfg.StrOpt('firmware_image_checksum',
+               help="SHA1 checksum of firmware image file."),
+    cfg.StrOpt('firmware_rollback_image_url',
+               help="Image URL of firmware update cleaning step's "
+                    "rollback image. Optional. If not provided, "
+                    "rollback is skipped."),
+    cfg.StrOpt('firmware_rollback_image_checksum',
+               help="SHA1 checksum of firmware rollback image file. "
+                    "This is required if firmware_rollback_image_url is set."),
     cfg.IntOpt('adjusted_root_disk_size_gb',
                min=0,
                help="Ironic adjusted disk size to use in the standalone tests "

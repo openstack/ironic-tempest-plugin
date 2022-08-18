@@ -352,3 +352,67 @@ class BaremetalIdracRedfishRaidCleaning(
 class BaremetalIdracWSManRaidCleaning(
         BaremetalIdracRaidCleaning):
     raid_interface = 'idrac-wsman'
+
+
+class BaremetalRedfishFirmwareUpdate(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.68'  # to support redfish firmware update
+    driver = 'redfish'
+    delete_node = False
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalRedfishFirmwareUpdate, cls).skip_checks()
+        if not CONF.baremetal.firmware_image_url:
+            raise cls.skipException("Firmware image URL is not "
+                                    "provided. Skipping test case.")
+        if not CONF.baremetal.firmware_image_checksum:
+            raise cls.skipException("Firmware image SHA1 checksum is not "
+                                    "provided. Skipping test case.")
+
+    def _firmware_update(self, fw_image_url, fw_image_checksum):
+        steps = [
+            {
+                "interface": "management",
+                "step": "update_firmware",
+                "args": {
+                    "firmware_images": [
+                        {
+                            "url": fw_image_url,
+                            "checksum": fw_image_checksum,
+                            "wait": 300
+                        }
+                    ]
+                }
+            }
+        ]
+        self.manual_cleaning(self.node, clean_steps=steps)
+
+    @utils.services('network')
+    @decorators.idempotent_id('360e0c0e-3c17-4d2e-b052-55a932c1a4c7')
+    def test_firmware_update(self):
+        # WARNING: Removing power from a server while it is in the process of
+        # updating firmware may result in devices in the server, or the server
+        # itself becoming inoperable.
+        # Execution of firmware test case needs careful execution as it
+        # changes state of server, may result in break down of server on
+        # interruption. As it deals with firmware of component, make sure
+        # to provide proper image url path while testing with correct SHA1
+        # checksum of image.
+        self._firmware_update(CONF.baremetal.firmware_image_url,
+                              CONF.baremetal.firmware_image_checksum)
+        if (CONF.baremetal.firmware_rollback_image_url
+                and CONF.baremetal.firmware_rollback_image_checksum):
+            self.addCleanup(self._firmware_update,
+                            CONF.baremetal.firmware_rollback_image_url,
+                            CONF.baremetal.firmware_rollback_image_checksum)
+
+
+class BaremetalIdracRedfishFirmwareUpdate(BaremetalRedfishFirmwareUpdate):
+
+    driver = 'idrac'
+    boot_interface = 'ipxe'
+    management_interface = 'idrac-redfish'
+    power_interface = 'idrac-redfish'
