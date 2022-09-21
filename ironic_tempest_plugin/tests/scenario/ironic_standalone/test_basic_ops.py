@@ -601,3 +601,56 @@ class BaremetalIdracVirtualMediaWholedisk(
     @utils.services('image', 'network')
     def test_deploy_virtual_media_boot(self):
         self.boot_and_verify_node()
+
+
+class BaremetalIdracSyncBootModeDirectWholedisk(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    mandatory_attr = ['driver', 'power_interface', 'management_interface',
+                      'bios_interface']
+
+    api_microversion = '1.40'  # to get list_node_bios_settings
+    driver = 'idrac'
+
+    # NOTE: Image with UEFI support is necessary
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+    boot_interface = 'ipxe'
+    power_interface = 'idrac-redfish'
+    management_interface = 'idrac-redfish'
+    bios_interface = 'idrac-redfish'
+    deploy_interface = 'direct'
+    bios_mode = {'boot_mode': 'bios'}
+    uefi_mode = {'boot_mode': 'uefi'}
+
+    def _get_boot_mode_to_update(self):
+        _, bios_settings = self.baremetal_client.\
+            list_node_bios_settings(self.node['uuid'])
+        for attr_name in bios_settings['bios']:
+            if attr_name['name'] == 'BootMode':
+                if attr_name['value'] == 'Uefi':
+                    boot_mode = self.bios_mode
+                else:
+                    boot_mode = self.uefi_mode
+        return boot_mode
+
+    @decorators.idempotent_id('c2bebda2-fd27-4b10-9015-f7d877f0eb60')
+    @utils.services('image', 'network')
+    def test_sync_boot_mode(self):
+        boot_mode_path = '/instance_info/capabilities'
+        mode_to_update = self._get_boot_mode_to_update()
+        self.update_node(self.node['uuid'], [{'op': 'replace',
+                                              'path': boot_mode_path,
+                                              'value': mode_to_update}])
+        self.boot_and_verify_node()
+        if mode_to_update == self.uefi_mode:
+            mode_to_update = self.bios_mode
+        else:
+            mode_to_update = self.uefi_mode
+        self.update_node(self.node['uuid'], [{'op': 'replace',
+                                              'path': boot_mode_path,
+                                              'value': mode_to_update}])
+        self.set_node_provision_state(self.node['uuid'], 'rebuild')
+        self.wait_provisioning_state(self.node['uuid'], 'active',
+                                     timeout=CONF.baremetal.active_timeout,
+                                     interval=30)
