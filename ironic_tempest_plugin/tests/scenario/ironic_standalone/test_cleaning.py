@@ -416,3 +416,76 @@ class BaremetalIdracRedfishFirmwareUpdate(BaremetalRedfishFirmwareUpdate):
     boot_interface = 'ipxe'
     management_interface = 'idrac-redfish'
     power_interface = 'idrac-redfish'
+
+
+class BaremetalIdracRedfishConfiguartionMolds(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.72'  # to support configuration molds functionality
+    delete_node = False
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    driver = 'idrac'
+    boot_interface = 'ipxe'
+    management_interface = 'idrac-redfish'
+    power_interface = 'idrac-redfish'
+    wholedisk_image = True
+
+    @utils.services('network')
+    @decorators.idempotent_id('69386cf6-bbf2-451e-b927-f68c66075f02')
+    def test_configuration_molds_export(self):
+        if not CONF.baremetal.export_location:
+            raise self.skipException("Export configuration location path "
+                                     "is not provided. Skipping test case. "
+                                     "Make sure to provide correct "
+                                     "configuration path in which "
+                                     "configuration would be exported. "
+                                     "In case of Swift object storage, "
+                                     "make to sure to provide proper "
+                                     "container path.")
+
+        steps = [
+            {
+                "interface": "management",
+                "step": "export_configuration",
+                "args": {
+                    "export_configuration_location":
+                        CONF.baremetal.export_location
+                }
+            }
+        ]
+        self.manual_cleaning(self.node, clean_steps=steps)
+
+    @utils.services('network')
+    @decorators.idempotent_id('cad15719-c293-4338-8fa9-986ef02b4682')
+    def test_configuration_molds_import(self):
+        if not CONF.baremetal.import_location:
+            raise self.skipException("Import configuration JSON file location "
+                                     "is not provided. Make sure to provide "
+                                     "correct configuration file with proper "
+                                     "configuration which needs to be tested "
+                                     "during execution of this test. "
+                                     "Skipping test case.")
+        steps = [
+            {
+                "interface": "management",
+                "step": "import_configuration",
+                "args": {
+                    "import_configuration_location":
+                        CONF.baremetal.import_location
+                }
+            }
+        ]
+        self.manual_cleaning(self.node, clean_steps=steps)
+        if CONF.baremetal.rollback_import_location:
+            rollback_steps = [
+                {
+                    "interface": "management",
+                    "step": "import_configuration",
+                    "args": {
+                        "import_configuration_location":
+                            CONF.baremetal.rollback_import_location
+                    }
+                }
+            ]
+            self.addCleanup(self.manual_cleaning, self.node,
+                            clean_steps=rollback_steps)

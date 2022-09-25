@@ -139,6 +139,13 @@ BaremetalGroup = [
                      "tests.")),
     cfg.StrOpt('storage_inventory_file',
                help="Path to storage inventory file for RAID cleaning tests."),
+    cfg.StrOpt('export_location',
+               help="Export config location for configuration molds."),
+    cfg.StrOpt('import_location',
+               help="Import config location for configuration molds."),
+    cfg.StrOpt('rollback_import_location',
+               help="Rollback import config location for configuration "
+                    "molds. Optional. If not provided, rollback is skipped."),
     cfg.ListOpt('enabled_drivers',
                 default=['fake', 'pxe_ipmitool', 'agent_ipmitool'],
                 help="List of Ironic enabled drivers."),
