@@ -418,7 +418,7 @@ class BaremetalIdracRedfishFirmwareUpdate(BaremetalRedfishFirmwareUpdate):
     power_interface = 'idrac-redfish'
 
 
-class BaremetalIdracRedfishConfiguartionMolds(
+class BaremetalIdracRedfishConfigurationMolds(
         bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.72'  # to support configuration molds functionality
