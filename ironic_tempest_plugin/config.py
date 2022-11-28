@@ -97,6 +97,9 @@ BaremetalGroup = [
                default=30,
                help="Timeout for association of Nova instance and Ironic "
                     "node"),
+    cfg.IntOpt('inspect_timeout',
+               default=10,
+               help="Timeout for inspecting an Ironic node."),
     cfg.IntOpt('power_timeout',
                default=60,
                help="Timeout for Ironic power transitions."),

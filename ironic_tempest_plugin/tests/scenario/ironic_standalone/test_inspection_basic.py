@@ -12,10 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
 from tempest.lib import decorators
 
 from ironic_tempest_plugin.tests.scenario import \
     baremetal_standalone_manager as bsm
+
+CONF = config.CONF
 
 
 class BaremetalIdracInspect(bsm.BaremetalStandaloneScenarioTest):
@@ -50,7 +53,8 @@ class BaremetalIdracInspect(bsm.BaremetalStandaloneScenarioTest):
         self.baremetal_client.set_node_provision_state(self.node['uuid'],
                                                        'inspect')
 
-        self.wait_provisioning_state(self.node['uuid'], 'manageable')
+        self.wait_provisioning_state(self.node['uuid'], 'manageable',
+                                     timeout=CONF.baremetal.inspect_timeout)
 
         self._verify_node_inspection_data()
 
