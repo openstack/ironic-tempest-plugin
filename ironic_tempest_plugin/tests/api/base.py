@@ -12,6 +12,7 @@
 
 import functools
 
+from oslo_log import log as logging
 from tempest import config
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
@@ -22,6 +23,8 @@ from ironic_tempest_plugin.common import waiters
 from ironic_tempest_plugin.services.baremetal import base
 from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
 
+
+LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
@@ -124,7 +127,8 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                     cls.set_node_provision_state(node, 'deleted',
                                                  ['available', None])
                 except lib_exc.BadRequest:
-                    pass
+                    LOG.warning('Cleanup: Failed to unprovision node: %s',
+                                node)
 
             # Delete allocations explicitly after unprovisioning instances, but
             # before deleting nodes.
@@ -132,13 +136,15 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
                 try:
                     cls.client.delete_allocation(allocation)
                 except lib_exc.NotFound:
-                    pass
+                    LOG.warning('Cleanup: Failed to delete allocation: %s',
+                                allocation)
 
             for node in cls.created_objects['node']:
                 try:
                     cls.client.update_node(node, instance_uuid=None)
                 except lib_exc.TempestException:
-                    pass
+                    LOG.warning('Cleanup: Failed to delete node: %s',
+                                node)
 
             for resource in RESOURCE_TYPES:
                 uuids = cls.created_objects[resource]

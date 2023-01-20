@@ -869,13 +869,6 @@ class TestNodeProtected(base.BaseBaremetalTest):
         _, self.node = self.create_node(self.chassis['uuid'])
         self.provide_node(self.node['uuid'])
 
-    def tearDown(self):
-        try:
-            self.client.update_node(self.node['uuid'], protected=False)
-        except Exception:
-            pass
-        super(TestNodeProtected, self).tearDown()
-
     @decorators.idempotent_id('52f0cb1c-ad7b-43dc-8e22-a76438b67716')
     def test_node_protected_set_unset(self):
         self.deploy_node(self.node['uuid'])
@@ -905,6 +898,7 @@ class TestNodeProtected(base.BaseBaremetalTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.set_node_provision_state,
                           self.node['uuid'], 'rebuild', 'active')
+        self.client.update_node(self.node['uuid'], protected=False)
 
     @decorators.idempotent_id('04a21b51-2991-4213-8c2f-a96cfdada802')
     def test_node_protected_from_deletion(self):
@@ -918,6 +912,7 @@ class TestNodeProtected(base.BaseBaremetalTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.client.delete_node,
                           self.node['uuid'])
+        self.client.update_node(self.node['uuid'], protected=False)
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('1c819f4c-6c1d-4150-ba4a-3b0dcb3c8694')
@@ -933,6 +928,7 @@ class TestNodeProtected(base.BaseBaremetalTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.client.update_node,
                           self.node['uuid'], protected_reason='reason!')
+        self.client.update_node(self.node['uuid'], protected=False)
 
 
 class TestNodesProtectedOldApi(base.BaseBaremetalTest):
