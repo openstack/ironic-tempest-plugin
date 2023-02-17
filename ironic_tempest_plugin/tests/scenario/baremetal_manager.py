@@ -271,7 +271,8 @@ class BaremetalScenarioTest(manager.ScenarioTest):
             password=rescue_password,
             server=self.instance,
             servers_client=servers_client,
-            ssh_timeout=CONF.baremetal.rescue_timeout)
+            ssh_timeout=CONF.baremetal.rescue_timeout,
+            ssh_allow_agent=False)
         linux_client.validate_authentication()
 
     def unrescue_instance(self, instance, node, server_ip,
