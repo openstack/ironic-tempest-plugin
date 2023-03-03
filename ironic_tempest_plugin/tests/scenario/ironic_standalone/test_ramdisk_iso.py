@@ -22,14 +22,10 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class BaremetalRamdiskBootIso(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalRamdiskBootIsoIPXE(bsm.BaremetalStandaloneScenarioTest):
 
-    if 'redfish' in CONF.baremetal.enabled_hardware_types:
-        driver = 'redfish'
-        boot_interface = 'redfish-virtual-media'
-    else:
-        driver = 'ipmi'
-        boot_interface = 'ipxe'
+    driver = 'ipmi'
+    boot_interface = 'ipxe'
     delete_node = False
     deploy_interface = 'ramdisk'
     api_microversion = '1.66'
@@ -38,7 +34,30 @@ class BaremetalRamdiskBootIso(bsm.BaremetalStandaloneScenarioTest):
 
     @classmethod
     def skip_checks(cls):
-        super(BaremetalRamdiskBootIso, cls).skip_checks()
+        super().skip_checks()
+        if not cls.image_ref:
+            raise cls.skipException('Skipping ramdisk ISO booting as'
+                                    'no ramdisk_iso_image_ref is defined.')
+
+    @decorators.idempotent_id('2859d115-9266-4461-9286-79b146e65dc9')
+    @utils.services('image', 'network')
+    def test_ramdisk_boot(self):
+        self.boot_and_verify_ramdisk_node(self.image_ref, iso=True)
+
+
+class BaremetalRamdiskBootIsoVMedia(bsm.BaremetalStandaloneScenarioTest):
+
+    driver = 'redfish'
+    boot_interface = 'redfish-virtual-media'
+    delete_node = False
+    deploy_interface = 'ramdisk'
+    api_microversion = '1.66'
+    image_ref = CONF.baremetal.ramdisk_iso_image_ref
+    wholedisk_image = False
+
+    @classmethod
+    def skip_checks(cls):
+        super().skip_checks()
         if not cls.image_ref:
             raise cls.skipException('Skipping ramdisk ISO booting as'
                                     'no ramdisk_iso_image_ref is defined.')
