@@ -138,7 +138,8 @@ BaremetalGroup = [
                help="An http link to the wholedisk image to use in the "
                     "tests."),
     cfg.StrOpt('whole_disk_image_checksum',
-               help="An MD5 checksum of the image."),
+               help="An checksum of the image. Recommend SHA256 or SHA512"
+                    "as MD5 is deprecated."),
     cfg.StrOpt('partition_image_ref',
                help="UUID of the partitioned image to use in the tests."),
     cfg.StrOpt('ramdisk_iso_image_ref',
