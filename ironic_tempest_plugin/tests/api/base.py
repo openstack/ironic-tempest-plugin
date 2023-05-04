@@ -482,3 +482,16 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         """
         resp, body = cls.client.create_allocation(resource_class, **kwargs)
         return resp, body
+
+
+class BaseBaremetalRBACTest(BaseBaremetalTest):
+
+    # Unless otherwise superceeded by a version, RBAC tests generally start at
+    # version 1.70 as that is when System scope and the delineation occured.
+    min_microversion = '1.70'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseBaremetalRBACTest, cls).skip_checks()
+        if not CONF.enforce_scope.ironic:
+            raise cls.skipException('RBAC tests for Ironic are not enabled.')
