@@ -7,22 +7,30 @@
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-standalone
+        - ironic-standalone-zed
         - ironic-standalone-yoga
-        - ironic-standalone-xena
+        - ironic-standalone-xena:
+            voting: false
         - ironic-standalone-wallaby:
             voting: false
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-zed
         - ironic-tempest-functional-python3-yoga
-        - ironic-tempest-functional-python3-xena
+        - ironic-tempest-functional-python3-xena:
+            voting: false
         - ironic-tempest-functional-python3-wallaby:
             voting: false
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-zed
         - ironic-inspector-tempest-yoga
-        - ironic-inspector-tempest-xena
+        - ironic-inspector-tempest-xena:
+            voting: false
         - ironic-inspector-tempest-wallaby:
             voting: false
         - ironic-standalone-anaconda
+        - ironic-standalone-anaconda-2023.1
         - ironic-standalone-redfish
+        - ironic-standalone-redfish-zed
         - ironic-standalone-redfish-yoga:
             voting: false
         - ironic-standalone-redfish-xena:
@@ -33,6 +41,8 @@
         # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
             voting: false
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-zed:
+            voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-yoga:
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-xena:
@@ -40,6 +50,7 @@
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-wallaby:
             voting: false
         - ironic-inspector-tempest-discovery
+        - ironic-inspector-tempest-discovery-zed
         - ironic-inspector-tempest-discovery-yoga:
             voting: false
         - ironic-inspector-tempest-discovery-xena:
@@ -49,13 +60,13 @@
     gate:
       jobs:
         - ironic-standalone
+        - ironic-standalone-zed
         - ironic-standalone-yoga
-        - ironic-standalone-xena
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-zed
         - ironic-tempest-functional-python3-yoga
-        - ironic-tempest-functional-python3-xena
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-zed
         - ironic-inspector-tempest-yoga
-        - ironic-inspector-tempest-xena
         - ironic-standalone-redfish
         - ironic-inspector-tempest-discovery
