@@ -134,6 +134,16 @@
     override-checkout: stable/train
 
 - job:
+    name: ironic-tempest-functional-rbac-scope-enforced-2023.1
+    parent: ironic-tempest-functional-rbac-scope-enforced
+    override-checkout: stable/2023.1
+
+- job:
+    name: ironic-tempest-functional-rbac-scope-enforced-zed
+    parent: ironic-tempest-functional-rbac-scope-enforced
+    override-checkout: stable/zed
+
+- job:
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-zed
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/zed
@@ -227,6 +237,16 @@
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
         USE_PYTHON3: True
+
+- job:
+    name: ironic-inspector-tempest-rbac-scope-enforced-2023.1
+    parent: ironic-inspector-tempest-rbac-scope-enforced
+    override-checkout: stable/2023.1
+
+- job:
+    name: ironic-inspector-tempest-rbac-scope-enforced-zed
+    parent: ironic-inspector-tempest-rbac-scope-enforced
+    override-checkout: stable/zed
 
 - job:
     name: ironic-inspector-tempest-discovery-2023.1

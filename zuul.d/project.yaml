@@ -20,6 +20,11 @@
             voting: false
         - ironic-tempest-functional-python3-xena:
             voting: false
+        - ironic-tempest-functional-rbac-scope-enforced
+        # Enable these *once* we have the policy fix backported
+        # for making own node changes.
+        # - ironic-tempest-functional-rbac-scope-enforced-2023.1
+        # - ironic-tempest-functional-rbac-scope-enforced-zed
         - ironic-inspector-tempest
         - ironic-inspector-tempest-2023.1
         - ironic-inspector-tempest-zed
@@ -63,9 +68,11 @@
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-2023.1
         - ironic-tempest-functional-python3-zed
+        - ironic-tempest-functional-rbac-scope-enforced
         - ironic-inspector-tempest
         - ironic-inspector-tempest-2023.1
         - ironic-inspector-tempest-zed
+        - ironic-inspector-tempest-rbac-scope-enforced
         - ironic-standalone-redfish
         - ironic-standalone-redfish-2023.1
         - ironic-inspector-tempest-discovery
