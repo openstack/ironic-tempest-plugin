@@ -44,10 +44,10 @@ class TestNodeProjectReader(base.BaseBaremetalRBACTest):
     def test_reader_cannot_create_node(self):
         try:
             resp, body = self.reader_client.create_node(self.chassis['uuid'])
-        except lib_exc.ServerFault as e:
+        except lib_exc.Forbidden as e:
             resp = e.resp
 
-        self.assertEqual(500, resp.status)
+        self.assertEqual(403, resp.status)
 
     def test_reader_cannot_get_node(self):
         """Reader cannot get node
@@ -388,7 +388,7 @@ class TestNodeProjectReader(base.BaseBaremetalRBACTest):
         """
         try:
             resp, body = self.reader_client.get_node_indicator_state(
-                self.node['uuid'], 'system', 'alert')
+                self.node['uuid'], 'system')
         except lib_exc.NotFound as e:
             resp = e.resp
 
@@ -660,10 +660,10 @@ class TestNodeProjectReader(base.BaseBaremetalRBACTest):
             resp, body = self.reader_client.ipa_heartbeat(
                 self.node['uuid'], callback_url='http://foo/',
                 agent_token=uuidutils.generate_uuid(), agent_version='1')
-        except lib_exc.NotFound as e:
+        except lib_exc.BadRequest as e:
             resp = e.resp
 
-        self.assertEqual(404, resp.status)
+        self.assertEqual(400, resp.status)
 
 
 class TestNodeSystemReader(base.BaseBaremetalRBACTest):
