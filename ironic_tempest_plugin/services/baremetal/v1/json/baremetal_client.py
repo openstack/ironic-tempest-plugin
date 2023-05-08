@@ -704,11 +704,11 @@ class BaremetalClient(base.BaremetalClient):
                         Possible values are: OFF, ON, BLINKING or UNKNOWN.
 
         """
-        resp, body = self._put_request('nodes/%s/management/indicators/%s/%s'
-                                       % (node_uuid, component, ind_ident),
-                                       state)
+        resp, body = self._put_request(
+            'nodes/%s/management/indicators/%s@%s'
+            % (node_uuid, ind_ident, component), {'state': state})
         self.expected_success(http_client.OK, resp.status)
-        return body
+        return resp, body
 
     @base.handle_errors
     def get_node_indicator_state(self, node_uuid, component, ind_ident):
@@ -719,11 +719,11 @@ class BaremetalClient(base.BaremetalClient):
         :param ind_ident: The indicator of a Bare Metal component.
 
         """
-        path = 'nodes/%s/management/indicators/%s/%s' % (node_uuid, component,
-                                                         ind_ident)
+        path = 'nodes/%s/management/indicators/%s@%s' % (node_uuid, ind_ident,
+                                                         component)
         resp, body = self._list_request(path)
         self.expected_success(http_client.OK, resp.status)
-        return body
+        return resp, body
 
     @base.handle_errors
     def get_node_supported_boot_devices(self, node_uuid):
