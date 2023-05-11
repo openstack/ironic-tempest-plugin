@@ -539,7 +539,7 @@ class TestNodeProjectReader(base.BaseBaremetalRBACTest):
         baremetal:node:vif:attach
         """
         try:
-            resp, body = self.reader_client.vif_attach(
+            resp = self.reader_client.vif_attach(
                 self.node['uuid'], 'vifid')
         except lib_exc.NotFound as e:
             resp = e.resp
@@ -1173,7 +1173,7 @@ class TestNodeSystemReader(base.BaseBaremetalRBACTest):
         baremetal:node:vif:attach
         """
         try:
-            resp, body = self.reader_client.vif_attach(
+            resp = self.reader_client.vif_attach(
                 self.node['uuid'], 'vifid')
         except lib_exc.Forbidden as e:
             resp = e.resp
