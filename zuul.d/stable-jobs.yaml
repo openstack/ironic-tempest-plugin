@@ -1,4 +1,9 @@
 - job:
+    name: ironic-standalone-2023.1
+    parent: ironic-standalone
+    override-checkout: stable/2023.1
+
+- job:
     name: ironic-standalone-zed
     parent: ironic-standalone
     override-checkout: stable/zed
@@ -35,6 +40,11 @@
     vars:
       devstack_localrc:
         USE_PYTHON3: True
+
+- job:
+    name: ironic-standalone-redfish-2023.1
+    parent: ironic-standalone
+    override-checkout: stable/2023.1
 
 - job:
     name: ironic-standalone-redfish-zed
@@ -84,6 +94,11 @@
     override-checkout: stable/2023.1
 
 - job:
+    name: ironic-tempest-functional-python3-2023.1
+    parent: ironic-tempest-functional-python3
+    override-checkout: stable/2023.1
+
+- job:
     name: ironic-tempest-functional-python3-zed
     parent: ironic-tempest-functional-python3
     override-checkout: stable/zed
@@ -124,6 +139,11 @@
     override-checkout: stable/zed
 
 - job:
+    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.1
+    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
+    override-checkout: stable/2023.1
+
+- job:
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-yoga
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/yoga
@@ -155,6 +175,11 @@
     vars:
       devstack_localrc:
         USE_PYTHON3: True
+
+- job:
+    name: ironic-inspector-tempest-2023.1
+    parent: ironic-inspector-tempest
+    override-checkout: stable/2023.1
 
 - job:
     name: ironic-inspector-tempest-zed
@@ -202,6 +227,11 @@
         FIXED_NETWORK_SIZE: 4096
         EBTABLES_RACE_FIX: True
         USE_PYTHON3: True
+
+- job:
+    name: ironic-inspector-tempest-discovery-2023.1
+    parent: ironic-inspector-tempest-discovery
+    override-checkout: stable/2023.1
 
 - job:
     name: ironic-inspector-tempest-discovery-zed
