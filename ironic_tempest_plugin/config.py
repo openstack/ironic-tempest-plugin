@@ -238,6 +238,17 @@ BaremetalGroup = [
     cfg.StrOpt('default_boot_option',
                # No good default here, we need to actually set it.
                help="The default boot option the testing nodes are using."),
+    cfg.BoolOpt("rebuild_remote_dhcpless",
+                default=True,
+                help="If we should issue a rebuild request when testing "
+                     "dhcpless virtual media deployments. This may be useful "
+                     "if bug 2032377 is not fixed in the agent ramdisk."),
+    cfg.StrOpt("public_subnet_id",
+               help="The public subnet ID where routers will be bound for "
+                    "testing purposes with the dhcp-less test scenario."),
+    cfg.StrOpt("public_subnet_ip",
+               help="The public subnet IP to bind the public router to for "
+                    "dhcp-less testing.")
 ]
 
 BaremetalFeaturesGroup = [
@@ -258,6 +269,14 @@ BaremetalFeaturesGroup = [
                 default=False,
                 help="Defines if in-band RAID can be built in deploy time "
                      "(possible starting with Victoria)."),
+    cfg.BoolOpt('dhcpless_vmedia',
+                default=False,
+                help="Defines if it is possible to execute DHCP-Less "
+                     "deployment of baremetal nodes through virtual media. "
+                     "This test requires full OS images with configuration "
+                     "support for embedded network metadata through glean "
+                     "or cloud-init, and thus cannot be executed with "
+                     "most default job configurations."),
 ]
 
 BaremetalIntrospectionGroup = [
