@@ -1,4 +1,9 @@
 - job:
+    name: ironic-standalone-2023.2
+    parent: ironic-standalone
+    override-checkout: stable/2023.2
+
+- job:
     name: ironic-standalone-2023.1
     parent: ironic-standalone
     override-checkout: stable/2023.1
@@ -40,6 +45,11 @@
     vars:
       devstack_localrc:
         USE_PYTHON3: True
+
+- job:
+    name: ironic-standalone-redfish-2023.2
+    parent: ironic-standalone
+    override-checkout: stable/2023.2
 
 - job:
     name: ironic-standalone-redfish-2023.1
@@ -89,9 +99,19 @@
         USE_PYTHON3: True
 
 - job:
+    name: ironic-standalone-anaconda-2023.2
+    parent: ironic-standalone-anaconda
+    override-checkout: stable/2023.2
+
+- job:
     name: ironic-standalone-anaconda-2023.1
     parent: ironic-standalone-anaconda
     override-checkout: stable/2023.1
+
+- job:
+    name: ironic-tempest-functional-python3-2023.2
+    parent: ironic-tempest-functional-python3
+    override-checkout: stable/2023.2
 
 - job:
     name: ironic-tempest-functional-python3-2023.1
@@ -134,6 +154,11 @@
     override-checkout: stable/train
 
 - job:
+    name: ironic-tempest-functional-rbac-scope-enforced-2023.2
+    parent: ironic-tempest-functional-rbac-scope-enforced
+    override-checkout: stable/2023.2
+
+- job:
     name: ironic-tempest-functional-rbac-scope-enforced-2023.1
     parent: ironic-tempest-functional-rbac-scope-enforced
     override-checkout: stable/2023.1
@@ -147,6 +172,11 @@
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-zed
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/zed
+
+- job:
+    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.2
+    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
+    override-checkout: stable/2023.2
 
 - job:
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.1
@@ -185,6 +215,11 @@
     vars:
       devstack_localrc:
         USE_PYTHON3: True
+
+- job:
+    name: ironic-inspector-tempest-2023.2
+    parent: ironic-inspector-tempest
+    override-checkout: stable/2023.2
 
 - job:
     name: ironic-inspector-tempest-2023.1
@@ -239,6 +274,11 @@
         USE_PYTHON3: True
 
 - job:
+    name: ironic-inspector-tempest-rbac-scope-enforced-2023.2
+    parent: ironic-inspector-tempest-rbac-scope-enforced
+    override-checkout: stable/2023.2
+
+- job:
     name: ironic-inspector-tempest-rbac-scope-enforced-2023.1
     parent: ironic-inspector-tempest-rbac-scope-enforced
     override-checkout: stable/2023.1
@@ -247,6 +287,11 @@
     name: ironic-inspector-tempest-rbac-scope-enforced-zed
     parent: ironic-inspector-tempest-rbac-scope-enforced
     override-checkout: stable/zed
+
+- job:
+    name: ironic-inspector-tempest-discovery-2023.2
+    parent: ironic-inspector-tempest-discovery
+    override-checkout: stable/2023.2
 
 - job:
     name: ironic-inspector-tempest-discovery-2023.1

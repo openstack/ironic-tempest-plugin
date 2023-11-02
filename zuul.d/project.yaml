@@ -7,72 +7,65 @@
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-standalone
+        - ironic-standalone-2023.2
         - ironic-standalone-2023.1
-        - ironic-standalone-zed
-        - ironic-standalone-yoga:
-            voting: false
-        - ironic-standalone-xena:
+        - ironic-standalone-zed:
             voting: false
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-2023.2
         - ironic-tempest-functional-python3-2023.1
-        - ironic-tempest-functional-python3-zed
-        - ironic-tempest-functional-python3-yoga:
-            voting: false
-        - ironic-tempest-functional-python3-xena:
+        - ironic-tempest-functional-python3-zed:
             voting: false
         - ironic-tempest-functional-rbac-scope-enforced
+        - ironic-tempest-functional-rbac-scope-enforced-2023.2
         # Enable these *once* we have the policy fix backported
         # for making own node changes.
         # - ironic-tempest-functional-rbac-scope-enforced-2023.1
         # - ironic-tempest-functional-rbac-scope-enforced-zed
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-2023.2
         - ironic-inspector-tempest-2023.1
-        - ironic-inspector-tempest-zed
-        - ironic-inspector-tempest-yoga:
-            voting: false
-        - ironic-inspector-tempest-xena:
+        - ironic-inspector-tempest-zed:
             voting: false
         - ironic-standalone-anaconda
+        - ironic-standalone-anaconda-2023.2
         - ironic-standalone-anaconda-2023.1
         - ironic-standalone-redfish
+        - ironic-standalone-redfish-2023.2
         - ironic-standalone-redfish-2023.1
-        - ironic-standalone-redfish-zed
-        - ironic-standalone-redfish-yoga:
-            voting: false
-        - ironic-standalone-redfish-xena:
+        - ironic-standalone-redfish-zed:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
             voting: false
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.2:
+            voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.1:
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-zed:
             voting: false
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-yoga:
-            voting: false
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-xena:
-            voting: false
         - ironic-inspector-tempest-discovery
+        - ironic-inspector-tempest-discovery-2023.2
         - ironic-inspector-tempest-discovery-2023.1
-        - ironic-inspector-tempest-discovery-zed
-        - ironic-inspector-tempest-discovery-yoga:
-            voting: false
-        - ironic-inspector-tempest-discovery-xena:
+        - ironic-inspector-tempest-discovery-zed:
             voting: false
     gate:
       jobs:
         - ironic-standalone
+        - ironic-standalone-2023.2
         - ironic-standalone-2023.1
-        - ironic-standalone-zed
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-2023.2
         - ironic-tempest-functional-python3-2023.1
-        - ironic-tempest-functional-python3-zed
+        - ironic-tempest-functional-rbac-scope-enforced-2023.2
         - ironic-tempest-functional-rbac-scope-enforced
         - ironic-inspector-tempest
+        - ironic-inspector-tempest-2023.2
         - ironic-inspector-tempest-2023.1
-        - ironic-inspector-tempest-zed
         - ironic-inspector-tempest-rbac-scope-enforced
+        - ironic-inspector-tempest-rbac-scope-enforced-2023.2
         - ironic-standalone-redfish
+        - ironic-standalone-redfish-2023.2
         - ironic-standalone-redfish-2023.1
         - ironic-inspector-tempest-discovery
