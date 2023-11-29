@@ -700,3 +700,88 @@ class BaremetalRedfishIPxeAnacondaNoGlance(
             kernel_ref=CONF.baremetal.anaconda_kernel_ref,
             ramdisk_ref=CONF.baremetal.anaconda_initial_ramdisk_ref,
             stage2_ref=CONF.baremetal.anaconda_stage2_ramdisk_ref)
+
+
+class BaremetalChangeBaseBootInterface(
+        bsm.BaremetalStandaloneScenarioTest):
+
+    # NOTE(TheJulia): The resource setup class *already* auto-sets the
+    # requested boot interface. We just never tried to articulate
+    # this sort of configuration before this class.
+    # The goal: Test as many boot interfaces to ensure they are functional
+    # under the base context
+
+    api_microversion = '1.31'  # to set the boot_interface
+    driver = None
+    # This is intentionally meant to be a relatively light weight test,
+    # but one that covers the common cases, i.e. direct is most appropriate
+    # here. Ramdisk/anaconda/ansible and friends are all more specific
+    # cased.
+    deploy_interface = 'direct'
+    image_ref = CONF.baremetal.whole_disk_image_url
+    image_checksum = CONF.baremetal.whole_disk_image_checksum
+    wholedisk_image = True
+
+    # This is a special override which allows us to just use the base
+    # driver interface defined on the node, and not have to special case it
+    # and focus on the "driver".
+    use_available_driver = True
+
+    # List of valid drivers which these tests *can* attempt to utilize.
+    # Generally these should be the most commom, stock, upstream drivers.
+    valid_driver_list = ['ipmi', 'redfish']
+
+    # Bypass secondary attribute presence check as these tests don't require
+    # the driver to be set.
+    mandatory_attr = ['image_ref']
+
+
+class BaremetalPXEBootTestClass(BaremetalChangeBaseBootInterface):
+
+    boot_interface = 'pxe'
+
+    @decorators.idempotent_id('62c12d2c-8c9f-4526-b9ab-b9cd63e0ea8a')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalIPXEBootTestClass(BaremetalChangeBaseBootInterface):
+
+    boot_interface = 'ipxe'
+
+    @decorators.idempotent_id('113acd0a-9872-4631-b3ee-54da7e3bb262')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalHTTPBootTestClass(BaremetalChangeBaseBootInterface):
+
+    boot_interface = 'http'
+
+    @decorators.idempotent_id('782c43db-77a1-4a3a-b46e-0ce9cbb7fba5')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalHttpIPXEBootTestClass(BaremetalChangeBaseBootInterface):
+
+    boot_interface = 'http-ipxe'
+
+    @decorators.idempotent_id('45400d8e-55a5-4ba6-81f5-935a4183ed90')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
+class BaremetalRedfishVmediaBootTestClass(BaremetalChangeBaseBootInterface):
+
+    boot_interface = 'redfish-virtual-media'
+    driver = 'redfish'
+
+    @decorators.idempotent_id('10535270-27e5-4616-9013-9507b1960dfa')
+    @utils.services('network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
