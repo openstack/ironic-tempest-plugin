@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ipaddress
 import random
 
 from oslo_utils import uuidutils
@@ -265,8 +266,66 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
             raise lib_exc.TimeoutException(msg)
 
     @classmethod
+    def gen_config_drive_net_info(cls, node_id, n_port):
+        # Find the port with the vif.
+        use_port = None
+        _, body = cls.baremetal_client.list_node_ports(node_id)
+        for port in body['ports']:
+            _, p = cls.baremetal_client.show_port(port['uuid'])
+            if 'tenant_vif_port_id' in p['internal_info']:
+                use_port = p
+                break
+        if not use_port:
+            m = ('Unable to determine proper mac address to use for config '
+                 'to apply for the virtual media port test.')
+            raise lib_exc.InvalidConfiguration(m)
+        vif_mac_address = use_port['address']
+        if CONF.validation.ip_version_for_ssh == 4:
+            ip_version = "ipv4"
+        else:
+            ip_version = "ipv6"
+        ip_address = n_port['fixed_ips'][0]['ip_address']
+        subnet_id = n_port['fixed_ips'][0]['subnet_id']
+        subnet = cls.os_primary.subnets_client.show_subnet(
+            subnet_id).get('subnet')
+        ip_netmask = str(ipaddress.ip_network(subnet.get('cidr')).netmask)
+        if ip_version == "ipv4":
+            route = [{
+                "netmask": "0.0.0.0",
+                "network": "0.0.0.0",
+                "gateway": subnet.get('gateway_ip'),
+            }]
+        else:
+            # Eh... the data structure doesn't really allow for
+            # this to be easy since a default route with v6
+            # is just referred to as ::/0
+            # so network and netmask would be ::, which is
+            # semi-mind-breaking. Anyway, route advertisers are
+            # expected in this case.
+            route = []
+
+        return {
+            "links": [{"id": "port-test",
+                       "type": "vif",
+                       "ethernet_mac_address": vif_mac_address}],
+            "networks": [
+                {
+                    "id": "network0",
+                    "type": ip_version,
+                    "link": "port-test",
+                    "ip_address": ip_address,
+                    "netmask": ip_netmask,
+                    "network_id": "network0",
+                    "routes": route
+                }
+            ],
+            "services": []
+        }
+
+    @classmethod
     def boot_node(cls, image_ref=None, image_checksum=None,
-                  boot_option=None):
+                  boot_option=None, config_drive_networking=False,
+                  fallback_network=None):
         """Boot ironic node.
 
         The following actions are executed:
@@ -282,7 +341,13 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         :param boot_option: The defaut boot option to utilize. If not
                             specified, the ironic deployment default shall
                             be utilized.
+        :param config_drive_networking: If we should load configuration drive
+            with network_data values.
+        :param fallback_network: Network to use if we are not able to detect
+            a network for use.
         """
+        config_drive = {}
+
         if image_ref is None:
             image_ref = cls.image_ref
         if image_checksum is None:
@@ -291,8 +356,22 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
             boot_option = cls.boot_option
 
         network, subnet, router = cls.create_networks()
-        n_port = cls.create_neutron_port(network_id=network['id'])
+        try:
+            n_port = cls.create_neutron_port(network_id=network['id'])
+
+        except TypeError:
+            if fallback_network:
+                n_port = cls.create_neutron_port(
+                    network_id=fallback_network)
+            else:
+                raise
         cls.vif_attach(node_id=cls.node['uuid'], vif_id=n_port['id'])
+        config_drive = None
+        if config_drive_networking:
+            config_drive = {}
+            config_drive['network_data'] = cls.gen_config_drive_net_info(
+                cls.node['uuid'], n_port)
+
         patch = [{'path': '/instance_info/image_source',
                   'op': 'add',
                   'value': image_ref}]
@@ -308,9 +387,15 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
             patch.append({'path': '/instance_info/capabilities',
                           'op': 'add',
                           'value': {'boot_option': boot_option}})
-        # TODO(vsaienko) add testing for custom configdrive
         cls.update_node(cls.node['uuid'], patch=patch)
-        cls.set_node_provision_state(cls.node['uuid'], 'active')
+
+        if not config_drive:
+            cls.set_node_provision_state(cls.node['uuid'], 'active')
+        else:
+            cls.set_node_provision_state(
+                cls.node['uuid'], 'active',
+                configdrive=config_drive)
+
         cls.wait_power_state(cls.node['uuid'],
                              bm.BaremetalPowerStates.POWER_ON)
         cls.wait_provisioning_state(cls.node['uuid'],
@@ -332,7 +417,12 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         cls.detach_all_vifs_from_node(node_id, force_delete=force_delete)
 
         if cls.delete_node or force_delete:
-            cls.set_node_provision_state(node_id, 'deleted')
+            node_state = cls.get_node(node_id)['provision_state']
+            if node_state != bm.BaremetalProvisionStates.AVAILABLE:
+                # Check the state before making the call, to permit tests to
+                # drive node into a clean state before exiting the test, which
+                # is needed for some tests because of complex tests.
+                cls.set_node_provision_state(node_id, 'deleted')
             # NOTE(vsaienko) We expect here fast switching from deleted to
             # available as automated cleaning is disabled so poll status
             # each 1s.
@@ -579,9 +669,16 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 'Partitioned images are not supported with multitenancy.')
 
     @classmethod
-    def set_node_to_active(cls, image_ref=None, image_checksum=None):
-        cls.boot_node(image_ref, image_checksum)
-        if CONF.validation.connect_method == 'floating':
+    def set_node_to_active(cls, image_ref=None, image_checksum=None,
+                           fallback_network=None,
+                           config_drive_networking=None,
+                           method_to_get_ip=None):
+        cls.boot_node(image_ref, image_checksum,
+                      fallback_network=fallback_network,
+                      config_drive_networking=config_drive_networking)
+        if method_to_get_ip:
+            cls.node_ip = method_to_get_ip(cls.node['uuid'])
+        elif CONF.validation.connect_method == 'floating':
             cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
         elif CONF.validation.connect_method == 'fixed':
             cls.node_ip = cls.get_server_ip(cls.node['uuid'])
@@ -622,11 +719,7 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         cls.update_node_driver(cls.node['uuid'], cls.driver, **boot_kwargs)
 
     @classmethod
-    def resource_cleanup(cls):
-        if CONF.validation.connect_method == 'floating':
-            if cls.node_ip:
-                cls.cleanup_floating_ip(cls.node_ip)
-
+    def cleanup_vif_attachments(cls):
         vifs = cls.get_node_vifs(cls.node['uuid'])
         # Remove ports before deleting node, to catch regression for cases
         # when user did this prior unprovision node.
@@ -635,6 +728,18 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                 cls.ports_client.delete_port(vif)
             except lib_exc.NotFound:
                 pass
+
+    @classmethod
+    def resource_cleanup(cls):
+        if CONF.validation.connect_method == 'floating':
+            if cls.node_ip:
+                try:
+                    cls.cleanup_floating_ip(cls.node_ip)
+                except IndexError:
+                    # There is no fip to actually remove in this case.
+                    pass
+
+        cls.cleanup_vif_attachments()
         cls.terminate_node(cls.node['uuid'])
         cls.unreserve_node(cls.node)
         base.reset_baremetal_api_microversion()
