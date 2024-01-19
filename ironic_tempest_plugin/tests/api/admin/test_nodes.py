@@ -413,6 +413,184 @@ class TestNodesVif(base.BaseBaremetalTest):
 
         self.client.vif_detach(self.node['uuid'], self.nport_id)
 
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('628350f8-4498-4204-b546-f3c01b93c7e3')
+    def test_vif_already_attached_on_internal_info(self):
+        """Negative test for duplicated attachment/detachment of VIFs.
+
+        Test steps:
+        1) Create chassis and node in setUp.
+        2) Create port for the node.
+        3) Attach VIF to the node.
+        4) Try to attach the same VIF to the node.
+        5) Detach VIF from the node.
+        6) Try to detach the same VIF from the node.
+        """
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.28'))
+        _, self.port = self.create_port(self.node['uuid'],
+                                        data_utils.rand_mac_address())
+        self.client.vif_attach(self.node['uuid'], self.nport_id)
+        _, body = self.client.vif_list(self.node['uuid'])
+        self.assertEqual({'vifs': [{'id': self.nport_id}]}, body)
+        self.assertRaises(lib_exc.Conflict, self.client.vif_attach,
+                          self.node['uuid'], self.nport_id)
+        self.client.vif_detach(self.node['uuid'], self.nport_id)
+        self.assertRaises(lib_exc.BadRequest, self.client.vif_detach,
+                          self.node['uuid'], self.nport_id)
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('ec0c14a4-6853-4907-9091-755c9c6c152f')
+    def test_vif_already_attached_with_portgroups(self):
+        """Negative test: try duplicated attachment of VIFs with port groups.
+
+        Test steps:
+        1) Create chassis and node in setUp.
+        2) Create port for the node.
+        3) Create port group for the node.
+        4) Plug port into port group.
+        5) Attach VIF to the node.
+        6) Try to attach the same VIF to the node.
+        7) Check that VIF was not attached to port when portgroup is busy.
+        8) Detach VIF from the node.
+        9) Check there is no VIF data in port group internal info.
+        """
+        _, self.port = self.create_port(self.node['uuid'],
+                                        data_utils.rand_mac_address())
+        _, self.portgroup = self.create_portgroup(
+            self.node['uuid'], address=data_utils.rand_mac_address())
+
+        patch = [{'path': '/portgroup_uuid',
+                  'op': 'add',
+                  'value': self.portgroup['uuid']}]
+        self.client.update_port(self.port['uuid'], patch)
+        self.client.vif_attach(self.node['uuid'], self.nport_id)
+        self.assertRaises(lib_exc.Conflict, self.client.vif_attach,
+                          self.node['uuid'], self.nport_id)
+
+        _, port = self.client.show_port(self.port['uuid'])
+        self.assertNotIn('tenant_vif_port_id', port['internal_info'])
+
+        self.client.vif_detach(self.node['uuid'], self.nport_id)
+        _, portgroup = self.client.show_portgroup(self.portgroup['uuid'])
+        self.assertNotIn('tenant_vif_port_id', portgroup['internal_info'])
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('91e08d6a-0438-4171-b404-bc86b0bc8861')
+    def test_vif_attach_no_free_port(self):
+        """Negative test for VIF attachment attempt with no free ports.
+
+        Test steps:
+        1) Create chassis and node in setUp.
+        2) Create port for the node.
+        3) Attach VIF to the node.
+        4) Try to attach new VIF to the same node with port.
+        5) Check that VIF still attached with original port.
+        """
+        _, self.port = self.create_port(self.node['uuid'],
+                                        data_utils.rand_mac_address())
+        self.client.vif_attach(self.node['uuid'], self.nport_id)
+        self.assertRaises(lib_exc.BadRequest, self.client.vif_attach,
+                          self.node['uuid'], 'test-vif-new')
+        _, port = self.client.show_port(self.port['uuid'])
+        self.assertEqual(self.nport_id,
+                         port['internal_info']['tenant_vif_port_id'])
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('85b610cd-5ba8-49a7-8ce2-5e364056fd29')
+    def test_vif_attach_no_port(self):
+        """Negative test for VIF attachment attempt with no ports."""
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.vif_attach,
+                          self.node['uuid'], self.nport_id)
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('481777b8-8f0d-4932-af3c-1a8e166949f3')
+    def test_vif_attach_with_empty_portgroup(self):
+        """Negative test for VIF attachment attempt to empty port group.
+
+        Test steps:
+        1) Create chassis and node in setUp.
+        2) Create a port group for the node.
+        3) Try to attach VIF to the node.
+        4) Check that VIF info did not get to port group when there is no port.
+        """
+        _, self.portgroup = self.create_portgroup(
+            self.node['uuid'], address=data_utils.rand_mac_address())
+        self.assertRaises(lib_exc.BadRequest, self.client.vif_attach,
+                          self.node['uuid'], self.nport_id)
+        _, portgroup = self.client.show_portgroup(self.portgroup['uuid'])
+        self.assertNotIn('tenant_vif_port_id', portgroup['internal_info'])
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('5572fecc-bc22-461a-a891-7f74e2e936bd')
+    def test_vif_attach_port_not_in_portgroup(self):
+        """Negative test for VIF attachment to the port not in port group.
+
+        Test steps:
+        1) Create chassis and node in setUp.
+        2) Create a port group for the node.
+        3) Create a port for the node.
+        4) Attach VIF to the node.
+        5) Check that VIF was attached to the port.
+        6) Check that VIF was NOT attached to the portgroup.
+        """
+        _, self.portgroup = self.create_portgroup(
+            self.node['uuid'], address=data_utils.rand_mac_address())
+        _, self.port = self.create_port(self.node['uuid'],
+                                        data_utils.rand_mac_address())
+        self.client.vif_attach(self.node['uuid'], self.nport_id)
+        _, port = self.client.show_port(self.port['uuid'])
+        self.assertEqual(self.nport_id,
+                         port['internal_info']['tenant_vif_port_id'])
+        _, portgroup = self.client.show_portgroup(self.portgroup['uuid'])
+        self.assertNotIn('tenant_vif_port_id', portgroup['internal_info'])
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('3affca81-9f3f-4dab-ad3d-77c892d8d0d7')
+    def test_vif_attach_node_doesnt_exist(self):
+        """Negative test to try to attach VIF to not-existing node."""
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.vif_attach,
+                          data_utils.rand_uuid(),
+                          self.nport_id)
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('9290e1f9-7e75-4e12-aea7-3649348e7f36')
+    def test_vif_attach_no_args(self):
+        """Negative test for VIF attachment with lack of arguments."""
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.vif_attach,
+                          self.node['uuid'], '')
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.vif_attach,
+                          '', '')
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.vif_attach,
+                          '', self.nport_id)
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('da036225-47b0-43b7-9586-0d6390bd3cd9')
+    def test_vif_detach_not_existing(self):
+        """Negative test for VIF detachment of not existing VIF."""
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.vif_detach,
+                          self.node['uuid'], self.nport_id)
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('ff3c9ce2-4979-4a54-a860-fab088a6669f')
+    def test_vif_detach_no_args(self):
+        """Negative test for VIF detachment with lack of arguments."""
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.vif_detach,
+                          self.node['uuid'], '')
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.vif_detach,
+                          '', '')
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.vif_detach,
+                          '', self.nport_id)
+
 
 class TestHardwareInterfaces(base.BaseBaremetalTest):
 
