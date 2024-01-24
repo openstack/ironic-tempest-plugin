@@ -33,13 +33,13 @@ inspector_service_option = cfg.BoolOpt("ironic_inspector",
                                        "is expected to be available")
 
 ironic_scope_enforcement = cfg.BoolOpt('ironic',
-                                       default=False,
+                                       default=True,
                                        help='Wheter or not ironic is '
                                             'exepcted to enforce auth '
                                             'scope.')
 
 inspector_scope_enforcement = cfg.BoolOpt('ironic_inspector',
-                                          default=False,
+                                          default=True,
                                           help='Whether or not '
                                                'ironic-inspector is expected '
                                                'to enforce auth scope.')
