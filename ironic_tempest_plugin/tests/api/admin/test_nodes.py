@@ -1044,7 +1044,12 @@ class TestNodeProtected(base.BaseBaremetalTest):
         super(TestNodeProtected, self).setUp()
 
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.node = self.create_node(
+            self.chassis['uuid'],
+            # Fake deploy interface to bypass cleaning in the test flow.
+            deploy_interface='fake',
+            # Noop network interface to skip networking involvement.
+            network_interface='noop')
         self.provide_node(self.node['uuid'])
 
     @decorators.idempotent_id('52f0cb1c-ad7b-43dc-8e22-a76438b67716')
@@ -1114,7 +1119,9 @@ class TestNodesProtectedOldApi(base.BaseBaremetalTest):
     def setUp(self):
         super(TestNodesProtectedOldApi, self).setUp()
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        deploy_interface='fake',
+                                        network_interface='noop')
         self.deploy_node(self.node['uuid'])
         _, self.node = self.client.show_node(self.node['uuid'])
 

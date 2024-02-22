@@ -25,7 +25,8 @@ class TestPorts(base.BaseBaremetalTest):
         super(TestPorts, self).setUp()
 
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        network_interface='noop')
         _, self.port = self.create_port(self.node['uuid'],
                                         data_utils.rand_mac_address())
 
@@ -275,7 +276,8 @@ class TestPortsWithPhysicalNetwork(base.BaseBaremetalTest):
                 TestPortsWithPhysicalNetwork.min_microversion)
         )
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        network_interface='noop')
 
     @decorators.idempotent_id('f1a5d279-c456-4311-ad31-fea09f61c22b')
     def test_create_port_with_physical_network(self):

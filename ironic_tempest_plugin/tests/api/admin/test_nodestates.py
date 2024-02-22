@@ -78,7 +78,9 @@ class TestNodeStatesV1_1(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     @decorators.idempotent_id('ccb8fca9-2ba0-480c-a037-34c3bd09dc74')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'])
+        _, node = self.create_node(self.chassis['uuid'],
+                                   deploy_interface='fake',
+                                   network_interface='noop')
         # Nodes appear in NONE state by default until v1.1
         self.assertIsNone(node['provision_state'])
         provision_states_list = ['active', 'deleted']
@@ -97,7 +99,9 @@ class TestNodeStatesV1_2(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     @decorators.idempotent_id('9c414984-f3b6-4b3d-81da-93b60d4662fb')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'])
+        _, node = self.create_node(self.chassis['uuid'],
+                                   deploy_interface='fake',
+                                   network_interface='noop')
         # Nodes appear in AVAILABLE state by default from v1.2 to v1.10
         self.assertEqual('available', node['provision_state'])
         provision_states_list = ['active', 'deleted']
@@ -116,7 +120,9 @@ class TestNodeStatesV1_4(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     @decorators.idempotent_id('3d606003-05ce-4b5a-964d-bdee382fafe9')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'])
+        _, node = self.create_node(self.chassis['uuid'],
+                                   deploy_interface='fake',
+                                   network_interface='noop')
         # Nodes appear in AVAILABLE state by default from v1.2 to v1.10
         self.assertEqual('available', node['provision_state'])
         # MANAGEABLE state and PROVIDE transition have been added in v1.4
@@ -138,7 +144,9 @@ class TestNodeStatesV1_6(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     @decorators.idempotent_id('6c9ce4a3-713b-4c76-91af-18c48d01f1bb')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'])
+        _, node = self.create_node(self.chassis['uuid'],
+                                   deploy_interface='fake',
+                                   network_interface='noop')
         # Nodes appear in AVAILABLE state by default from v1.2 to v1.10
         self.assertEqual('available', node['provision_state'])
         # INSPECT* states have been added in v1.6
@@ -162,7 +170,9 @@ class TestNodeStatesV1_11(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     @decorators.idempotent_id('31f53828-b83d-40c7-98e5-843e28a1b6b9')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'])
+        _, node = self.create_node(self.chassis['uuid'],
+                                   deploy_interface='fake',
+                                   network_interface='noop')
         # Nodes appear in ENROLL state by default from v1.11
         self.assertEqual('enroll', node['provision_state'])
         provision_states_list = [

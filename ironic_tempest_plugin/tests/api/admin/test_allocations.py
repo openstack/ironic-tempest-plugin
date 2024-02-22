@@ -38,8 +38,15 @@ class Base(base.BaseBaremetalTest):
         self.resource_class = uuidutils.generate_uuid()
 
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'],
-                                        resource_class=self.resource_class)
+        _, self.node = self.create_node(
+            self.chassis['uuid'],
+            resource_class=self.resource_class,
+            # Fake deploy interface to avoid stop  when automated
+            # cleaning is on.
+            deploy_interface='fake',
+            # noop network interface in case a cleaning/provisioning network
+            # is not defined.
+            network_interface='noop')
         self.provide_and_power_off_node(self.node['uuid'])
 
 
@@ -75,7 +82,8 @@ class TestAllocations(Base):
     @decorators.idempotent_id('eb074d06-e5f4-4fb4-b992-c9929db488ae')
     def test_create_allocation_with_traits(self):
         _, node2 = self.create_node(self.chassis['uuid'],
-                                    resource_class=self.resource_class)
+                                    resource_class=self.resource_class,
+                                    deploy_interface='fake')
         self.client.set_node_traits(node2['uuid'], ['CUSTOM_MEOW'])
         self.provide_and_power_off_node(node2['uuid'])
 
@@ -99,7 +107,9 @@ class TestAllocations(Base):
         node_name = 'allocation-test-1'
         _, node2 = self.create_node(self.chassis['uuid'],
                                     resource_class=self.resource_class,
-                                    name=node_name)
+                                    name=node_name,
+                                    deploy_interface='fake',
+                                    network_interface='noop')
         self.provide_and_power_off_node(node2['uuid'])
 
         _, body = self.create_allocation(self.resource_class,
@@ -203,7 +213,8 @@ class TestAllocations(Base):
     @decorators.idempotent_id('2378727f-77c3-4289-9562-bd2f3b147a60')
     def test_create_allocation_node_mismatch(self):
         _, node2 = self.create_node(self.chassis['uuid'],
-                                    resource_class=self.resource_class + 'alt')
+                                    resource_class=self.resource_class + 'alt',
+                                    deploy_interface='fake')
         # Mismatch between the resource class and the candidate node
         _, body = self.create_allocation(
             self.resource_class, candidate_nodes=[node2['uuid']])

@@ -29,7 +29,8 @@ class TestPortGroups(base.BaseBaremetalTest):
             api_microversion_fixture.APIMicroversionFixture(
                 self.min_microversion))
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        network_interface='noop')
         _, self.portgroup = self.create_portgroup(
             self.node['uuid'], address=data_utils.rand_mac_address(),
             name=data_utils.rand_name('portgroup'))

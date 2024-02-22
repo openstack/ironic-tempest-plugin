@@ -34,7 +34,9 @@ class TestNodeProjectReader(base.BaseBaremetalRBACTest):
         self.reader_client = self.os_project_reader.baremetal.BaremetalClient()
         _, self.chassis = self.create_chassis()
         # Bare node, no inherent permissions by default for project readers.
-        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        network_interface='noop',
+                                        deploy_interface='fake')
 
     # Default policy is:
     # ('role:reader and '
@@ -684,7 +686,9 @@ class TestNodeSystemReader(base.BaseBaremetalRBACTest):
         self.client = self.os_system_admin.baremetal.BaremetalClient()
         self.reader_client = self.os_system_reader.baremetal.BaremetalClient()
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        network_interface='noop',
+                                        deploy_interface='fake')
 
     def test_reader_cannot_create_node(self):
         """Reader cannot create node
