@@ -545,6 +545,21 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # The node driver to use in the test
     driver = None
 
+    # If we do not require an explicit driver to be set as a base for
+    # the test. This is useful for tests where we perform a vertical
+    # slice of drivers to test as opposed to focusing all testing
+    # around the driver itself. This allows for us to verify the
+    # driver interfaces align with the established contracts,
+    # and allows the same test to use ipmi, redfish, or some other
+    # known driver to work.
+    use_available_driver = None
+
+    # If we don't require an explicit driver, then what drivers *can* we
+    # operate with. In essence, this exists to prevent the test from failing
+    # on 3rd party drivers, and vendor specific driers which do not support
+    # the sort of itnerfaces we may be trying to test by default.
+    valid_driver_list = []
+
     # The bios interface to use by the HW type. The bios interface of the
     # node used in the test will be set to this value. If set to None, the
     # node will retain its existing bios_interface value (which may have been
@@ -601,7 +616,8 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     @classmethod
     def skip_checks(cls):
         super(BaremetalStandaloneScenarioTest, cls).skip_checks()
-        if (cls.driver not in CONF.baremetal.enabled_drivers
+        if (not cls.use_available_driver
+            and cls.driver not in CONF.baremetal.enabled_drivers
                 + CONF.baremetal.enabled_hardware_types):
             raise cls.skipException(
                 'The driver: %(driver)s used in test is not in the list of '
@@ -716,6 +732,12 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
 
         # just get an available node
         cls.node = cls.get_and_reserve_node()
+        if (cls.use_available_driver
+                and not cls.driver
+                and cls.node['driver'] in cls.valid_driver_list):
+            # If we're attempting to re-use the existing driver, then
+            # lets save a value for update_node_driver to work with.
+            cls.driver = cls.node['driver']
         cls.update_node_driver(cls.node['uuid'], cls.driver, **boot_kwargs)
 
     @classmethod
