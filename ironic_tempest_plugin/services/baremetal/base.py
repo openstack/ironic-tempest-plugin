@@ -63,8 +63,22 @@ class BaremetalClient(rest_client.RestClient):
     def get_headers(self):
         headers = super(BaremetalClient, self).get_headers()
         if BAREMETAL_MICROVERSION:
+            # NOTE(TheJulia): This is not great, because it can blind a test
+            # to the actual version supported.
             headers[self.api_microversion_header_name] = BAREMETAL_MICROVERSION
         return headers
+
+    def get_raw_headers(self):
+        """A proper get headers without guessing the microversion."""
+        return super(BaremetalClient, self).get_headers()
+
+    def get_min_max_api_microversions(self):
+        """Returns a tuple of minimum and remote microversions."""
+        _, resp_body = self._show_request(None, uri='/')
+        version = resp_body.get('default_version', {})
+        api_min = version.get('min_version')
+        api_max = version.get('version')
+        return (api_min, api_max)
 
     def request(self, *args, **kwargs):
         resp, resp_body = super(BaremetalClient, self).request(*args, **kwargs)

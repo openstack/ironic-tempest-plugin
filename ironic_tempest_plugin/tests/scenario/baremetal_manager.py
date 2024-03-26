@@ -82,6 +82,7 @@ class BaremetalScenarioTest(manager.ScenarioTest):
         super(BaremetalScenarioTest, cls).skip_checks()
         if not CONF.service_available.ironic:
             raise cls.skipException('Ironic is not enabled.')
+        # This is the configuration based skip test
         cfg_min_version = CONF.baremetal.min_microversion
         cfg_max_version = CONF.baremetal.max_microversion
         api_version_utils.check_skip_with_microversion(cls.min_microversion,
@@ -96,6 +97,17 @@ class BaremetalScenarioTest(manager.ScenarioTest):
             client = cls.os_system_admin.baremetal.BaremetalClient()
         else:
             client = cls.os_admin.baremetal.BaremetalClient()
+
+        # This is the automatic based upon remote version skip check,
+        # as it requires an API client to obtain the remote version.
+        if cls.min_microversion or cls.max_microversion:
+            api_min, api_max = client.get_min_max_api_microversions()
+            api_version_utils.check_skip_with_microversion(
+                cls.min_microversion,
+                cls.max_microversion,
+                api_min,
+                api_max)
+
         cls.baremetal_client = client
 
     @classmethod

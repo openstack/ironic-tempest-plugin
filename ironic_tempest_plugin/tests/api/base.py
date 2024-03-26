@@ -76,6 +76,8 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
 
         cfg_min_version = CONF.baremetal.min_microversion
         cfg_max_version = CONF.baremetal.max_microversion
+
+        # Check versions and skip based upon *configuration*
         api_version_utils.check_skip_with_microversion(cls.min_microversion,
                                                        cls.max_microversion,
                                                        cfg_min_version,
@@ -99,6 +101,15 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
             cls.client = cls.os_system_admin.baremetal.BaremetalClient()
         else:
             cls.client = cls.os_admin.baremetal.BaremetalClient()
+
+        # Skip the test if the class version doesn't match.
+        if cls.min_microversion or cls.max_microversion:
+            api_min, api_max = cls.client.get_min_max_api_microversions()
+            api_version_utils.check_skip_with_microversion(
+                cls.min_microversion,
+                cls.max_microversion,
+                api_min,
+                api_max)
 
     @classmethod
     def resource_setup(cls):
