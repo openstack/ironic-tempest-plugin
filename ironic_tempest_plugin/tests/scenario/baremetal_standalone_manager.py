@@ -791,8 +791,12 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                     "args": {"raid_config": config},
                 }
             ]
-            self.baremetal_client.create_deploy_template(
+            _, template = self.baremetal_client.create_deploy_template(
                 'CUSTOM_RAID', steps=steps)
+            # Set a cleanup to ensure the deploy template is removed.
+            self.addCleanup(
+                self.baremetal_client.delete_deploy_template,
+                template['uuid'])
             self.baremetal_client.add_node_trait(self.node['uuid'],
                                                  'CUSTOM_RAID')
 
