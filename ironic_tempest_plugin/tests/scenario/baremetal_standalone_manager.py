@@ -192,7 +192,12 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         """
         vifs = cls.get_node_vifs(node_id)
         for vif in vifs:
-            cls.baremetal_client.vif_detach(node_id, vif)
+            try:
+                cls.baremetal_client.vif_detach(node_id, vif)
+            except lib_exc.BadRequest:
+                # When the vif was already removed, such as the
+                # node was already unprovisioned.
+                pass
             if force_delete:
                 try:
                     cls.ports_client.delete_port(vif)
@@ -877,8 +882,7 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=True))
 
-    @classmethod
-    def boot_node_ramdisk(cls, ramdisk_ref, iso=False):
+    def boot_node_ramdisk(self, ramdisk_ref, iso=False):
         """Boot ironic using a ramdisk node.
 
         The following actions are executed:
@@ -894,11 +898,11 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                     us actually an ISO image.
         """
         if ramdisk_ref is None:
-            ramdisk_ref = cls.image_ref
+            ramdisk_ref = self.image_ref
 
-        network, subnet, router = cls.create_networks()
-        n_port = cls.create_neutron_port(network_id=network['id'])
-        cls.vif_attach(node_id=cls.node['uuid'], vif_id=n_port['id'])
+        network, subnet, router = self.create_networks()
+        n_port = self.create_neutron_port(network_id=network['id'])
+        self.vif_attach(node_id=self.node['uuid'], vif_id=n_port['id'])
         if iso:
             patch_path = '/instance_info/boot_iso'
         else:
@@ -909,22 +913,25 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         patch = [{'path': patch_path,
                   'op': 'add',
                   'value': ramdisk_ref}]
-        cls.update_node(cls.node['uuid'], patch=patch)
-        cls.set_node_provision_state(cls.node['uuid'], 'active')
+        self.update_node(self.node['uuid'], patch=patch)
+        self.set_node_provision_state(self.node['uuid'], 'active')
+        self.addCleanup(
+            self.set_node_provision_state,
+            self.node['uuid'], 'deleted')
         if CONF.validation.connect_method == 'floating':
-            cls.node_ip = cls.add_floatingip_to_node(cls.node['uuid'])
+            self.node_ip = self.add_floatingip_to_node(self.node['uuid'])
         elif CONF.validation.connect_method == 'fixed':
-            cls.node_ip = cls.get_server_ip(cls.node['uuid'])
+            self.node_ip = self.get_server_ip(self.node['uuid'])
         else:
             m = ('Configuration option "[validation]/connect_method" '
                  'must be set.')
             raise lib_exc.InvalidConfiguration(m)
-        cls.wait_power_state(cls.node['uuid'],
-                             bm.BaremetalPowerStates.POWER_ON)
-        cls.wait_provisioning_state(cls.node['uuid'],
-                                    bm.BaremetalProvisionStates.ACTIVE,
-                                    timeout=CONF.baremetal.active_timeout,
-                                    interval=30)
+        self.wait_power_state(self.node['uuid'],
+                              bm.BaremetalPowerStates.POWER_ON)
+        self.wait_provisioning_state(self.node['uuid'],
+                                     bm.BaremetalProvisionStates.ACTIVE,
+                                     timeout=CONF.baremetal.active_timeout,
+                                     interval=30)
 
     def boot_and_verify_ramdisk_node(self, ramdisk_ref=None, iso=False,
                                      should_succeed=True):
