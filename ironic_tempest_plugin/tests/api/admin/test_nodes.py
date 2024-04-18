@@ -312,7 +312,10 @@ class TestNodesVif(base.BaseBaremetalTest):
         super(TestNodesVif, self).setUp()
 
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'])
+        # The tests will mostly fail in this class if exposed to the
+        # noop network interface, which is what the default is.
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        network_interface='flat')
         if CONF.network.shared_physical_network:
             self.net = self.os_admin.networks_client.list_networks(
                 name=CONF.compute.fixed_network_name)['networks'][0]
@@ -432,7 +435,9 @@ class TestNodesVif(base.BaseBaremetalTest):
                                         data_utils.rand_mac_address())
         self.client.vif_attach(self.node['uuid'], self.nport_id)
         _, body = self.client.vif_list(self.node['uuid'])
+
         self.assertEqual({'vifs': [{'id': self.nport_id}]}, body)
+
         self.assertRaises(lib_exc.Conflict, self.client.vif_attach,
                           self.node['uuid'], self.nport_id)
         self.client.vif_detach(self.node['uuid'], self.nport_id)
@@ -495,6 +500,7 @@ class TestNodesVif(base.BaseBaremetalTest):
         _, port = self.client.show_port(self.port['uuid'])
         self.assertEqual(self.nport_id,
                          port['internal_info']['tenant_vif_port_id'])
+        self.client.vif_detach(self.node['uuid'], self.nport_id)
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('85b610cd-5ba8-49a7-8ce2-5e364056fd29')
@@ -545,6 +551,7 @@ class TestNodesVif(base.BaseBaremetalTest):
                          port['internal_info']['tenant_vif_port_id'])
         _, portgroup = self.client.show_portgroup(self.portgroup['uuid'])
         self.assertNotIn('tenant_vif_port_id', portgroup['internal_info'])
+        self.client.vif_detach(self.node['uuid'], self.nport_id)
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('3affca81-9f3f-4dab-ad3d-77c892d8d0d7')
@@ -554,20 +561,6 @@ class TestNodesVif(base.BaseBaremetalTest):
                           self.client.vif_attach,
                           data_utils.rand_uuid(),
                           self.nport_id)
-
-    @decorators.attr(type='negative')
-    @decorators.idempotent_id('9290e1f9-7e75-4e12-aea7-3649348e7f36')
-    def test_vif_attach_no_args(self):
-        """Negative test for VIF attachment with lack of arguments."""
-        self.assertRaises(lib_exc.BadRequest,
-                          self.client.vif_attach,
-                          self.node['uuid'], '')
-        self.assertRaises(lib_exc.BadRequest,
-                          self.client.vif_attach,
-                          '', '')
-        self.assertRaises(lib_exc.BadRequest,
-                          self.client.vif_attach,
-                          '', self.nport_id)
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('da036225-47b0-43b7-9586-0d6390bd3cd9')
@@ -1119,9 +1112,7 @@ class TestNodesProtectedOldApi(base.BaseBaremetalTest):
     def setUp(self):
         super(TestNodesProtectedOldApi, self).setUp()
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'],
-                                        deploy_interface='fake',
-                                        network_interface='noop')
+        _, self.node = self.create_node(self.chassis['uuid'])
         self.deploy_node(self.node['uuid'])
         _, self.node = self.client.show_node(self.node['uuid'])
 

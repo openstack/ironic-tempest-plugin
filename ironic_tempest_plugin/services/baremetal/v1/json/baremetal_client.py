@@ -261,7 +261,12 @@ class BaremetalClient(base.BaremetalClient):
 
         """
         node = {}
-        for field in ('resource_class', 'name', 'description', 'shard'):
+        # Explicitly allow definition of network interface and deploy
+        # interface to allow tests to specify the required values
+        # as they hold a great deal of logic which is executed upon and
+        # they can ultimately impact test behavior.
+        for field in ('resource_class', 'name', 'description', 'shard',
+                      'network_interface', 'deploy_interface'):
             if kwargs.get(field):
                 node[field] = kwargs[field]
 
@@ -271,7 +276,7 @@ class BaremetalClient(base.BaremetalClient):
                             'cpus': kwargs.get('cpus', 8),
                             'local_gb': kwargs.get('local_gb', 1024),
                             'memory_mb': kwargs.get('memory_mb', 4096)},
-             'driver': kwargs.get('driver', 'fake')}
+             'driver': kwargs.get('driver', 'fake-hardware')}
         )
 
         return self._create_request('nodes', node)

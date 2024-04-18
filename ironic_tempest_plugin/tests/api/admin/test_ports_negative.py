@@ -25,8 +25,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         super(TestPortsNegative, self).setUp()
 
         _, self.chassis = self.create_chassis()
-        _, self.node = self.create_node(self.chassis['uuid'],
-                                        network_interface='noop')
+        _, self.node = self.create_node(self.chassis['uuid'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0a6ee1f7-d0d9-4069-8778-37f3aa07303a')
