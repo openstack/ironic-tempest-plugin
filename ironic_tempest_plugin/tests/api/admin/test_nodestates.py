@@ -78,9 +78,7 @@ class TestNodeStatesV1_1(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     @decorators.idempotent_id('ccb8fca9-2ba0-480c-a037-34c3bd09dc74')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'],
-                                   deploy_interface='fake',
-                                   network_interface='noop')
+        _, node = self.create_node(self.chassis['uuid'])
         # Nodes appear in NONE state by default until v1.1
         self.assertIsNone(node['provision_state'])
         provision_states_list = ['active', 'deleted']
@@ -96,19 +94,33 @@ class TestNodeStatesV1_2(TestNodeStatesMixin, base.BaseBaremetalTest):
     def setUp(self):
         super(TestNodeStatesV1_2, self).setUp()
         self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.2'))
+        # Make node with 1.2, so the start state written to the DB as expected.
+        _, self.node = self.create_node(self.chassis['uuid'])
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.31'))
+        # Now with a 1.31 microversion, swap the deploy and network
+        # interfaces into place so the test doesn't break depending on
+        # the environment's default state.
+        self.client.update_node(self.node['uuid'],
+                                [{'path': '/deploy_interface',
+                                  'op': 'replace',
+                                  'value': 'fake'},
+                                 {'path': '/network_interface',
+                                  'op': 'replace',
+                                  'value': 'noop'}])
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.2'))
 
     @decorators.idempotent_id('9c414984-f3b6-4b3d-81da-93b60d4662fb')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'],
-                                   deploy_interface='fake',
-                                   network_interface='noop')
+        _, node = self.client.show_node(self.node['uuid'])
         # Nodes appear in AVAILABLE state by default from v1.2 to v1.10
-        self.assertEqual('available', node['provision_state'])
+        self.assertEqual('available', self.node['provision_state'])
         provision_states_list = ['active', 'deleted']
         target_states_list = ['active', 'available']
         for (provision_state, target_state) in zip(provision_states_list,
                                                    target_states_list):
-            self.client.set_node_provision_state(node['uuid'], provision_state)
+            self.client.set_node_provision_state(node['uuid'],
+                                                 provision_state)
             self._validate_provision_state(node['uuid'], target_state)
 
 
@@ -117,12 +129,25 @@ class TestNodeStatesV1_4(TestNodeStatesMixin, base.BaseBaremetalTest):
     def setUp(self):
         super(TestNodeStatesV1_4, self).setUp()
         self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.4'))
+        _, self.node = self.create_node(self.chassis['uuid'])
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.31'))
+        # Now with a 1.31 microversion, swap the deploy and network
+        # interfaces into place so the test doesn't break depending on
+        # the environment's default state.
+        self.client.update_node(self.node['uuid'],
+                                [{'path': '/deploy_interface',
+                                  'op': 'replace',
+                                  'value': 'fake'},
+                                 {'path': '/network_interface',
+                                  'op': 'replace',
+                                  'value': 'noop'}])
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.4'))
 
     @decorators.idempotent_id('3d606003-05ce-4b5a-964d-bdee382fafe9')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'],
-                                   deploy_interface='fake',
-                                   network_interface='noop')
+        # Make node with 1.2, so the start state written to the DB as expected.
+        _, node = self.client.show_node(self.node['uuid'])
         # Nodes appear in AVAILABLE state by default from v1.2 to v1.10
         self.assertEqual('available', node['provision_state'])
         # MANAGEABLE state and PROVIDE transition have been added in v1.4
@@ -132,7 +157,8 @@ class TestNodeStatesV1_4(TestNodeStatesMixin, base.BaseBaremetalTest):
             'manageable', 'available', 'active', 'available']
         for (provision_state, target_state) in zip(provision_states_list,
                                                    target_states_list):
-            self.client.set_node_provision_state(node['uuid'], provision_state)
+            self.client.set_node_provision_state(node['uuid'],
+                                                 provision_state)
             self._validate_provision_state(node['uuid'], target_state)
 
 
@@ -140,13 +166,27 @@ class TestNodeStatesV1_6(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     def setUp(self):
         super(TestNodeStatesV1_6, self).setUp()
+        # Creates a node with 1.31, and is later reset for the rest of the test
+        # due to Ironic's evolution of drivers.
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.6'))
+        _, self.node = self.create_node(self.chassis['uuid'])
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.31'))
+        # Now with a 1.31 microversion, swap the deploy and network
+        # interfaces into place so the test doesn't break depending on
+        # the environment's default state.
+        self.client.update_node(self.node['uuid'],
+                                [{'path': '/deploy_interface',
+                                  'op': 'replace',
+                                  'value': 'fake'},
+                                 {'path': '/network_interface',
+                                  'op': 'replace',
+                                  'value': 'noop'}])
         self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.6'))
 
     @decorators.idempotent_id('6c9ce4a3-713b-4c76-91af-18c48d01f1bb')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'],
-                                   deploy_interface='fake',
-                                   network_interface='noop')
+        _, node = self.client.show_node(self.node['uuid'])
         # Nodes appear in AVAILABLE state by default from v1.2 to v1.10
         self.assertEqual('available', node['provision_state'])
         # INSPECT* states have been added in v1.6
@@ -156,33 +196,41 @@ class TestNodeStatesV1_6(TestNodeStatesMixin, base.BaseBaremetalTest):
             'manageable', 'manageable', 'available', 'active', 'available']
         for (provision_state, target_state) in zip(provision_states_list,
                                                    target_states_list):
-            self.client.set_node_provision_state(node['uuid'], provision_state)
-            self._validate_provision_state(node['uuid'], target_state)
+            self.client.set_node_provision_state(node['uuid'],
+                                                 provision_state)
+            self._validate_provision_state(node['uuid'],
+                                           target_state)
 
 
 class TestNodeStatesV1_11(TestNodeStatesMixin, base.BaseBaremetalTest):
 
     def setUp(self):
         super(TestNodeStatesV1_11, self).setUp()
+        # Creates a node with 1.31, and is later reset for the rest of the test
+        # due to Ironic's evolution of drivers.
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.31'))
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        deploy_interface='fake',
+                                        network_interface='noop')
         self.useFixture(
             api_microversion_fixture.APIMicroversionFixture('1.11')
         )
 
     @decorators.idempotent_id('31f53828-b83d-40c7-98e5-843e28a1b6b9')
     def test_set_node_provision_state(self):
-        _, node = self.create_node(self.chassis['uuid'],
-                                   deploy_interface='fake',
-                                   network_interface='noop')
         # Nodes appear in ENROLL state by default from v1.11
-        self.assertEqual('enroll', node['provision_state'])
+        self.assertEqual('enroll', self.node['provision_state'])
         provision_states_list = [
             'manage', 'inspect', 'provide', 'active', 'deleted']
         target_states_list = [
             'manageable', 'manageable', 'available', 'active', 'available']
         for (provision_state, target_state) in zip(provision_states_list,
                                                    target_states_list):
-            self.client.set_node_provision_state(node['uuid'], provision_state)
-            self._validate_provision_state(node['uuid'], target_state)
+            self.client.set_node_provision_state(self.node['uuid'],
+                                                 provision_state)
+            self._validate_provision_state(self.node['uuid'],
+                                           target_state)
 
 
 class TestNodeStatesV1_12(TestNodeStatesMixin, base.BaseBaremetalTest):
