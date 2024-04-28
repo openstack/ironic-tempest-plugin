@@ -137,8 +137,9 @@ class BaremetalRedfishDHCPLessDeploy(bsm.BaremetalStandaloneScenarioTest):
             self.wait_provisioning_state(self.node['uuid'], 'active',
                                          timeout=CONF.baremetal.active_timeout,
                                          interval=30)
-            # Assert we were able to ping after rebuilding.
-            self.assertTrue(self.ping_ip_address(self.node_ip))
+            # NOTE(TheJulia): We explicitly don't ping in this test as
+            # what we are testing is that we are able to return to active.
+            # i.e. That the agent is operating as designed.
         # Force delete so we remove the vifs
         self.terminate_node(self.node['uuid'], force_delete=True)
 
