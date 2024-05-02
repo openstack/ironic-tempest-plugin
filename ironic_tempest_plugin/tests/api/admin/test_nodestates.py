@@ -212,7 +212,8 @@ class TestNodeStatesV1_11(TestNodeStatesMixin, base.BaseBaremetalTest):
             api_microversion_fixture.APIMicroversionFixture('1.31'))
         _, self.node = self.create_node(self.chassis['uuid'],
                                         deploy_interface='fake',
-                                        network_interface='noop')
+                                        network_interface='noop',
+                                        inspect_interface='fake')
         self.useFixture(
             api_microversion_fixture.APIMicroversionFixture('1.11')
         )
