@@ -33,36 +33,6 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class BaremetalCleaningAgentIpmitoolWholedisk(
-        bsm.BaremetalStandaloneScenarioTest):
-
-    driver = 'agent_ipmitool'
-    image_ref = CONF.baremetal.whole_disk_image_ref
-    wholedisk_image = True
-    delete_node = False
-    api_microversion = '1.28'
-
-    @decorators.idempotent_id('0d82cedd-9697-4cf7-8e4a-80d510f53615')
-    @utils.services('image', 'network')
-    def test_manual_cleaning(self):
-        self.check_manual_partition_cleaning(self.node)
-
-
-class BaremetalCleaningPxeIpmitoolWholedisk(
-        bsm.BaremetalStandaloneScenarioTest):
-
-    driver = 'pxe_ipmitool'
-    image_ref = CONF.baremetal.whole_disk_image_ref
-    wholedisk_image = True
-    delete_node = False
-    api_microversion = '1.28'
-
-    @decorators.idempotent_id('fb03abfa-cdfc-41ec-aaa8-c70402786a85')
-    @utils.services('image', 'network')
-    def test_manual_cleaning(self):
-        self.check_manual_partition_cleaning(self.node)
-
-
 class BaremetalCleaningIpmiWholedisk(
         bsm.BaremetalStandaloneScenarioTest):
 
