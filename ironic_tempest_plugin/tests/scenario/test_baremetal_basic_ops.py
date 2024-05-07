@@ -237,6 +237,12 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             self.rescue_instance(self.instance, self.node, ip_address)
             self.unrescue_instance(self.instance, self.node, ip_address)
 
+        # Reboot node
+        self.reboot_node(self.instance)
+
+        # ensure we can ping the node again
+        self.assertTrue(self.ping_ip_address(ip_address))
+
         self.terminate_instance(self.instance)
 
     @decorators.idempotent_id('549173a5-38ec-42bb-b0e2-c8b9f4a08943')

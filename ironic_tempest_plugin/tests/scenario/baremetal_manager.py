@@ -244,6 +244,13 @@ class BaremetalScenarioTest(manager.ScenarioTest):
 
         return instance, node
 
+    def reboot_node(self, instance, servers_client=None):
+        if servers_client is None:
+            servers_client = self.os_primary.servers_client
+        servers_client.reboot_server(instance['id'], type='HARD')
+        waiters.wait_for_server_status(servers_client,
+                                       instance['id'], 'ACTIVE')
+
     def terminate_instance(self, instance, servers_client=None):
         if servers_client is None:
             servers_client = self.os_primary.servers_client
