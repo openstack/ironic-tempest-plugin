@@ -311,12 +311,12 @@ class TestNodesVif(base.BaseBaremetalTest):
     def setUp(self):
         super(TestNodesVif, self).setUp()
 
-        _, self.chassis = self.create_chassis()
-        # The tests will mostly fail in this class if exposed to the
-        # noop network interface, which is what the default is.
-        _, self.node = self.create_node(self.chassis['uuid'],
-                                        network_interface='flat')
         if CONF.network.shared_physical_network:
+            if not CONF.compute.fixed_network_name:
+                raise self.skipException(
+                    'Unable to perform vif test as there is no network '
+                    'defined for the [compute]fixed_network_name '
+                    'parameter.')
             self.net = self.os_admin.networks_client.list_networks(
                 name=CONF.compute.fixed_network_name)['networks'][0]
         else:
@@ -324,6 +324,12 @@ class TestNodesVif(base.BaseBaremetalTest):
                 create_network()['network']
             self.addCleanup(self.os_admin.networks_client.delete_network,
                             self.net['id'])
+
+        _, self.chassis = self.create_chassis()
+        # The tests will mostly fail in this class if exposed to the
+        # noop network interface, which is what the default is.
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        network_interface='flat')
 
         self.nport_id = self.os_admin.ports_client.create_port(
             network_id=self.net['id'])['port']['id']
