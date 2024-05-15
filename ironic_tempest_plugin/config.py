@@ -242,7 +242,9 @@ BaremetalGroup = [
                 default=True,
                 help="If we should issue a rebuild request when testing "
                      "dhcpless virtual media deployments. This may be useful "
-                     "if bug 2032377 is not fixed in the agent ramdisk."),
+                     "if bug 2032377 is not fixed in the agent ramdisk. This "
+                     "test is functionally incompatible with Temporary URLs "
+                     "as they may timeout while the test is running."),
     cfg.StrOpt("public_subnet_id",
                help="The public subnet ID where routers will be bound for "
                     "testing purposes with the dhcp-less test scenario."),
