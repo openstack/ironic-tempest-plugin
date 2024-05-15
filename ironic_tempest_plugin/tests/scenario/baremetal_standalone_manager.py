@@ -935,6 +935,17 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
 
     def boot_and_verify_ramdisk_node(self, ramdisk_ref=None, iso=False,
                                      should_succeed=True):
+        node = self.get_node(node_id=self.node['uuid'])
+        node_capabilities = node['properties'].get('capabilities', '')
+        if (ramdisk_ref and 'tinycore' in ramdisk_ref.lower()
+                and ('boot_mode:uefi' in node_capabilities
+                     or 'uefi' in node.get('boot_mode', 'None'))):
+            # Checks the top level field if the API gives it to us, i.e.
+            # the test version supports it, and the lower level original
+            # properties field which upstream CI populates.
+            raise self.skipException('Skipping ramdisk test as tinycore '
+                                     'cannot be booted in UEFI mode.')
+
         self.boot_node_ramdisk(ramdisk_ref, iso)
         self.assertTrue(self.ping_ip_address(self.node_ip,
                                              should_succeed=should_succeed))
