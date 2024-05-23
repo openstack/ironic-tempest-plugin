@@ -741,7 +741,15 @@ class TestHardwareInterfaces(base.BaseBaremetalTest):
                                     [{'path': '/%s' % field,
                                       'op': 'remove'}])
             _, node = self.client.show_node(self.node['uuid'])
-            self.assertEqual('fake', node[field])
+            if (iface in ['boot', 'deploy', 'inspect', 'network']
+                    and 'fake' != node[field]):
+                # NOTE(TheJulia): Depending on the remote configuration
+                # these interfaces may have explicit defaults which the
+                # reset action changes the value to. This is okay, but
+                # we need to not fail when that is the case.
+                self.assertNotEqual(self.node[field], node[field])
+            else:
+                self.assertEqual('fake', node[field])
 
 
 class TestResetInterfaces(TestHardwareInterfaces):
@@ -1211,7 +1219,21 @@ class TestNodesProtectedOldApi(base.BaseBaremetalTest):
     def setUp(self):
         super(TestNodesProtectedOldApi, self).setUp()
         _, self.chassis = self.create_chassis()
+
         _, self.node = self.create_node(self.chassis['uuid'])
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.31'))
+        # Now with a 1.31 microversion, swap the deploy and network
+        # interfaces into place so the test doesn't break depending on
+        # the environment's default state.
+        self.client.update_node(self.node['uuid'],
+                                [{'path': '/deploy_interface',
+                                  'op': 'replace',
+                                  'value': 'fake'},
+                                 {'path': '/network_interface',
+                                  'op': 'replace',
+                                  'value': 'noop'}])
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.1'))
         self.deploy_node(self.node['uuid'])
         _, self.node = self.client.show_node(self.node['uuid'])
 

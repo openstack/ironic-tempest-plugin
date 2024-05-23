@@ -67,6 +67,9 @@ class BaremetalBFV(baremetal_manager.BaremetalScenarioTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.volumes_client.delete_volume, volume['id'])
         self.assertEqual(name, volume['name'])
+        # NOTE(TheJulia): This can fail if the remote service can't figure out
+        # what to do. Really depends on the remote storage configuration which
+        # is not something we can sense out remotely.
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
         # The volume retrieved on creation has a non-up-to-date status.
