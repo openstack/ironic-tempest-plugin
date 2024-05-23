@@ -180,6 +180,105 @@ class TestNodes(base.BaseBaremetalTest):
         self.assertNotIn('description', loaded_node)
 
 
+class TestNodesWithJsonExtSupport(base.BaseBaremetalTest):
+    """Tests for baremetal nodes to validate appending .json extension to a
+
+    node's `name` or `uuid` in API versions 1.90 and prior works.
+    """
+
+    max_microversion = '1.90'  # Max API version allowed for testing: 1.90
+    min_microversion = '1.90'  # Min API version allowed for testing: 1.90
+
+    def setUp(self):
+        super(TestNodesWithJsonExtSupport, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+    @decorators.idempotent_id('2ffec2ec-3dca-4e4f-ac6c-dee7c44cdef5')
+    def test_update_node_with_json(self):
+        """Update a node while appending .json extension to its uuid"""
+        props = {'cpu_arch': 'x86_64',
+                 'cpus': '12',
+                 'local_gb': '10',
+                 'memory_mb': '128'}
+
+        _, node = self.create_node(self.chassis['uuid'], **props)
+
+        new_p = {'cpu_arch': 'arm64',
+                 'cpus': '1',
+                 'local_gb': '10000',
+                 'memory_mb': '12300'}
+
+        _, body = self.client.update_node('%s.json' % node['uuid'],
+                                          properties=new_p)
+        _, node = self.client.show_node(node['uuid'])
+        self._assertExpected(new_p, node['properties'])
+
+    @decorators.idempotent_id('4c376a23-04b8-4fc8-955f-abc5668d34c3')
+    def test_delete_node_with_json(self):
+        """Delete a node while appending .json extension to its uuid"""
+        _, node = self.create_node(self.chassis['uuid'])
+
+        self.delete_node('%s.json' % node['uuid'])
+
+        self.assertRaises(lib_exc.NotFound, self.client.show_node,
+                          node['uuid'])
+
+    @decorators.idempotent_id('bc1134aa-2950-409c-b91c-b2d85df9b065')
+    def test_show_node_with_json(self):
+        """Show a node while appending .json extension to its uuid"""
+        _, loaded_node = self.client.show_node('%s.json' % self.node['uuid'])
+        self._assertExpected(self.node, loaded_node)
+
+
+class TestNodesWithoutJsonExtSupport(base.BaseBaremetalTest):
+    """Tests for baremetal nodes to validate appending .json extension to a
+
+    node's `name` or `uuid` in API versions later than 1.90 is disabled.
+    """
+
+    min_microversion = '1.91'  # Min API version allowed for testing: 1.91
+
+    def setUp(self):
+        super(TestNodesWithoutJsonExtSupport, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+    @decorators.idempotent_id('65505002-3ac7-4a07-9f66-2e3bcb0f5e95')
+    def test_update_node_with_json(self):
+        """Trying to update a node while appending .json extension 404s"""
+        props = {'cpu_arch': 'x86_64',
+                 'cpus': '12',
+                 'local_gb': '10',
+                 'memory_mb': '128'}
+
+        _, node = self.create_node(self.chassis['uuid'], **props)
+
+        new_p = {'cpu_arch': 'arm64',
+                 'cpus': '1',
+                 'local_gb': '10000',
+                 'memory_mb': '12300'}
+
+        self.assertRaises(lib_exc.NotFound, self.client.update_node,
+                          '%s.json' % node['uuid'], properties=new_p)
+
+    @decorators.idempotent_id('594160b6-a608-4024-98d1-818f75d2d895')
+    def test_delete_node_with_json(self):
+        """Trying to delete a node while appending .json extension 404s"""
+        _, node = self.create_node(self.chassis['uuid'])
+        self.assertRaises(lib_exc.NotFound, self.client.delete_node,
+                          '%s.json' % node['uuid'])
+
+    @decorators.idempotent_id('e83cd539-4d09-46d0-a448-365a219ca353')
+    def test_show_node_with_json(self):
+        """Trying to show a node while appending .json extension 404s"""
+
+        self.assertRaises(lib_exc.NotFound, self.client.show_node,
+                          '%s.json' % self.node['uuid'])
+
+
 class TestNodesResourceClass(base.BaseBaremetalTest):
 
     min_microversion = '1.21'

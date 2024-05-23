@@ -225,6 +225,94 @@ class TestAllocations(Base):
         self.assertTrue(body['last_error'])
 
 
+class TestAllocationsWithJsonExtSupport(Base):
+    """Tests for baremetal allocations to validate appending .json extension
+
+     to an allocation's `name` or `uuid` in API versions 1.90 and prior works.
+     """
+
+    max_microversion = '1.90'  # Max API version allowed for testing: 1.90
+    min_microversion = '1.90'  # Min API version allowed for testing: 1.90
+
+    @decorators.idempotent_id('d111b85b-a169-440e-9dcd-9b8b6ad8c917')
+    def test_create_show_allocation_with_json(self):
+        """Show an allocation while appending .json extension to its uuid"""
+        self.assertIsNone(self.node['allocation_uuid'])
+        _, body = self.create_allocation(self.resource_class)
+        uuid = body['uuid']
+
+        self.assertTrue(uuid)
+        self.assertEqual('allocating', body['state'])
+        self.assertEqual(self.resource_class, body['resource_class'])
+        self.assertIsNone(body['last_error'])
+        self.assertIsNone(body['node_uuid'])
+
+        _, body = waiters.wait_for_allocation(self.client, uuid)
+        self.assertEqual('active', body['state'])
+        self.assertEqual(self.resource_class, body['resource_class'])
+        self.assertIsNone(body['last_error'])
+        self.assertEqual(self.node['uuid'], body['node_uuid'])
+
+        _, body2 = self.client.show_node_allocation(body['node_uuid'])
+        self.assertEqual(body, body2)
+
+        _, node = self.client.show_node('%s.json' % self.node['uuid'])
+        self.assertEqual(uuid, node['allocation_uuid'])
+
+    @decorators.idempotent_id('b94643f4-f789-4c04-a806-bf769e0bc181')
+    def test_delete_allocation_with_json(self):
+        """Delete an allocation while appending .json extension to its uuid"""
+        _, body = self.create_allocation(self.resource_class)
+
+        self.client.delete_allocation('%s.json' % body['uuid'])
+
+        self.assertRaises(lib_exc.NotFound, self.client.show_allocation,
+                          '%s.json' % body['uuid'])
+
+
+class TestAllocationsWithoutJsonExtSupport(Base):
+    """Tests for baremetal allocations to validate appending .json extension
+
+    to an allocation's `name` or `uuid` in API versions later than 1.90 is
+
+    disabled.
+    """
+
+    min_microversion = '1.91'  # Min API version allowed for testing: 1.91
+
+    @decorators.idempotent_id('6b851ef4-e364-4a3e-af1d-e6b73c1adec6')
+    def test_create_show_allocation_with_json(self):
+        """Trying to show an allocation while appending .json ext 404s"""
+        self.assertIsNone(self.node['allocation_uuid'])
+        _, body = self.create_allocation(self.resource_class)
+        uuid = body['uuid']
+
+        self.assertTrue(uuid)
+        self.assertEqual('allocating', body['state'])
+        self.assertEqual(self.resource_class, body['resource_class'])
+        self.assertIsNone(body['last_error'])
+        self.assertIsNone(body['node_uuid'])
+
+        _, body = waiters.wait_for_allocation(self.client, uuid)
+        self.assertEqual('active', body['state'])
+        self.assertEqual(self.resource_class, body['resource_class'])
+        self.assertIsNone(body['last_error'])
+        self.assertEqual(self.node['uuid'], body['node_uuid'])
+
+        _, body2 = self.client.show_node_allocation(body['node_uuid'])
+        self.assertEqual(body, body2)
+
+        self.assertRaises(lib_exc.NotFound, self.client.show_allocation,
+                          '%s.json' % body['uuid'])
+
+    @decorators.idempotent_id('cdf36c46-3da7-4306-b265-bcea3ab3bc3f')
+    def test_delete_allocation_with_json(self):
+        """Trying to delete an allocation while appending .json ext 404s"""
+        _, body = self.create_allocation(self.resource_class)
+        self.assertRaises(lib_exc.NotFound, self.client.delete_allocation,
+                          '%s.json' % body['uuid'])
+
+
 class TestBackfill(Base):
     """Tests for backfilling baremetal allocations."""
 

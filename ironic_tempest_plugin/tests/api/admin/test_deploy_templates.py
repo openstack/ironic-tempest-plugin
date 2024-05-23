@@ -196,6 +196,70 @@ class TestDeployTemplates(base.BaseBaremetalTest):
         self.assertEqual([new_steps[1]], body['steps'])
 
 
+class TestDeployTemplatesWithJsonExtSupport(base.BaseBaremetalTest):
+    """Tests for deploy templates to validate appending .json extension to a
+
+    template's `name` or `uuid` in API versions 1.90 and prior works.
+    """
+
+    max_microversion = '1.90'  # Max API version allowed for testing: 1.90
+    min_microversion = '1.90'  # Min API version allowed for testing: 1.90
+
+    def setUp(self):
+        super(TestDeployTemplatesWithJsonExtSupport, self).setUp()
+        self.name = _get_random_trait()
+        self.steps = copy.deepcopy(EXAMPLE_STEPS)
+        _, self.template = self.create_deploy_template(self.name,
+                                                       steps=self.steps)
+
+    @decorators.idempotent_id('df2fabbd-3c8b-4979-8f13-c58c96122adb')
+    def test_delete_deploy_template_with_json(self):
+        """Delete a template while appending .json extension to its uuid"""
+        self.delete_deploy_template('%s.json' % self.template['uuid'])
+
+        self.assertRaises(lib_exc.NotFound, self.client.show_deploy_template,
+                          self.template['uuid'])
+
+    @decorators.idempotent_id('8b64a54d-ead7-4b3f-8fae-a1b8bdefe3ee')
+    def test_show_deploy_template_with_json(self):
+        """Show a template while appending .json extension to its uuid"""
+        _, template = self.client.show_deploy_template('%s.json' %
+                                                       self.template['uuid'])
+        self._assertExpected(self.template, template)
+        self.assertEqual(self.name, template['name'])
+        self.assertEqual(self.steps, template['steps'])
+        self.assertIn('uuid', template)
+        self.assertEqual({}, template['extra'])
+
+
+class TestDeployTemplatesWithoutJsonExtSupport(base.BaseBaremetalTest):
+    """Tests for deploy templates to validate appending .json extension to a
+
+    template's `name` or `uuid` in API versions later than 1.90 is disabled.
+    """
+
+    min_microversion = '1.91'  # Min API version allowed for testing: 1.91
+
+    def setUp(self):
+        super(TestDeployTemplatesWithoutJsonExtSupport, self).setUp()
+        self.name = _get_random_trait()
+        self.steps = copy.deepcopy(EXAMPLE_STEPS)
+        _, self.template = self.create_deploy_template(self.name,
+                                                       steps=self.steps)
+
+    @decorators.idempotent_id('61d05189-9f84-4973-835b-a860b655dfe3')
+    def test_delete_deploy_template_with_json(self):
+        """Trying to delete a template while appending .json ext 404s"""
+        self.assertRaises(lib_exc.NotFound, self.client.delete_deploy_template,
+                          '%s.json' % self.template['uuid'])
+
+    @decorators.idempotent_id('432429dd-b964-4133-aa46-cd43a7cd9c37')
+    def test_show_deploy_template_with_json(self):
+        """Trying to show a template while appending .json ext 404s"""
+        self.assertRaises(lib_exc.NotFound, self.client.show_deploy_template,
+                          '%s.json' % self.template['uuid'])
+
+
 class TestDeployTemplatesOldAPI(base.BaseBaremetalTest):
     """Negative tests for deploy templates using an old API version."""
 

@@ -153,3 +153,106 @@ class TestPortGroups(base.BaseBaremetalTest):
         self.assertEqual(new_address, body['address'])
         self._assertExpected(new_extra, body['extra'])
         self.assertNotIn('foo', body['extra'])
+
+
+class TestPortGroupsWithJsonExtSupport(base.BaseBaremetalTest):
+    """Basic test cases to validate appending .json extension to a portgroup's
+
+    `name` or `uuid` in API versions 1.90 and prior works.
+    """
+
+    max_microversion = '1.90'  # Max API version allowed for testing: 1.90
+    min_microversion = '1.90'  # Min API version allowed for testing: 1.90
+
+    def setUp(self):
+        super(TestPortGroupsWithJsonExtSupport, self).setUp()
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture(
+                self.min_microversion))
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.portgroup = self.create_portgroup(
+            self.node['uuid'], address=data_utils.rand_mac_address(),
+            name=data_utils.rand_name('portgroup'))
+
+    @decorators.idempotent_id('607ea131-ef5c-44e9-a900-a8e426b804e8')
+    def test_delete_portgroup_with_json(self):
+        """Delete a portgroup while appending .json extension to its uuid"""
+        self.delete_portgroup('%s.json' % self.portgroup['uuid'])
+        self.assertRaises(lib_exc.NotFound, self.client.show_portgroup,
+                          self.portgroup['uuid'])
+
+    @decorators.idempotent_id('9126ecac-310f-440a-81d4-ba9af1767845')
+    def test_show_portgroup_with_json(self):
+        """Show a portgroup while appending .json extension to its uuid"""
+        _, portgroup = self.client.show_portgroup('%s.json' %
+                                                  self.portgroup['uuid'])
+        self._assertExpected(self.portgroup, portgroup)
+
+    @decorators.idempotent_id('a6f154aa-e447-4576-89e2-9e8951fb7c43')
+    def test_update_portgroup_with_json(self):
+        """Update a portgroup while appending .json extension to its uuid"""
+        new_address = data_utils.rand_mac_address()
+        new_extra = {'foo': 'test'}
+
+        patch = [{'path': '/address',
+                  'op': 'replace',
+                  'value': new_address},
+                 {'path': '/extra/foo',
+                  'op': 'replace',
+                  'value': new_extra['foo']},
+                 ]
+
+        self.client.update_portgroup('%s.json' % self.portgroup['uuid'],
+                                     patch)
+
+        _, body = self.client.show_portgroup(self.portgroup['uuid'])
+
+        self.assertEqual(new_address, body['address'])
+        self._assertExpected(new_extra, body['extra'])
+
+
+class TestPortGroupsWithoutJsonExtSupport(base.BaseBaremetalTest):
+    """Basic test cases to validate appending .json extension to a portgroup's
+
+    `name` or `uuid` in API versions later than 1.90 is disabled.
+    """
+
+    min_microversion = '1.91'  # Min API version allowed for testing: 1.91
+
+    def setUp(self):
+        super(TestPortGroupsWithoutJsonExtSupport, self).setUp()
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.portgroup = self.create_portgroup(
+            self.node['uuid'], address=data_utils.rand_mac_address(),
+            name=data_utils.rand_name('portgroup'))
+
+    @decorators.idempotent_id('2aede448-7165-4d54-92de-3be31ae19af0')
+    def test_delete_portgroup_with_json(self):
+        """Trying to delete a portgroup while appending .json ext 404s"""
+        self.assertRaises(lib_exc.NotFound, self.client.delete_portgroup,
+                          '%s.json' % self.portgroup['uuid'])
+
+    @decorators.idempotent_id('be8ade56-8ac1-49f4-981a-93b403fa1d79')
+    def test_show_portgroup_with_json(self):
+        """Trying to show a portgroup while appending .json ext 404s"""
+        self.assertRaises(lib_exc.NotFound, self.client.show_portgroup,
+                          '%s.json' % self.portgroup['uuid'])
+
+    @decorators.idempotent_id('f624352a-6560-4ec1-b4ff-ccfe7cda08f2')
+    def test_update_portgroup_with_json(self):
+        """Trying to update a portgroup while appending .json ext 404s"""
+        new_address = data_utils.rand_mac_address()
+        new_extra = {'foo': 'test'}
+
+        patch = [{'path': '/address',
+                  'op': 'replace',
+                  'value': new_address},
+                 {'path': '/extra/foo',
+                  'op': 'replace',
+                  'value': new_extra['foo']},
+                 ]
+
+        self.assertRaises(lib_exc.NotFound, self.client.update_portgroup,
+                          '%s.json' % self.portgroup['uuid'], patch)
