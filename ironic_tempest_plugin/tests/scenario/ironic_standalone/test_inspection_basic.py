@@ -21,23 +21,16 @@ from ironic_tempest_plugin.tests.scenario import \
 CONF = config.CONF
 
 
-class BaremetalIdracInspect(bsm.BaremetalStandaloneScenarioTest):
+class BaremetalInspectBase:
 
-    driver = 'idrac'
     mandatory_attr = ['driver', 'inspect_interface']
-    # The test cases clean up at the end by detaching the VIF.
-    # Support for VIFs was introduced by version 1.28
-    # (# v1.28: Add vifs subcontroller to node).
-    api_microversion = '1.28'
+    # (# v1.31: Support for updating inspect_interface).
+    api_microversion = '1.31'
     delete_node = False
+    wait_provisioning_state_interval = 1
 
-    def _verify_node_inspection_data(self):
-        _, node = self.baremetal_client.show_node(self.node['uuid'])
-
-        self.assertEqual(node['properties']['cpu_arch'], 'x86_64')
-        self.assertGreater(int(node['properties']['memory_mb']), 0)
-        self.assertGreater(int(node['properties']['cpus']), 0)
-        self.assertGreater(int(node['properties']['local_gb']), 0)
+    def _verify_node_inspection_data(self, node):
+        self.assertIn(node['properties']['cpu_arch'], ['x86_64', 'aarch64'])
 
     @decorators.idempotent_id('47ea4487-4720-43e8-a024-53ae82f8c264')
     def test_baremetal_inspect(self):
@@ -50,17 +43,46 @@ class BaremetalIdracInspect(bsm.BaremetalStandaloneScenarioTest):
         """
         self.baremetal_client.set_node_provision_state(self.node['uuid'],
                                                        'manage')
+        _, node = self.baremetal_client.show_node(self.node['uuid'])
+        if 'cpu_arch' in node['properties']:
+            new_properties = node['properties'].copy()
+            new_properties.pop('cpu_arch')
+            self.baremetal_client.update_node(self.node['uuid'],
+                                              properties=new_properties)
+
         self.baremetal_client.set_node_provision_state(self.node['uuid'],
                                                        'inspect')
+        self.wait_provisioning_state(
+            self.node['uuid'], 'manageable',
+            timeout=CONF.baremetal.inspect_timeout,
+            interval=self.wait_provisioning_state_interval)
 
-        self.wait_provisioning_state(self.node['uuid'], 'manageable',
-                                     timeout=CONF.baremetal.inspect_timeout)
-
-        self._verify_node_inspection_data()
+        _, node = self.baremetal_client.show_node(self.node['uuid'])
+        self._verify_node_inspection_data(node)
 
         self.baremetal_client.set_node_provision_state(self.node['uuid'],
                                                        'provide')
         self.wait_provisioning_state(self.node['uuid'], 'available')
+
+
+class BaremetalRedfishAgentInspect(BaremetalInspectBase,
+                                   bsm.BaremetalStandaloneScenarioTest):
+    driver = 'redfish'
+    inspect_interface = 'agent'
+    wait_provisioning_state_interval = 15
+
+    # TODO(dtantsur): test aborting inspection and fetching inspection data
+
+
+class BaremetalIdracInspect(BaremetalInspectBase,
+                            bsm.BaremetalStandaloneScenarioTest):
+    driver = 'idrac'
+
+    def _verify_node_inspection_data(self, node):
+        super()._verify_node_inspection_data(node)
+        self.assertGreater(int(node['properties']['memory_mb']), 0)
+        self.assertGreater(int(node['properties']['cpus']), 0)
+        self.assertGreater(int(node['properties']['local_gb']), 0)
 
 
 class BaremetalIdracRedfishInspect(BaremetalIdracInspect):

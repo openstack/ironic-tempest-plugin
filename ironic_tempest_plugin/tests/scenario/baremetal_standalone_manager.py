@@ -607,6 +607,12 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # set via a different test).
     power_interface = None
 
+    # The inspect interface to use by the HW type. The inspect interface of the
+    # node used in the test will be set to this value. If set to None, the
+    # node will retain its existing inspect_interface value (which may have
+    # been set via a different test).
+    inspect_interface = None
+
     # Boolean value specify if image is wholedisk or not.
     wholedisk_image = None
 
@@ -632,55 +638,18 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
                     'driver': cls.driver,
                     'enabled_drivers': CONF.baremetal.enabled_drivers,
                     'enabled_hw_types': CONF.baremetal.enabled_hardware_types})
-        if (cls.bios_interface and cls.bios_interface not in
-                CONF.baremetal.enabled_bios_interfaces):
-            raise cls.skipException(
-                "Bios interface %(iface)s required by the test is not in the "
-                "list of enabled bios interfaces %(enabled)s" % {
-                    'iface': cls.bios_interface,
-                    'enabled': CONF.baremetal.enabled_bios_interfaces})
-        if (cls.deploy_interface and cls.deploy_interface not in
-                CONF.baremetal.enabled_deploy_interfaces):
-            raise cls.skipException(
-                "Deploy interface %(iface)s required by test is not "
-                "in the list of enabled deploy interfaces %(enabled)s" % {
-                    'iface': cls.deploy_interface,
-                    'enabled': CONF.baremetal.enabled_deploy_interfaces})
-        if (cls.rescue_interface and cls.rescue_interface not in
-                CONF.baremetal.enabled_rescue_interfaces):
-            raise cls.skipException(
-                "Rescue interface %(iface)s required by test is not "
-                "in the list of enabled rescue interfaces %(enabled)s" % {
-                    'iface': cls.rescue_interface,
-                    'enabled': CONF.baremetal.enabled_rescue_interfaces})
-        if (cls.boot_interface and cls.boot_interface not in
-                CONF.baremetal.enabled_boot_interfaces):
-            raise cls.skipException(
-                "Boot interface %(iface)s required by test is not "
-                "in the list of enabled boot interfaces %(enabled)s" % {
-                    'iface': cls.boot_interface,
-                    'enabled': CONF.baremetal.enabled_boot_interfaces})
-        if (cls.raid_interface and cls.raid_interface not in
-                CONF.baremetal.enabled_raid_interfaces):
-            raise cls.skipException(
-                "RAID interface %(iface)s required by test is not "
-                "in the list of enabled RAID interfaces %(enabled)s" % {
-                    'iface': cls.raid_interface,
-                    'enabled': CONF.baremetal.enabled_raid_interfaces})
-        if (cls.management_interface and cls.management_interface not in
-                CONF.baremetal.enabled_management_interfaces):
-            raise cls.skipException(
-                "Management interface %(iface)s required by test is not "
-                "in the list of enabled management interfaces %(enabled)s" % {
-                    'iface': cls.management_interface,
-                    'enabled': CONF.baremetal.enabled_management_interfaces})
-        if (cls.power_interface and cls.power_interface not in
-                CONF.baremetal.enabled_power_interfaces):
-            raise cls.skipException(
-                "Power interface %(iface)s required by test is not "
-                "in the list of enabled power interfaces %(enabled)s" % {
-                    'iface': cls.power_interface,
-                    'enabled': CONF.baremetal.enabled_power_interfaces})
+        for iface in base.SUPPORTED_INTERFACES:
+            requested = getattr(cls, f'{iface}_interface')
+            enabled = getattr(CONF.baremetal, f'enabled_{iface}_interfaces')
+            if requested and requested not in enabled:
+                raise cls.skipException(
+                    "%(type)s interface %(iface)s required by the test is not "
+                    "in the list of enabled %(type)s interfaces "
+                    "%(enabled)s" % {
+                        'iface': requested,
+                        'type': iface,
+                        'enabled': ', '.join(enabled),
+                    })
         if (cls.wholedisk_image is not None
                 and not cls.wholedisk_image
                 and CONF.baremetal.use_provision_network):
@@ -720,20 +689,9 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         if not uuidutils.is_uuid_like(cls.image_ref):
             image_checksum = cls.image_checksum
         boot_kwargs = {'image_checksum': image_checksum}
-        if cls.bios_interface:
-            boot_kwargs['bios_interface'] = cls.bios_interface
-        if cls.deploy_interface:
-            boot_kwargs['deploy_interface'] = cls.deploy_interface
-        if cls.rescue_interface:
-            boot_kwargs['rescue_interface'] = cls.rescue_interface
-        if cls.boot_interface:
-            boot_kwargs['boot_interface'] = cls.boot_interface
-        if cls.raid_interface:
-            boot_kwargs['raid_interface'] = cls.raid_interface
-        if cls.management_interface:
-            boot_kwargs['management_interface'] = cls.management_interface
-        if cls.power_interface:
-            boot_kwargs['power_interface'] = cls.power_interface
+        for iface in base.SUPPORTED_INTERFACES:
+            if requested := getattr(cls, f'{iface}_interface'):
+                boot_kwargs[f'{iface}_interface'] = requested
 
         # just get an available node
         cls.node = cls.get_and_reserve_node()

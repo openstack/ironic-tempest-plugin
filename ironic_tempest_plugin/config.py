@@ -98,7 +98,7 @@ BaremetalGroup = [
                help="Timeout for association of Nova instance and Ironic "
                     "node"),
     cfg.IntOpt('inspect_timeout',
-               default=10,
+               default=300,
                help="Timeout for inspecting an Ironic node."),
     cfg.IntOpt('power_timeout',
                default=60,
@@ -203,6 +203,9 @@ BaremetalGroup = [
     cfg.ListOpt('enabled_power_interfaces',
                 default=['fake', 'ipmitool'],
                 help="List of Ironic enabled power interfaces."),
+    cfg.ListOpt('enabled_inspect_interfaces',
+                default=['no-inspect'],
+                help="List of Ironic enabled inspect interfaces."),
     cfg.StrOpt('default_rescue_interface',
                help="Ironic default rescue interface."),
     cfg.StrOpt('firmware_image_url',

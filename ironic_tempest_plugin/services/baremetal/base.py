@@ -23,6 +23,11 @@ from tempest.lib.common import rest_client
 # separate processes so global variables are not shared among them.
 BAREMETAL_MICROVERSION = None
 
+# Interfaces that can be set via the baremetal client and by logic in scenario
+# managers.
+SUPPORTED_INTERFACES = ['bios', 'deploy', 'rescue', 'boot', 'raid',
+                        'management', 'power', 'inspect']
+
 
 def set_baremetal_api_microversion(baremetal_microversion):
     global BAREMETAL_MICROVERSION

@@ -20,6 +20,26 @@ class BaremetalClient(base.BaremetalClient):
     version = '1'
     uri_prefix = 'v1'
 
+    node_attributes = (
+        'properties/cpu_arch',
+        'properties/cpus',
+        'properties/local_gb',
+        'properties/memory_mb',
+        'driver',
+        'instance_uuid',
+        'resource_class',
+        'protected',
+        'protected_reason',
+        # TODO(dtantsur): maintenance is set differently
+        # in newer API versions.
+        'maintenance',
+        'description',
+        'shard'
+    ) + tuple(
+        f'{iface}_interface'
+        for iface in base.SUPPORTED_INTERFACES
+    )
+
     @staticmethod
     def _get_headers(api_version):
         """Return headers for a request.
@@ -507,26 +527,8 @@ class BaremetalClient(base.BaremetalClient):
         else:
             params = {}
 
-        node_attributes = ('properties/cpu_arch',
-                           'properties/cpus',
-                           'properties/local_gb',
-                           'properties/memory_mb',
-                           'driver',
-                           'bios_interface',
-                           'deploy_interface',
-                           'raid_interface',
-                           'rescue_interface',
-                           'instance_uuid',
-                           'resource_class',
-                           'protected',
-                           'protected_reason',
-                           # TODO(dtantsur): maintenance is set differently
-                           # in newer API versions.
-                           'maintenance',
-                           'description',
-                           'shard')
         if not patch:
-            patch = self._make_patch(node_attributes, **kwargs)
+            patch = self._make_patch(self.node_attributes, **kwargs)
 
         return self._patch_request('nodes', uuid, patch, params=params)
 
