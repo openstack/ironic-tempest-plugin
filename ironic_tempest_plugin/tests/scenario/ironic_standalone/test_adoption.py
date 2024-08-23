@@ -34,7 +34,7 @@ class BaremetalAdoptionDriverWholedisk(
         driver = 'ipmi'
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
-    deploy_interface = 'iscsi'
+    deploy_interface = 'direct'
     # 1.37 is required to be able to copy traits
     api_microversion = '1.37'
 
