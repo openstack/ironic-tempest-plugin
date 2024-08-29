@@ -50,6 +50,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
     TEST_RESCUE_MODE = False
     image_ref = None
     wholedisk_image = None
+    auto_lease = False
 
     @classmethod
     def skip_checks(cls):
@@ -210,12 +211,21 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         output = client.exec_command(cmd).rstrip()
         self.assertEqual(success_string, output)
 
+    def validate_lessee(self):
+        iinfo = self.node.get('instance_info')
+        dii = self.node.get('driver_internal_info', {})
+        if 'automatic_lessee' in dii and iinfo:
+            # NOTE(JayF): This item not being in instance_info tells us we
+            # set the lessee.
+            self.assertEqual(iinfo['project_id'], self.node['lessee'])
+
     def baremetal_server_ops(self):
         self.add_keypair()
         self.instance, self.node = self.boot_instance(image_id=self.image_ref)
         self.validate_image()
         self.validate_ports()
         self.validate_scheduling()
+        self.validate_lessee()
         ip_address = self.get_server_ip(self.instance)
         vm_client = self.get_remote_client(ip_address, server=self.instance)
 
@@ -264,6 +274,7 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
     def test_baremetal_server_ops_wholedisk_image(self):
         self.image_ref = CONF.baremetal.whole_disk_image_ref
         self.wholedisk_image = True
+        self.auto_lease = True
         self.baremetal_server_ops()
 
 
