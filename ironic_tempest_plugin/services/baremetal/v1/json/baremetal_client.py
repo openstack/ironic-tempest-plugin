@@ -1008,3 +1008,19 @@ class BaremetalClient(base.BaremetalClient):
         }
 
         return self._create_request_no_response_body('heartbeat', kwargs)
+
+    @base.handle_errors
+    def show_inventory(self, uuid, api_version='1.81'):
+        """Gets hardware inventory for the specific node.
+
+        :param uuid: Unique identifier of the node in UUID format.
+        :param api_version: Ironic API version to use.
+        :return: Inventory as a dictionary.
+
+        """
+        extra_headers, headers = self._get_headers(api_version)
+        resp, body = self._show_request(
+            'inventory', uuid, headers=headers, extra_headers=extra_headers,
+            uri=f'{self.uri_prefix}/nodes/{uuid}/inventory')
+        self.expected_success(http_client.OK, resp.status)
+        return body

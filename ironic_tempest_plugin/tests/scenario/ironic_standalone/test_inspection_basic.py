@@ -70,8 +70,60 @@ class BaremetalRedfishAgentInspect(BaremetalInspectBase,
     driver = 'redfish'
     inspect_interface = 'agent'
     wait_provisioning_state_interval = 15
+    # 1.81 adds support for inventory API
+    api_microversion = '1.81'
 
-    # TODO(dtantsur): test aborting inspection and fetching inspection data
+    def _verify_node_inspection_data(self, node):
+        super()._verify_node_inspection_data(node)
+        inspection_data = self.baremetal_client.show_inventory(
+            self.node['uuid'])
+        self.assertEqual({'inventory', 'plugin_data'}, set(inspection_data))
+
+        # Inventory sanity check
+        inventory = inspection_data['inventory']
+        self.assertGreater(inventory['cpu']['count'], 0)
+        self.assertGreater(inventory['memory']['physical_mb'], 256)
+        self.assertGreater(len(inventory['disks']), 0)
+        self.assertGreater(len(inventory['interfaces']), 0)
+
+    @decorators.idempotent_id('82670a85-49b7-4d28-b8a8-6e18b0d4c8d1')
+    def test_inspect_abort(self):
+        _, node = self.baremetal_client.show_node(self.node['uuid'])
+        current_state = node['provision_state']
+
+        def cleanup():
+            nonlocal current_state
+
+            if current_state == 'inspect failed':
+                self.baremetal_client.set_node_provision_state(
+                    self.node['uuid'], 'manage')
+                self.wait_provisioning_state(self.node['uuid'], 'manageable')
+                current_state = 'manageable'
+
+            if current_state == 'manageable':
+                self.baremetal_client.set_node_provision_state(
+                    self.node['uuid'], 'provide')
+                self.wait_provisioning_state(self.node['uuid'], 'available')
+
+        self.addCleanup(cleanup)
+
+        if current_state != 'manageable':
+            self.baremetal_client.set_node_provision_state(self.node['uuid'],
+                                                           'manage')
+        current_state = 'manageable'
+
+        self.baremetal_client.set_node_provision_state(self.node['uuid'],
+                                                       'inspect')
+        self.wait_provisioning_state(
+            self.node['uuid'], 'inspect wait',
+            timeout=300, interval=5)
+
+        self.baremetal_client.set_node_provision_state(self.node['uuid'],
+                                                       'abort')
+        self.wait_provisioning_state(
+            self.node['uuid'], 'inspect failed',
+            timeout=60, interval=1)
+        current_state = 'inspect failed'
 
 
 class BaremetalIdracInspect(BaremetalInspectBase,
