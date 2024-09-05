@@ -15,17 +15,11 @@
         - ironic-tempest-functional-python3-2024.1
         - ironic-tempest-functional-python3-2023.2:
             voting: false
-        - ironic-tempest-functional-rbac-scope-enforced
         - ironic-tempest-functional-rbac-scope-enforced-2024.1
         - ironic-tempest-functional-rbac-scope-enforced-2023.2
         # Enable these *once* we have the policy fix backported
         # for making own node changes.
         # - ironic-tempest-functional-rbac-scope-enforced-2023.1
-        - ironic-inspector-tempest
-        - ironic-inspector-tempest-2024.1
-        - ironic-inspector-tempest-2023.2
-        - ironic-inspector-tempest-2023.1:
-            voting: false
         - ironic-standalone-anaconda
         - ironic-standalone-anaconda-2024.1
         - ironic-standalone-anaconda-2023.2
@@ -35,6 +29,11 @@
         - ironic-standalone-redfish-2024.1
         - ironic-standalone-redfish-2023.2
         - ironic-standalone-redfish-2023.1:
+            voting: false
+        # NOTE(dtantsur): inspector is deprecated and rarely sees any changes,
+        # no point in running many jobs
+        - ironic-inspector-tempest
+        - ironic-inspector-tempest-2024.1:
             voting: false
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting.
@@ -47,10 +46,7 @@
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.1:
             voting: false
-        - ironic-inspector-tempest-discovery
-        - ironic-inspector-tempest-discovery-2024.1
-        - ironic-inspector-tempest-discovery-2023.2
-        - ironic-inspector-tempest-discovery-2023.1:
+        - ironic-inspector-tempest-discovery:
             voting: false
     gate:
       jobs:
@@ -62,14 +58,10 @@
         - ironic-tempest-functional-python3-2023.2
         - ironic-tempest-functional-rbac-scope-enforced-2024.1
         - ironic-tempest-functional-rbac-scope-enforced-2023.2
-        - ironic-tempest-functional-rbac-scope-enforced
-        - ironic-inspector-tempest
-        - ironic-inspector-tempest-2024.1
-        - ironic-inspector-tempest-2023.2
-        - ironic-inspector-tempest-rbac-scope-enforced
-        - ironic-inspector-tempest-rbac-scope-enforced-2024.1
-        - ironic-inspector-tempest-rbac-scope-enforced-2023.2
+        - ironic-standalone-anaconda
+        - ironic-standalone-anaconda-2024.1
+        - ironic-standalone-anaconda-2023.2
         - ironic-standalone-redfish
         - ironic-standalone-redfish-2024.1
         - ironic-standalone-redfish-2023.2
-        - ironic-inspector-tempest-discovery
+        - ironic-inspector-tempest
