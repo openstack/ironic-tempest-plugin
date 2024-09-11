@@ -139,6 +139,11 @@ class BaremetalClient(base.BaremetalClient):
         return self._list_request('deploy_templates', **kwargs)
 
     @base.handle_errors
+    def list_runbooks(self, **kwargs):
+        """List all runbooks."""
+        return self._list_request('runbooks', **kwargs)
+
+    @base.handle_errors
     def show_node(self, uuid, api_version=None):
         """Gets a specific node.
 
@@ -266,6 +271,14 @@ class BaremetalClient(base.BaremetalClient):
         :return: Serialized deploy template as a dictionary.
         """
         return self._show_request('deploy_templates', deploy_template_ident)
+
+    def show_runbook(self, runbook_ident):
+        """Gets a specific runbook.
+
+        :param runbook_ident: Name or UUID of runbook.
+        :return: Serialized runbook as a dictionary.
+        """
+        return self._show_request('runbooks', runbook_ident)
 
     @base.handle_errors
     def create_node(self, chassis_id=None, **kwargs):
@@ -444,6 +457,23 @@ class BaremetalClient(base.BaremetalClient):
         return self._create_request('deploy_templates', kwargs)
 
     @base.handle_errors
+    def create_runbook(self, name, **kwargs):
+        """Create a runbook with the specified parameters.
+
+        :param name: The name of the runbook.
+        :param kwargs:
+            steps: steps of the runbook.
+            uuid: UUID of the runbook. Optional.
+            public: An optional boolean value indicating whether the runbook
+                is public (accessible to others)
+                or private (restricted to the owner).
+            extra: meta-data of the runbook. Optional.
+        :return: A tuple with the server response and the created runbook.
+        """
+        kwargs['name'] = name
+        return self._create_request('runbooks', kwargs)
+
+    @base.handle_errors
     def delete_node(self, uuid):
         """Deletes a node having the specified UUID.
 
@@ -509,6 +539,15 @@ class BaremetalClient(base.BaremetalClient):
         :return: A tuple with the server response and the response body.
         """
         return self._delete_request('deploy_templates', deploy_template_ident)
+
+    @base.handle_errors
+    def delete_runbook(self, runbook_ident):
+        """Deletes a runbook having the specified name or UUID.
+
+        :param runbook_ident: Name or UUID of the runbook.
+        :return: A tuple with the server response and the response body.
+        """
+        return self._delete_request('runbooks', runbook_ident)
 
     @base.handle_errors
     def update_node(self, uuid, patch=None, **kwargs):
@@ -598,6 +637,18 @@ class BaremetalClient(base.BaremetalClient):
                                    patch)
 
     @base.handle_errors
+    def update_runbook(self, runbook_ident, patch):
+        """Update the specified runbook.
+
+        :param runbook_ident: Name or UUID of the runbook.
+        :param patch: List of dicts representing json patches. Each dict
+            has keys 'path', 'op' and 'value'; to update a field.
+        :return: A tuple with the server response and the updated runbook.
+        """
+
+        return self._patch_request('runbooks', runbook_ident, patch)
+
+    @base.handle_errors
     def set_node_power_state(self, node_uuid, state):
         """Set power state of the specified node.
 
@@ -624,7 +675,8 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def set_node_provision_state(self, node_uuid, state, configdrive=None,
-                                 clean_steps=None, rescue_password=None):
+                                 clean_steps=None, rescue_password=None,
+                                 runbook=None):
         """Set provision state of the specified node.
 
         :param node_uuid: The unique identifier of the node.
@@ -634,6 +686,7 @@ class BaremetalClient(base.BaremetalClient):
             configuration drive string.
         :param clean_steps: A list with clean steps to execute.
         :param rescue_password: user password used to rescue.
+        :param runbook: The unique identifier of a runbook.
         """
         data = {'target': state}
         # NOTE (vsaienk0): Add both here if specified, do not check anything.
@@ -644,6 +697,8 @@ class BaremetalClient(base.BaremetalClient):
             data['clean_steps'] = clean_steps
         if rescue_password is not None:
             data['rescue_password'] = rescue_password
+        if runbook is not None:
+            data['runbook'] = runbook
         return self._put_request('nodes/%s/states/provision' % node_uuid,
                                  data)
 

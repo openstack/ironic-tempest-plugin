@@ -38,7 +38,7 @@ SUPPORTED_DRIVERS = ['fake', 'fake-hardware']
 # NOTE(jroll): resources must be deleted in a specific order, this list
 # defines the resource types to clean up, and the correct order.
 RESOURCE_TYPES = ['port', 'portgroup', 'node', 'volume_connector',
-                  'volume_target', 'chassis', 'deploy_template']
+                  'volume_target', 'chassis', 'deploy_template', 'runbook']
 
 
 def creates(resource):
@@ -368,6 +368,18 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         return resp, body
 
     @classmethod
+    @creates('runbook')
+    def create_runbook(cls, name, **kwargs):
+        """Wrapper utility for creating test runbook.
+
+        :param name: The name of the runbook.
+        :return: A tuple with the server response and the created runbook.
+        """
+        resp, body = cls.client.create_runbook(name=name, **kwargs)
+
+        return resp, body
+
+    @classmethod
     def delete_chassis(cls, chassis_id):
         """Deletes a chassis having the specified UUID.
 
@@ -470,6 +482,20 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         if deploy_template_ident in cls.created_objects['deploy_template']:
             cls.created_objects['deploy_template'].remove(
                 deploy_template_ident)
+
+        return resp
+
+    @classmethod
+    def delete_runbook(cls, runbook_ident):
+        """Deletes a runbook having the specified name or UUID.
+
+        :param runbook_ident: Name or UUID of the runbook.
+        :return: Server response.
+        """
+        resp, body = cls.client.delete_runbook(runbook_ident)
+
+        if runbook_ident in cls.created_objects['runbook']:
+            cls.created_objects['runbook'].remove(runbook_ident)
 
         return resp
 

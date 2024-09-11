@@ -459,7 +459,7 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
             timeout=CONF.baremetal.unrescue_timeout,
             interval=1)
 
-    def manual_cleaning(self, node, clean_steps):
+    def manual_cleaning(self, node, clean_steps=None, runbook=None):
         """Performs manual cleaning.
 
         The following actions are executed:
@@ -470,15 +470,25 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
 
         :param node: Ironic node to associate instance_uuid with.
         :param clean_steps: clean steps for manual cleaning.
+        :param runbook: unique identifier of a runbook.
         """
+        if clean_steps is None and runbook is None:
+            raise ValueError("Either clean_steps or runbook must be provided.")
+
         self.set_node_provision_state(node['uuid'], 'manage')
         self.wait_provisioning_state(
             node['uuid'],
             [bm.BaremetalProvisionStates.MANAGEABLE],
             timeout=CONF.baremetal.unprovision_timeout,
             interval=30)
-        self.set_node_provision_state(
-            node['uuid'], 'clean', clean_steps=clean_steps)
+
+        if runbook:
+            self.set_node_provision_state(
+                node['uuid'], 'clean', runbook=runbook)
+        else:
+            self.set_node_provision_state(
+                node['uuid'], 'clean', clean_steps=clean_steps)
+
         self.wait_provisioning_state(
             node['uuid'],
             [bm.BaremetalProvisionStates.MANAGEABLE],
@@ -491,6 +501,17 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
              bm.BaremetalProvisionStates.AVAILABLE],
             timeout=CONF.baremetal.unprovision_timeout,
             interval=30)
+
+    def manual_cleaning_with_runbook(self, node):
+        steps = [{
+            'interface': 'bios',
+            'step': 'apply_configuration',
+            'args': {},
+            'order': 1
+        }]
+        _, runbook = self.baremetal_client.create_runbook('CUSTOM_AWESOME',
+                                                          steps=steps)
+        self.manual_cleaning(node, runbook=runbook)
 
     def check_manual_partition_cleaning(self, node):
         """Tests the cleanup step for erasing devices metadata.
