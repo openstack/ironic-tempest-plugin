@@ -79,8 +79,18 @@ class BaremetalClient(rest_client.RestClient):
 
     def get_min_max_api_microversions(self):
         """Returns a tuple of minimum and remote microversions."""
-        _, resp_body = self._show_request(None, uri='/')
-        version = resp_body.get('default_version', {})
+        if '/v1' in self.base_url:
+            root_uri = '/'
+        else:
+            # NOTE(dtantsur): we should just use / here but due to a bug in
+            # Ironic, / does not contain the microversion headers. See
+            # https://bugs.launchpad.net/ironic/+bug/2079023
+            root_uri = '/v1'
+        _, resp_body = self._show_request(None, uri=root_uri)
+        try:
+            version = resp_body['default_version']
+        except KeyError:
+            version = resp_body['version']
         api_min = version.get('min_version')
         api_max = version.get('version')
         return (api_min, api_max)
