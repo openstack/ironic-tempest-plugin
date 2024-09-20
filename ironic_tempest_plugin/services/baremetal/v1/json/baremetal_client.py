@@ -40,8 +40,8 @@ class BaremetalClient(base.BaremetalClient):
         for iface in base.SUPPORTED_INTERFACES
     )
 
-    @staticmethod
-    def _get_headers(api_version):
+    @classmethod
+    def _get_headers(cls, api_version):
         """Return headers for a request.
 
         Currently supports a header specifying the API version to use.
@@ -55,7 +55,7 @@ class BaremetalClient(base.BaremetalClient):
         headers = None
         if api_version is not None:
             extra_headers = True
-            headers = {'x-openstack-ironic-api-version': api_version}
+            headers = {cls.api_microversion_header_name: api_version}
         return extra_headers, headers
 
     @base.handle_errors
@@ -839,7 +839,7 @@ class BaremetalClient(base.BaremetalClient):
         headers = None
         if api_version is not None:
             extra_headers = True
-            headers = {'x-openstack-ironic-api-version': api_version}
+            headers = {self.api_microversion_header_name: api_version}
         return self._list_request('nodes/%s/vifs' % node_uuid,
                                   headers=headers,
                                   extra_headers=extra_headers)
