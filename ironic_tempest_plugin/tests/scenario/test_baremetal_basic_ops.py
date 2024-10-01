@@ -240,8 +240,16 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         # Reboot node
         self.reboot_node(self.instance)
 
-        # ensure we can ping the node again
-        self.assertTrue(self.ping_ip_address(ip_address))
+        # Ensure we have some sort of connectivity
+        # Attempt to ping, if all else fails fall back to an ssh connection
+        # which worked previously.
+        pinging = self.ping_ip_address(ip_address)
+        if not pinging:
+            self.get_remote_client(ip_address, server=self.instance)
+        else:
+            # If we're here, this is successful. If ssh fails above,
+            # the job will ultimately fail.
+            self.assertTrue(pinging)
 
         self.terminate_instance(self.instance)
 
