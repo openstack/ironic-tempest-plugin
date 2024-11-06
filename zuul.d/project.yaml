@@ -11,8 +11,6 @@
         - ironic-standalone-2024.1
         - ironic-standalone-2023.2:
             voting: false
-        - ironic-standalone-2023.1:
-            voting: false
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-2024.2
         - ironic-tempest-functional-python3-2024.1
@@ -22,21 +20,15 @@
         - ironic-tempest-functional-rbac-scope-enforced-2024.1
         - ironic-tempest-functional-rbac-scope-enforced-2023.2:
             voting: false
-        - ironic-tempest-functional-rbac-scope-enforced-2023.1:
-            voting: false
         - ironic-standalone-anaconda
         - ironic-standalone-anaconda-2024.2
         - ironic-standalone-anaconda-2024.1
         - ironic-standalone-anaconda-2023.2:
             voting: false
-        - ironic-standalone-anaconda-2023.1:
-            voting: false
         - ironic-standalone-redfish
         - ironic-standalone-redfish-2024.2
         - ironic-standalone-redfish-2024.1
         - ironic-standalone-redfish-2023.2:
-            voting: false
-        - ironic-standalone-redfish-2023.1:
             voting: false
         # NOTE(dtantsur): inspector is deprecated and rarely sees any changes,
         # no point in running many jobs
@@ -55,8 +47,6 @@
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2024.1:
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.2:
-            voting: false
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2023.1:
             voting: false
         - ironic-inspector-tempest-discovery:
             voting: false
