@@ -372,7 +372,7 @@ class TestNodesResourceClassOldApi(base.BaseBaremetalTest):
     def test_create_node_resource_class_old_api(self):
         """Try to create a node with resource class using older api version."""
         resource_class = data_utils.arbitrary_string()
-        self.assertRaises(lib_exc.UnexpectedResponseCode, self.create_node,
+        self.assertRaises(lib_exc.NotAcceptable, self.create_node,
                           self.chassis['uuid'], resource_class=resource_class)
 
     @decorators.attr(type='negative')
@@ -380,7 +380,7 @@ class TestNodesResourceClassOldApi(base.BaseBaremetalTest):
     def test_update_node_resource_class_old_api(self):
         """Try to update a node with resource class using older api version."""
         resource_class = data_utils.arbitrary_string()
-        self.assertRaises(lib_exc.UnexpectedResponseCode,
+        self.assertRaises(lib_exc.NotAcceptable,
                           self.client.update_node,
                           self.node['uuid'], resource_class=resource_class)
 
@@ -390,10 +390,10 @@ class TestNodesResourceClassOldApi(base.BaseBaremetalTest):
         """Try to list nodes with resource class using older api version."""
         resource_class = data_utils.arbitrary_string()
         self.assertRaises(
-            lib_exc.UnexpectedResponseCode,
+            lib_exc.NotAcceptable,
             self.client.list_nodes, resource_class=resource_class)
         self.assertRaises(
-            lib_exc.UnexpectedResponseCode,
+            lib_exc.NotAcceptable,
             self.client.list_nodes_detail, resource_class=resource_class)
 
 
@@ -1043,10 +1043,9 @@ class TestNodesTraitsOldApi(base.BaseBaremetalTest):
     @decorators.idempotent_id('5419af7b-4e27-4be4-88f6-e01c598a8102')
     def test_list_node_traits_old_api(self):
         """Try to list traits for a node using an older api version."""
-        exc = self.assertRaises(
-            lib_exc.UnexpectedResponseCode,
+        self.assertRaises(
+            lib_exc.NotAcceptable,
             self.client.list_node_traits, self.node['uuid'])
-        self.assertEqual(406, exc.resp.status)
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('a4353f3a-bedc-4579-9c7e-4bebcd95903d')
@@ -1096,10 +1095,9 @@ class TestNodesTraitsOldApi(base.BaseBaremetalTest):
     @decorators.idempotent_id('eb75b3c8-ac9c-4399-90a2-c0030bfde7a6')
     def test_list_nodes_traits_field(self):
         """Try to list nodes' traits field using older api version."""
-        exc = self.assertRaises(
-            lib_exc.UnexpectedResponseCode,
+        self.assertRaises(
+            lib_exc.NotAcceptable,
             self.client.list_nodes, fields='traits')
-        self.assertEqual(406, exc.resp.status)
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('214ae7fc-149b-4657-b6bc-66353d49ade8')
