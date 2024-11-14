@@ -1024,3 +1024,11 @@ class BaremetalClient(base.BaremetalClient):
             uri=f'{self.uri_prefix}/nodes/{uuid}/inventory')
         self.expected_success(http_client.OK, resp.status)
         return body
+
+    @base.handle_errors
+    def get_shards(self, api_version='1.82'):
+        """Get all shards."""
+
+        extra_headers, headers = self._get_headers(api_version)
+        return self._list_request('shards', headers=headers,
+                                  extra_headers=extra_headers)

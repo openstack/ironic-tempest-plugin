@@ -12,8 +12,11 @@
 
 from tempest import config
 from tempest.lib import decorators
+from tempest.lib import exceptions
 
+from ironic_tempest_plugin.tests.api.admin import api_microversion_fixture
 from ironic_tempest_plugin.tests.api import base
+
 
 CONF = config.CONF
 
@@ -126,3 +129,60 @@ class TestNodeShardQueries(base.BaseBaremetalTest):
 
         self.assertIn(self.none_node_id, fetched_node_ids)
         self.assertNotIn(self.bad_node_id, fetched_node_ids)
+
+    @decorators.idempotent_id('77e36b09-308a-4fdf-bdac-d31d3b4c7c23')
+    def test_only_show_requested_shard_wrong_microversions(self):
+        """Test get node on shard filter fails on bad microversions.
+
+        Test that we get the correct error when using microversions
+        below the minimum supported.
+        """
+        shard = "oneshardtest"
+        self._setup_nodes(shard)
+
+        for microversion in ["1.37", "1.81"]:
+            self.useFixture(
+                api_microversion_fixture.APIMicroversionFixture(microversion)
+            )
+
+            self.assertRaises(
+                exceptions.NotAcceptable,
+                self.client.list_nodes,
+                shard=shard,
+            )
+
+
+class TestGetAllShards(base.BaseBaremetalTest):
+    """Tests for baremetal shards."""
+
+    min_microversion = '1.82'
+
+    def setUp(self):
+        super(TestGetAllShards, self).setUp()
+        _, self.chassis = self.create_chassis()
+        self.shards = ["shard1", "shard2", "shard3"]
+        self.node_ids = []
+        for shard in self.shards:
+            _, node = self.create_node(self.chassis['uuid'], shard=shard)
+            self.node_ids.append(node['uuid'])
+
+    @decorators.idempotent_id('fc786196-63c7-4e0d-bd14-3e478d4d1e3e')
+    def test_get_all_shards(self):
+        _, fetched_shards = self.client.get_shards()
+        fetched_shards = [shard['name'] for shard in fetched_shards['shards']]
+
+        self.assertItemsEqual(self.shards, fetched_shards)
+
+    @decorators.idempotent_id('e9d5fd51-1419-4af2-9d6c-c317556c2096')
+    def test_get_shards_wrong_microversions(self):
+        """Test get shards fails on bad microversions.
+
+        Test that we get the correct error when using microversions
+        below the minimum supported.
+        """
+        for microversion in ["1.37", "1.81"]:
+            self.useFixture(
+                api_microversion_fixture.APIMicroversionFixture(microversion)
+            )
+            # Test microversion below minimum supported
+            self.assertRaises(exceptions.NotFound, self.client.get_shards)
