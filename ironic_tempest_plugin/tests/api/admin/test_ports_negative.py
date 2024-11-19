@@ -26,6 +26,16 @@ class TestPortsNegative(base.BaseBaremetalTest):
 
         _, self.chassis = self.create_chassis()
         _, self.node = self.create_node(self.chassis['uuid'])
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.31'))
+        # Now with a 1.31 microversion, swap the network interfaces
+        # into place so the test doesn't break depending on
+        # the environment's default state.
+        self.client.update_node(self.node['uuid'],
+                                [{'path': '/network_interface',
+                                  'op': 'replace',
+                                  'value': 'noop'}])
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.1'))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0a6ee1f7-d0d9-4069-8778-37f3aa07303a')

@@ -25,9 +25,23 @@ class TestPorts(base.BaseBaremetalTest):
         super(TestPorts, self).setUp()
 
         _, self.chassis = self.create_chassis()
+        # NOTE(TheJulia): noop is required for the network interface for
+        # these tests, as newer versions of ironic can invoke network
+        # logic, and if is not configured with full integration configuration,
+        # can then result in failed tests.
         _, self.node = self.create_node(self.chassis['uuid'])
         _, self.port = self.create_port(self.node['uuid'],
                                         data_utils.rand_mac_address())
+        self.useFixture(
+            api_microversion_fixture.APIMicroversionFixture('1.31'))
+        # Now with a 1.31 microversion, swap the network interfaces
+        # into place so the test doesn't break depending on
+        # the environment's default state.
+        self.client.update_node(self.node['uuid'],
+                                [{'path': '/network_interface',
+                                  'op': 'replace',
+                                  'value': 'noop'}])
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('1.1'))
 
     @decorators.idempotent_id('83975898-2e50-42ed-b5f0-e510e36a0b56')
     def test_create_port(self):
