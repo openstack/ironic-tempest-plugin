@@ -137,3 +137,22 @@ class TestAllocationMicroversions(
                 "allocation_ident": allocation['uuid']
             }
         )
+
+
+class TestNodeFirmwarenMicroversions(
+        BaseTestMicroversionEnforcement,
+        MicroversionTestMixin):
+
+    min_microversion = "1.86"
+
+    def setUp(self):
+        super(TestNodeFirmwarenMicroversions, self).setUp()
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+    @decorators.idempotent_id('f50e9098-1870-46b1-b05c-660d0f8c534d')
+    def test_list_node_firmware(self):
+        self._microversion_test(
+            BaremetalClient.list_node_firmware, "1.86",
+            lib_exc.NotFound, {"node_uuid": self.node['uuid']}
+        )
