@@ -136,13 +136,13 @@ class InspectorDiscoveryTest(introspection_manager.InspectorScenarioTest):
            * Generate discovery rule;
            * Start introspection via ironic-inspector API;
            * Delete the node from ironic;
-           * Wating for node discovery;
+           * Waiting for node discovery;
            * Verify introspected node.
         """
         # NOTE(aarefiev): workaround for infra, 'tempest' user doesn't
         # have virsh privileges, so lets power on the node via ironic
         # and then delete it. Because of node is blacklisted in inspector
-        # we can't just power on it, therefor start introspection is used
+        # we can't just power on it, therefore start introspection is used
         # to whitelist discovered node first.
         self.baremetal_client.set_node_provision_state(
             self.node_info['uuid'], 'manage')

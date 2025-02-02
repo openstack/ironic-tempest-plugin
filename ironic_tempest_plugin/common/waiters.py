@@ -180,7 +180,7 @@ def wait_node_value_in_field(client, node_id, field, value,
         field_value = node[field]
         if raise_if_insufficent_access and '** Redacted' in field_value:
             msg = ('Unable to see contents of redacted field '
-                   'indicating insufficent access to execute this test.')
+                   'indicating insufficient access to execute this test.')
             raise lib_exc.InsufficientAPIAccess(msg)
         return value in field_value
 

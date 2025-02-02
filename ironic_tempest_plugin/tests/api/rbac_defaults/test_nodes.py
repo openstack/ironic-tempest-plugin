@@ -675,7 +675,7 @@ class TestNodeSystemReader(base.BaseBaremetalRBACTest):
     All tests here must always expect *multiple* nodes visible, since
     this is a global reader role.
 
-    https://opendev.org/openstack/ironic/src/branch/master/ironic/common/policy.py#L60  # noqa
+    https://opendev.org/openstack/ironic/src/branch/master/ironic/common/policy.py#L60
     """
 
     credentials = ['system_admin', 'system_reader']
