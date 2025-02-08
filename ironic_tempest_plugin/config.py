@@ -282,6 +282,10 @@ BaremetalFeaturesGroup = [
                      "support for embedded network metadata through glean "
                      "or cloud-init, and thus cannot be executed with "
                      "most default job configurations."),
+    cfg.BoolOpt('trunks_supported',
+                default=False,
+                help="Define if trunks are supported by networking driver "
+                     "with baremetal nodes."),
 ]
 
 BaremetalIntrospectionGroup = [
