@@ -638,7 +638,7 @@ class BaremetalChangeBaseBootInterface(
     use_available_driver = True
 
     # List of valid drivers which these tests *can* attempt to utilize.
-    # Generally these should be the most commom, stock, upstream drivers.
+    # Generally these should be the most common, stock, upstream drivers.
     valid_driver_list = ['ipmi', 'redfish']
 
     # Bypass secondary attribute presence check as these tests don't require

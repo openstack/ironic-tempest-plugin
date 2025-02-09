@@ -343,7 +343,7 @@ class BaremetalStandaloneManager(bm.BaremetalScenarioTest,
         :param image_ref: Reference to user image to boot node with.
         :param image_checksum: md5sum of image specified in image_ref.
                                Needed only when direct HTTP link is provided.
-        :param boot_option: The defaut boot option to utilize. If not
+        :param boot_option: The default boot option to utilize. If not
                             specified, the ironic deployment default shall
                             be utilized.
         :param config_drive_networking: If we should load configuration drive
@@ -583,7 +583,7 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # If we don't require an explicit driver, then what drivers *can* we
     # operate with. In essence, this exists to prevent the test from failing
     # on 3rd party drivers, and vendor specific driers which do not support
-    # the sort of itnerfaces we may be trying to test by default.
+    # the sort of interfaces we may be trying to test by default.
     valid_driver_list = []
 
     # The bios interface to use by the HW type. The bios interface of the
@@ -719,7 +719,7 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
         if (cls.use_available_driver
                 and not cls.driver
                 and cls.node['driver'] in cls.valid_driver_list):
-            # If we're attempting to re-use the existing driver, then
+            # If we're attempting to reuse the existing driver, then
             # lets save a value for update_node_driver to work with.
             cls.driver = cls.node['driver']
         cls.update_node_driver(cls.node['uuid'], cls.driver, **boot_kwargs)

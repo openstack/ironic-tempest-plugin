@@ -523,8 +523,8 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
 
 class BaseBaremetalRBACTest(BaseBaremetalTest):
 
-    # Unless otherwise superceeded by a version, RBAC tests generally start at
-    # version 1.70 as that is when System scope and the delineation occured.
+    # Unless otherwise superseded by a version, RBAC tests generally start at
+    # version 1.70 as that is when System scope and the delineation occurred.
     min_microversion = '1.70'
 
     @classmethod

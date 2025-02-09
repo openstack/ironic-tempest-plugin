@@ -30,5 +30,5 @@ class RaidCleaningInventoryValidationFailed(exceptions.TempestException):
 
 
 class InsufficientAPIAccess(exceptions.TempestException):
-    message = ("Insufficent Access to the API exists. Please use a user "
+    message = ("Insufficient Access to the API exists. Please use a user "
                "with an elevated level of access to execute this test.")
