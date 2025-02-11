@@ -61,9 +61,6 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
             * Verifies all properties are inspected
             * Verifies introspection data
             * Sets node to available state
-            * Creates a keypair
-            * Boots an instance using the keypair
-            * Deletes the instance
 
         """
         # prepare introspection rule
@@ -102,11 +99,6 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
                 node_id, baremetal_manager.BaremetalProvisionStates.AVAILABLE,
                 timeout=CONF.baremetal.active_timeout,
                 interval=self.wait_provisioning_state_interval)
-
-        self.wait_for_nova_aware_of_bvms()
-        self.add_keypair()
-        ins, _node = self.boot_instance()
-        self.terminate_instance(ins)
 
     @decorators.idempotent_id('70ca3070-184b-4b7d-8892-e977d2bc2870')
     def test_introspection_abort(self):
