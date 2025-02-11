@@ -16,10 +16,12 @@
 
 import time
 
+from oslo_log import log as logging
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils.linux import remote_client
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 
 from ironic_tempest_plugin.common import utils
@@ -27,6 +29,7 @@ from ironic_tempest_plugin.common import waiters as ironic_waiters
 from ironic_tempest_plugin import manager
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 def retry_on_conflict(func):
@@ -307,3 +310,44 @@ class BaremetalScenarioTest(manager.ScenarioTest):
                                        instance['id'], 'ACTIVE')
         # Verify server connection
         self.get_remote_client(server_ip, server=instance)
+
+    def wait_for_ssh(self, ip_address,
+                     username=None,
+                     private_key=None,
+                     server=None,
+                     timeout=60,
+                     delay=10):
+        def _wait_ssh():
+            try:
+                self.get_remote_client(ip_address, username, private_key,
+                                       server=server)
+            except Exception:
+                LOG.debug("Failed to get ssh client for %s", ip_address,
+                          exc_info=True)
+                return False
+            return True
+
+        res = test_utils.call_until_true(_wait_ssh, timeout, delay)
+        self.assertTrue(res, f"Failed to wait for ssh on {ip_address}")
+
+    def check_vm_connectivity(self,
+                              ip_address,
+                              username=None,
+                              private_key=None,
+                              should_connect=True,
+                              extra_msg="",
+                              server=None,
+                              mtu=None):
+        # NOTE(vsaienko): it may take some time to boot VM and initialize
+        # ssh by cloud init. Wait for SSH can pass authentication before
+        # checking connectivity.
+        if should_connect:
+            self.wait_for_ssh(ip_address=ip_address, username=username,
+                              private_key=private_key, server=server)
+        super().check_vm_connectivity(ip_address=ip_address,
+                                      username=username,
+                                      private_key=private_key,
+                                      should_connect=should_connect,
+                                      extra_msg=extra_msg,
+                                      server=server,
+                                      mtu=mtu)
