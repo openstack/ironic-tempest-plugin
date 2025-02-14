@@ -1032,3 +1032,11 @@ class BaremetalClient(base.BaremetalClient):
         extra_headers, headers = self._get_headers(api_version)
         return self._list_request('shards', headers=headers,
                                   extra_headers=extra_headers)
+
+    @base.handle_errors
+    def list_node_firmware(self, node_uuid):
+        """List firmware for a node.
+
+        :param node_uuid: The unique identifier of the node.
+        """
+        return self._list_request('/nodes/%s/firmware' % node_uuid)
