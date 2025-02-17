@@ -217,6 +217,9 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
         self.validate_ports()
         self.validate_scheduling()
         ip_address = self.get_server_ip(self.instance)
+        self.check_vm_connectivity(ip_address=ip_address,
+                                   private_key=self.keypair['private_key'],
+                                   server=self.instance)
         vm_client = self.get_remote_client(ip_address, server=self.instance)
 
         # We expect the ephemeral partition to be mounted on /mnt and to have
