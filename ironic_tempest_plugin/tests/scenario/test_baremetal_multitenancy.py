@@ -118,6 +118,7 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
             clients=self.os_primary,
             keypair=keypair,
             net_id=network['id'],
+            fixed_ip='10.0.100.101',
         )
         fixed_ip1 = instance1['addresses'][network['name']][0]['addr']
         floating_ip1 = self.create_floating_ip(
@@ -132,7 +133,8 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
                 clients=self.os_alt,
                 key_name=alt_keypair['name'],
                 flavor=CONF.compute.flavor_ref_alt,
-                networks=[{'uuid': alt_network['id']}]
+                networks=[{'uuid': alt_network['id'],
+                           'fixed_ip': '10.0.100.102'}],
             )
         else:
             # Create BM
@@ -140,6 +142,7 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
                 keypair=alt_keypair,
                 clients=self.os_alt,
                 net_id=alt_network['id'],
+                fixed_ip='10.0.100.102',
             )
         fixed_ip2 = alt_instance['addresses'][alt_network['name']][0]['addr']
         alt_floating_ip = self.create_floating_ip(
