@@ -135,6 +135,7 @@ class BaremetalDriverAnsibleWholedisk(bsm.BaremetalStandaloneScenarioTest):
     image_ref = CONF.baremetal.whole_disk_image_ref
     wholedisk_image = True
 
+    @decorators.unstable_test(bug='2101021')
     @decorators.idempotent_id('cde532cc-81ba-4489-b374-b4a85cc203eb')
     @utils.services('image', 'network')
     def test_ip_access_to_server(self):
