@@ -6,9 +6,6 @@
     check:
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
-        - ironic-standalone
-        - ironic-standalone-2024.2
-        - ironic-standalone-2024.1
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-2024.2
         - ironic-tempest-functional-python3-2024.1
@@ -31,9 +28,6 @@
             voting: false
     gate:
       jobs:
-        - ironic-standalone
-        - ironic-standalone-2024.2
-        - ironic-standalone-2024.1
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-2024.2
         - ironic-tempest-functional-python3-2024.1
