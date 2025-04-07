@@ -12,8 +12,6 @@
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-2024.2
         - ironic-tempest-functional-python3-2024.1
-        - ironic-tempest-functional-rbac-scope-enforced-2024.2
-        - ironic-tempest-functional-rbac-scope-enforced-2024.1
         - ironic-standalone-anaconda
         - ironic-standalone-anaconda-2024.2
         - ironic-standalone-anaconda-2024.1
@@ -39,8 +37,6 @@
         - ironic-tempest-functional-python3
         - ironic-tempest-functional-python3-2024.2
         - ironic-tempest-functional-python3-2024.1
-        - ironic-tempest-functional-rbac-scope-enforced-2024.2
-        - ironic-tempest-functional-rbac-scope-enforced-2024.1
         - ironic-standalone-anaconda
         - ironic-standalone-anaconda-2024.2
         - ironic-standalone-anaconda-2024.1
