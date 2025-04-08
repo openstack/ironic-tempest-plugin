@@ -178,6 +178,9 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             # CUSTOM_ prefix. Normalise it.
             node_resource_class = node['resource_class']
             node_resource_class = node_resource_class.upper()
+            node_resource_class = node_resource_class.translate(
+                str.maketrans(" -.:", "____", "!@#$%^&*()+=/\\?<>|\"'")
+            )
             node_resource_class = 'CUSTOM_' + node_resource_class
             self.assertEqual(resource_class, node_resource_class)
 
