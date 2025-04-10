@@ -139,14 +139,16 @@ class BaremetalScenarioTest(manager.ScenarioTest):
                                                       instance_id)
 
     @classmethod
-    def wait_for_agent_heartbeat(cls, node_id, timeout=None):
+    def wait_for_agent_heartbeat(cls, node_id, timeout=None,
+                                 abort_on_error_state=True):
         ironic_waiters.wait_node_value_in_field(
             cls.baremetal_client,
             node_id=node_id,
             field='driver_internal_info',
             value='agent_last_heartbeat',
             timeout=timeout or CONF.baremetal.deploywait_timeout,
-            interval=10)
+            interval=10,
+            abort_on_error_state=abort_on_error_state)
 
     @classmethod
     def get_node(cls, node_id=None, instance_id=None, api_version=None):
