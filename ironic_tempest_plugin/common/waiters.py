@@ -18,6 +18,7 @@ from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 
 from ironic_tempest_plugin.common import utils
+from ironic_tempest_plugin import exceptions as ironic_exc
 
 LOG = log.getLogger(__name__)
 
@@ -164,7 +165,8 @@ def wait_for_allocation(client, allocation_ident, timeout=15, interval=1,
 
 def wait_node_value_in_field(client, node_id, field, value,
                              raise_if_insufficent_access=True,
-                             timeout=None, interval=None):
+                             timeout=None, interval=None,
+                             abort_on_error_state=False):
     """Waits for a node to have a field value appear.
 
     :param client: an instance of tempest plugin BaremetalClient.
@@ -173,6 +175,8 @@ def wait_node_value_in_field(client, node_id, field, value,
     :param value: the value/key with-in the field to look for.
     :param timeout: the timeout after which the check is considered as failed.
     :param interval: an interval between show_node calls for status check.
+    :param abort_on_error_state: whether to abort waiting if the node reaches
+        an error state.
     """
 
     def is_field_updated():
@@ -181,7 +185,16 @@ def wait_node_value_in_field(client, node_id, field, value,
         if raise_if_insufficent_access and '** Redacted' in field_value:
             msg = ('Unable to see contents of redacted field '
                    'indicating insufficient access to execute this test.')
-            raise lib_exc.InsufficientAPIAccess(msg)
+            raise ironic_exc.InsufficientAPIAccess(msg)
+        elif (abort_on_error_state
+              and (node['provision_state'].endswith('failed')
+                   or node['provision_state'] == 'error')):
+            msg = ('Node %(node)s reached failure state %(state)s while '
+                   'waiting Error: %(error)s' %
+                   {'node': node_id, 'state': node['provision_state'],
+                    'error': node.get('last_error')})
+            LOG.debug(msg)
+            raise lib_exc.TempestException(msg)
         return value in field_value
 
     if not test_utils.call_until_true(is_field_updated, timeout,
