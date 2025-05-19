@@ -1040,3 +1040,18 @@ class BaremetalClient(base.BaremetalClient):
         :param node_uuid: The unique identifier of the node.
         """
         return self._list_request('/nodes/%s/firmware' % node_uuid)
+
+    @base.handle_errors
+    def list_portgroups_detail(self):
+        """List detailed portgroups."""
+        return self._list_request('portgroups/detail')
+
+    @base.handle_errors
+    def list_portgroups_by_node(self, node_ident):
+        """List portgroups filtered by node."""
+        return self._list_request(f'nodes/{node_ident}/portgroups')
+
+    @base.handle_errors
+    def list_portgroups_details_by_node(self, node_ident):
+        """List detailed portgroups filtered by node."""
+        return self._list_request(f'nodes/{node_ident}/portgroups/detail')
