@@ -31,11 +31,16 @@ class MicroversionTestMixin:
     """Mixin class containing shared microversion test functionality."""
 
     def _microversion_test(
-            self, method_name, min_version, expected_error, required_args,
-            ignore_positive=False):
+        self,
+        method_name,
+        min_version,
+        expected_error,
+        required_args,
+        ignore_positive=False,
+    ):
         """Test methods with invalid API versions"""
 
-        major, minor = map(int, min_version.split('.'))
+        major, minor = map(int, min_version.split("."))
         invalid_versions = []
         if minor >= 11:
             invalid_versions.append(f"{major}.{minor - 10}")
@@ -68,11 +73,20 @@ class MicroversionTestMixin:
                 )
                 method = getattr(self.client, method_name)
 
-                self.assertRaises(
-                    expected_error,
-                    method,
-                    **required_args,
-                )
+                try:
+                    method(**required_args)
+                    self.fail(
+                        f"Request for microversion {microversion} for "
+                        f"{method_name} unexpectedly succeeded. We expected "
+                        f"{expected_error.__name__}."
+                    )
+                except expected_error:
+                    pass  # Expected error, test passes
+                except Exception as e:
+                    self.fail(
+                        f"Request for microversion {microversion} for "
+                        f"{method_name} raised unexpected exception: {e}"
+                    )
 
         if ignore_positive:
             return True
@@ -100,20 +114,21 @@ class MicroversionTestMixin:
                 method(**required_args)
                 return True
 
-            except expected_error:
+            except expected_error as e:
                 self.fail(
-                    f"Method {method_name} failed with "
-                    f"valid microversion {min_version}"
+                    f"Method {method_name} failed with valid "
+                    f"microversion {min_version}: {e}"
                 )
             except Exception as e:
                 # Other exceptions might be expected due to invalid test data
                 # For example, a 404 might be expected if we're using fake IDs
                 self.assertNotIsInstance(
-                    e, expected_error,
+                    e,
+                    expected_error,
                     (
-                        f"Got unexpected {expected_error.__name__} with "
-                        f"valid microversion {min_version}"
-                    )
+                        f"Got unexpected {expected_error.__name__} with valid "
+                        f"microversion {min_version}: {e}"
+                    ),
                 )
 
 
