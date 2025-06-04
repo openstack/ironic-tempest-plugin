@@ -38,7 +38,8 @@ SUPPORTED_DRIVERS = ['fake', 'fake-hardware']
 # NOTE(jroll): resources must be deleted in a specific order, this list
 # defines the resource types to clean up, and the correct order.
 RESOURCE_TYPES = ['port', 'portgroup', 'node', 'volume_connector',
-                  'volume_target', 'chassis', 'deploy_template', 'runbook']
+                  'volume_target', 'chassis', 'deploy_template',
+                  'runbook', 'inspection_rule']
 
 
 def creates(resource):
@@ -519,6 +520,32 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
         """
         resp, body = cls.client.create_allocation(resource_class, **kwargs)
         return resp, body
+
+    @classmethod
+    @creates('inspection_rule')
+    def create_inspection_rule(cls, rule_uuid, payload):
+        """Wrapper utility for creating Inspection rule.
+
+        :param rule_uuid: UUID of the Inspection rule.
+        :param payload: Inspection rule other fields.
+        :return: Server response.
+        """
+        if rule_uuid is not None:
+            payload['uuid'] = rule_uuid
+
+        resp, body = cls.client.create_inspection_rule(payload)
+
+        return resp, body
+
+    @classmethod
+    def delete_inspection_rule(cls, rule_uuid):
+        """Delete a inspection rules having the specified UUID.
+
+        :param rule_uuid: UUID of the Inspection rule.
+        """
+        resp, body = cls.client.delete_inspection_rule(rule_uuid)
+
+        return resp
 
 
 class BaseBaremetalRBACTest(BaseBaremetalTest):

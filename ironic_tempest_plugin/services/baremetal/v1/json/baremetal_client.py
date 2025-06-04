@@ -326,7 +326,6 @@ class BaremetalClient(base.BaremetalClient):
         :param description: The description of the chassis.
             Default: test-chassis
         :return: A tuple with the server response and the created chassis.
-
         """
         chassis = {'description': kwargs.get('description', 'test-chassis')}
 
@@ -1055,3 +1054,38 @@ class BaremetalClient(base.BaremetalClient):
     def list_portgroups_details_by_node(self, node_ident):
         """List detailed portgroups filtered by node."""
         return self._list_request(f'nodes/{node_ident}/portgroups/detail')
+
+    @base.handle_errors
+    def create_inspection_rule(self, payload):
+        """Create Inspection rule.
+
+        :param payload: Inspection rule JSON
+        """
+        return self._create_request('inspection_rules', payload)
+
+    @base.handle_errors
+    def show_inspection_rule(self, rule_uuid):
+        """Show Inspection rule."""
+        return self._show_request('inspection_rules', rule_uuid)
+
+    @base.handle_errors
+    def list_inspection_rule(self, **kwargs):
+        """List all Inspection rules."""
+        return self._list_request('inspection_rules', **kwargs)
+
+    @base.handle_errors
+    def update_inspection_rule(self, rule_uuid, patch):
+        """Update the specified Inspection rule.
+
+        :param rule_uuid: The unique identifier of the inspection rule.
+        :param patch: List of dicts representing json patches.
+        """
+        return self._patch_request('inspection_rules', rule_uuid, patch)
+
+    @base.handle_errors
+    def delete_inspection_rule(self, rule_uuid):
+        """Delete Inspection rule.
+
+        :param rule_uuid: uuid of the inspection rule.
+        """
+        return self._delete_request('inspection_rules', rule_uuid)
