@@ -1,14 +1,4 @@
 - job:
-    name: ironic-standalone-2024.2
-    parent: ironic-standalone
-    override-checkout: stable/2024.2
-
-- job:
-    name: ironic-standalone-2024.1
-    parent: ironic-standalone
-    override-checkout: stable/2024.1
-
-- job:
     name: ironic-standalone-redfish-2025.2
     parent: ironic-standalone-redfish
     override-checkout: stable/2025.2
@@ -17,16 +7,6 @@
     name: ironic-standalone-redfish-2025.1
     parent: ironic-standalone-redfish
     override-checkout: stable/2025.1
-
-- job:
-    name: ironic-standalone-redfish-2024.2
-    parent: ironic-standalone-redfish
-    override-checkout: stable/2024.2
-
-- job:
-    name: ironic-standalone-redfish-2024.1
-    parent: ironic-standalone-redfish
-    override-checkout: stable/2024.1
 
 - job:
     name: ironic-standalone-anaconda-2025.2
@@ -39,16 +19,6 @@
     override-checkout: stable/2025.1
 
 - job:
-    name: ironic-standalone-anaconda-2024.2
-    parent: ironic-standalone-anaconda
-    override-checkout: stable/2024.2
-
-- job:
-    name: ironic-standalone-anaconda-2024.1
-    parent: ironic-standalone-anaconda
-    override-checkout: stable/2024.1
-
-- job:
     name: ironic-tempest-functional-python3-2025.2
     parent: ironic-tempest-functional-python3
     override-checkout: stable/2025.2
@@ -59,26 +29,6 @@
     override-checkout: stable/2025.1
 
 - job:
-    name: ironic-tempest-functional-python3-2024.2
-    parent: ironic-tempest-functional-python3
-    override-checkout: stable/2024.2
-
-- job:
-    name: ironic-tempest-functional-python3-2024.1
-    parent: ironic-tempest-functional-python3
-    override-checkout: stable/2024.1
-
-- job:
-    name: ironic-tempest-functional-rbac-scope-enforced-2024.2
-    parent: ironic-tempest-functional-rbac-scope-enforced
-    override-checkout: stable/2024.2
-
-- job:
-    name: ironic-tempest-functional-rbac-scope-enforced-2024.1
-    parent: ironic-tempest-functional-rbac-scope-enforced
-    override-checkout: stable/2024.1
-
-- job:
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2025.2
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/2025.2
@@ -87,23 +37,3 @@
     name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2025.1
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
     override-checkout: stable/2025.1
-
-- job:
-    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2024.2
-    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
-    override-checkout: stable/2024.2
-
-- job:
-    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2024.1
-    parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
-    override-checkout: stable/2024.1
-
-- job:
-    name: ironic-inspector-tempest-2024.2
-    parent: ironic-inspector-tempest
-    override-checkout: stable/2024.2
-
-- job:
-    name: ironic-inspector-tempest-2024.1
-    parent: ironic-inspector-tempest
-    override-checkout: stable/2024.1
