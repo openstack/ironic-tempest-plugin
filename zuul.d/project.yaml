@@ -7,29 +7,29 @@
       jobs:
         # NOTE(dtantsur): keep N-3 and older non-voting for these jobs.
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-2025.2
         - ironic-tempest-functional-python3-2025.1
-        - ironic-tempest-functional-python3-2024.2
         # NOTE(TheJulia): Consensus in the 2026.1 PTG is that we don't need
         # to run the anaconda job as heavily as we need to run the normal
         # tempest jobs.
         - ironic-standalone-anaconda
         - ironic-standalone-redfish
+        - ironic-standalone-redfish-2025.2
         - ironic-standalone-redfish-2025.1
-        - ironic-standalone-redfish-2024.2
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
             voting: false
-        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2025.1:
+        - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2025.2:
             voting: false
         - ironic-inspector-tempest-discovery:
             voting: false
     gate:
       jobs:
         - ironic-tempest-functional-python3
+        - ironic-tempest-functional-python3-2025.2
         - ironic-tempest-functional-python3-2025.1
-        - ironic-tempest-functional-python3-2024.2
         - ironic-standalone-anaconda
         - ironic-standalone-redfish
+        - ironic-standalone-redfish-2025.2
         - ironic-standalone-redfish-2025.1
-        - ironic-standalone-redfish-2024.2
