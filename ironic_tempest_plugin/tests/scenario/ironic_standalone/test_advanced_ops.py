@@ -27,6 +27,7 @@ class BaremetalRedfishDHCPLessDeploy(bsm.BaremetalStandaloneScenarioTest):
     driver = 'redfish'
     deploy_interface = 'direct'
     boot_interface = 'redfish-virtual-media'
+    # To force interface retoggling.
     image_ref = CONF.baremetal.whole_disk_image_ref
     image_checksum = CONF.baremetal.whole_disk_image_checksum
     wholedisk_image = True
@@ -95,7 +96,23 @@ class BaremetalRedfishDHCPLessDeploy(bsm.BaremetalStandaloneScenarioTest):
 
         # Get the latest state for the node.
         self.node = self.get_node(self.node['uuid'])
+        # This test, as far as I'm remembering after the fact, was developed
+        # in an environment where neutron was the default network interface.
+        # so we must try to set it to properly ensure dhcp-less operation.
         prior_prov_net = self.node['driver_info'].get('provisioning_network')
+        try:
+            self.client.update_node(self.node['uuid'],
+                                    [{'path': '/network_interface',
+                                      'op': 'replace',
+                                      'value': 'neutron'}])
+            self.addCleanup(self.update_node,
+                            self.node['uuid'],
+                            [{'op': 'replace',
+                              'path': '/network_interface',
+                              'value': 'flat'}])
+        except Exception:
+            raise self.skipException(
+                "Ironic configuration incorrect to exercise this test.")
 
         ip_version = CONF.validation.ip_version_for_ssh
         tenant_cidr = '10.0.6.0/24'
