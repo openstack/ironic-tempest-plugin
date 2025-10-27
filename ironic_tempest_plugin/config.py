@@ -87,7 +87,7 @@ BaremetalGroup = [
                help="Timeout for Ironic node to reach the "
                     "wait-callback state after powering on."),
     cfg.IntOpt('active_timeout',
-               default=300,
+               default=2000,
                help="Timeout for Ironic node to completely provision"),
     cfg.IntOpt('anaconda_active_timeout',
                default=3600,
@@ -98,21 +98,21 @@ BaremetalGroup = [
                help="Timeout for association of Nova instance and Ironic "
                     "node"),
     cfg.IntOpt('inspect_timeout',
-               default=300,
+               default=2000,
                help="Timeout for inspecting an Ironic node."),
     cfg.IntOpt('power_timeout',
                default=60,
                help="Timeout for Ironic power transitions."),
     cfg.IntOpt('unprovision_timeout',
-               default=300,
+               default=2000,
                help="Timeout for unprovisioning an Ironic node. "
                     "Takes longer since Kilo as Ironic performs an extra "
                     "step in Node cleaning."),
     cfg.IntOpt('rescue_timeout',
-               default=300,
+               default=2000,
                help="Timeout for rescuing an Ironic node."),
     cfg.IntOpt('unrescue_timeout',
-               default=300,
+               default=2000,
                help="Timeout for unrescuing an Ironic node."),
     cfg.StrOpt('min_microversion',
                help="Lower version of the test target microversion range. "
