@@ -1,0 +1,10 @@
+---
+deprecations:
+  - |
+    Support for ironic-inspector has been deprecated, because ironic-inspector
+    was already retired. Due to this deprecation, the following options are
+    also deprecated.
+
+    - ``[service_available] ironic_inspector``
+    - ``[enforce_scope] ironic_inspector``
+    - All options in the ``[baremetal_introspection]`` section.

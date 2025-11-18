@@ -20,6 +20,10 @@ from oslo_config import cfg
 from tempest import config  # noqa
 
 
+_INSPECTOR_REASON = ('ironic-inspector was retired in favor of the built-in'
+                     'agent inspect interface.')
+
+
 # NOTE(TheJulia): The following options are loaded into a tempest
 # plugin configuration option via plugin.py.
 ironic_service_option = cfg.BoolOpt('ironic',
@@ -29,6 +33,8 @@ ironic_service_option = cfg.BoolOpt('ironic',
 
 inspector_service_option = cfg.BoolOpt("ironic_inspector",
                                        default=False,
+                                       deprecated_for_removal=True,
+                                       deprecated_reason=_INSPECTOR_REASON,
                                        help="Whether or not ironic-inspector "
                                        "is expected to be available")
 
@@ -40,6 +46,8 @@ ironic_scope_enforcement = cfg.BoolOpt('ironic',
 
 inspector_scope_enforcement = cfg.BoolOpt('ironic_inspector',
                                           default=True,
+                                          deprecated_for_removal=True,
+                                          deprecated_reason=_INSPECTOR_REASON,
                                           help='Whether or not '
                                                'ironic-inspector is expected '
                                                'to enforce auth scope.')
@@ -288,28 +296,42 @@ BaremetalFeaturesGroup = [
 BaremetalIntrospectionGroup = [
     cfg.StrOpt('catalog_type',
                default='baremetal-introspection',
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Catalog type of the baremetal provisioning service"),
     cfg.StrOpt('endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="The endpoint type to use for the baremetal introspection"
                     " service"),
     cfg.IntOpt('introspection_sleep',
                default=30,
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Introspection sleep before check status"),
     cfg.IntOpt('introspection_timeout',
                default=600,
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Introspection time out"),
     cfg.IntOpt('introspection_start_timeout',
                default=90,
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Timeout to start introspection"),
     cfg.IntOpt('hypervisor_update_sleep',
                default=60,
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Time to wait until nova becomes aware of "
                     "bare metal instances"),
     cfg.IntOpt('hypervisor_update_timeout',
                default=300,
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Time out for wait until nova becomes aware of "
                     "bare metal instances"),
     # NOTE(aarefiev): status_check_period default is 60s, but checking
@@ -317,14 +339,20 @@ BaremetalIntrospectionGroup = [
     # 80s would be enough to make one more check.
     cfg.IntOpt('ironic_sync_timeout',
                default=80,
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Time it might take for Ironic--Inspector "
                     "sync to happen"),
     cfg.IntOpt('discovery_timeout',
                default=300,
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="Time to wait until new node would enrolled in "
                     "ironic"),
     cfg.BoolOpt('auto_discovery_feature',
                 default=False,
+                deprecated_for_removal=True,
+                deprecated_reason=_INSPECTOR_REASON,
                 help="Is the auto-discovery feature enabled. Enroll hook "
                      "should be specified in node_not_found_hook - processing "
                      "section of inspector.conf"),
@@ -332,11 +360,17 @@ BaremetalIntrospectionGroup = [
                # TODO(dtantsur): change to fake-hardware when Queens is no
                # longer supported.
                default='fake',
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="The driver expected to be set on newly discovered nodes. "
                     "Only has effect with auto_discovery_feature is True."),
     cfg.StrOpt('auto_discovery_target_driver',
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="The driver to set on the newly discovered nodes. "
                     "Only has effect with auto_discovery_feature is True."),
     cfg.StrOpt('data_store',
+               deprecated_for_removal=True,
+               deprecated_reason=_INSPECTOR_REASON,
                help="The storage backend for storing introspection data."),
 ]
