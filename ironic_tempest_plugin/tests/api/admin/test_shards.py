@@ -92,7 +92,7 @@ class TestNodeShardQueries(base.BaseBaremetalTest):
         _, fetched_nodes = self.client.list_nodes(shard=shard)
         fetched_node_ids = [node['uuid'] for node in fetched_nodes['nodes']]
 
-        self.assertItemsEqual(good_node_ids, fetched_node_ids)
+        self.assertCountEqual(good_node_ids, fetched_node_ids)
 
     @decorators.idempotent_id('6f1e241d-4386-4730-b9ff-28c6a3dcad31')
     def test_only_show_multiple_requested_shards(self):
@@ -108,7 +108,7 @@ class TestNodeShardQueries(base.BaseBaremetalTest):
             shard=','.join([shard, second_shard]))
         fetched_node_ids = [node['uuid'] for node in fetched_nodes['nodes']]
 
-        self.assertItemsEqual(good_node_ids, fetched_node_ids)
+        self.assertCountEqual(good_node_ids, fetched_node_ids)
         self.assertNotIn(self.bad_node_id, fetched_node_ids)
         self.assertNotIn(self.none_node_id, fetched_node_ids)
 
@@ -148,4 +148,4 @@ class TestGetAllShards(base.BaseBaremetalTest):
         _, fetched_shards = self.client.get_shards()
         fetched_shards = [shard['name'] for shard in fetched_shards['shards']]
 
-        self.assertItemsEqual(self.shards, fetched_shards)
+        self.assertCountEqual(self.shards, fetched_shards)
