@@ -10,15 +10,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_log import log as logging
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
+
 from ironic_tempest_plugin.tests.scenario import \
     baremetal_standalone_manager as bsm
 
 CONF = config.CONF
+
+
+LOG = logging.getLogger(__name__)
 
 
 class BaremetalRedfishDHCPLessDeploy(bsm.BaremetalStandaloneScenarioTest):
@@ -100,19 +105,22 @@ class BaremetalRedfishDHCPLessDeploy(bsm.BaremetalStandaloneScenarioTest):
         # in an environment where neutron was the default network interface.
         # so we must try to set it to properly ensure dhcp-less operation.
         prior_prov_net = self.node['driver_info'].get('provisioning_network')
-        try:
-            self.client.update_node(self.node['uuid'],
-                                    [{'path': '/network_interface',
-                                      'op': 'replace',
-                                      'value': 'neutron'}])
-            self.addCleanup(self.update_node,
-                            self.node['uuid'],
-                            [{'op': 'replace',
-                              'path': '/network_interface',
-                              'value': 'flat'}])
-        except Exception:
-            raise self.skipException(
-                "Ironic configuration incorrect to exercise this test.")
+        if self.node['network_interface'] != 'neutron':
+            try:
+                self.client.update_node(self.node['uuid'],
+                                        [{'path': '/network_interface',
+                                          'op': 'replace',
+                                          'value': 'neutron'}])
+                self.addCleanup(self.update_node,
+                                self.node['uuid'],
+                                [{'op': 'replace',
+                                  'path': '/network_interface',
+                                  'value': 'flat'}])
+            except Exception as e:
+                LOG.debug('Encountered error attempting to set the '
+                          'network_interface to neutron. Error: %s', e)
+                raise self.skipException(
+                    "Ironic configuration incorrect to exercise this test.")
 
         ip_version = CONF.validation.ip_version_for_ssh
         tenant_cidr = '10.0.6.0/24'
