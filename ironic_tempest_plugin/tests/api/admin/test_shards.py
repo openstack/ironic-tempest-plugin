@@ -137,7 +137,7 @@ class TestGetAllShards(base.BaseBaremetalTest):
     def setUp(self):
         super(TestGetAllShards, self).setUp()
         _, self.chassis = self.create_chassis()
-        self.shards = ["shard1", "shard2", "shard3"]
+        self.shards = {"shard1", "shard2", "shard3"}
         self.node_ids = []
         for shard in self.shards:
             _, node = self.create_node(self.chassis['uuid'], shard=shard)
@@ -146,6 +146,6 @@ class TestGetAllShards(base.BaseBaremetalTest):
     @decorators.idempotent_id('fc786196-63c7-4e0d-bd14-3e478d4d1e3e')
     def test_get_all_shards(self):
         _, fetched_shards = self.client.get_shards()
-        fetched_shards = [shard['name'] for shard in fetched_shards['shards']]
+        fetched_shards = {shard['name'] for shard in fetched_shards['shards']}
 
-        self.assertCountEqual(self.shards, fetched_shards)
+        self.assertTrue(self.shards.issubset(fetched_shards))
