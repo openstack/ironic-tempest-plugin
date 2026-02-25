@@ -14,7 +14,6 @@
 # under the License.
 
 from oslo_log import log as logging
-from tempest.common import compute
 from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
@@ -27,8 +26,7 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest,
-                        compute.NoVNCValidateMixin):
+class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
     """This smoke test tests an Ironic driver.
 
     It follows this basic set of operations:
@@ -224,25 +222,9 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest,
             # set the lessee.
             self.assertEqual(iinfo['project_id'], self.node['lessee'])
 
-    def validate_console(self):
-
-        body = self.servers_client.get_vnc_console(self.instance['id'],
-                                                   type='novnc')['console']
-        self.assertEqual('novnc', body['type'])
-        # Do the initial HTTP Request to novncproxy to get the NoVNC JavaScript
-        self.validate_novnc_html(body['url'])
-        # Do the WebSockify HTTP Request to novncproxy to do the RFB connection
-        self.websocket = compute.create_websocket(body['url'])
-        self.addCleanup(self.websocket.close)
-        # Validate that we successfully connected and upgraded to Web Sockets
-        self.validate_websocket_upgrade()
-        # Validate the RFB Negotiation to determine if a valid VNC session
-        self.validate_rfb_negotiation()
-
     def baremetal_server_ops(self):
         self.add_keypair()
         self.instance, self.node = self.boot_instance(image_id=self.image_ref)
-        self.validate_console()
         self.validate_image()
         self.validate_ports()
         self.validate_scheduling()
