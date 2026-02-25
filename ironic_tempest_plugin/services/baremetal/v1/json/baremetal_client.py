@@ -299,12 +299,13 @@ class BaremetalClient(base.BaremetalClient):
 
         """
         node = {}
-        # Explicitly allow definition of network interface and deploy
-        # interface to allow tests to specify the required values
-        # as they hold a great deal of logic which is executed upon and
-        # they can ultimately impact test behavior.
+        # Explicitly allow definition of network interface, deploy
+        # interface, and console interface to allow tests to specify
+        # the required values as they hold a great deal of logic which
+        # is executed upon and they can ultimately impact test behavior.
         for field in ('resource_class', 'name', 'description', 'shard',
-                      'network_interface', 'deploy_interface'):
+                      'network_interface', 'deploy_interface',
+                      'console_interface'):
             if kwargs.get(field):
                 node[field] = kwargs[field]
 

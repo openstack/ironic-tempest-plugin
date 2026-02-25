@@ -10,7 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
 from oslo_utils import uuidutils
+from tempest.common import compute
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -1319,3 +1321,47 @@ class TestNodeDescription(base.BaseBaremetalTest):
     def test_create_node_with_description(self):
         _, body = self.create_node(self.chassis['uuid'], description='meow')
         self.assertEqual('meow', body['description'])
+
+
+class TestNodeGraphicalConsole(base.BaseBaremetalTest,
+                               compute.NoVNCValidateMixin):
+    """Tests for fake-graphical console connection."""
+
+    min_microversion = '1.96'
+
+    @classmethod
+    def skip_checks(cls):
+        super(TestNodeGraphicalConsole, cls).skip_checks()
+        if CONF.baremetal.driver != 'fake-hardware':
+            raise cls.skipException('These tests rely on fake-hardware')
+        if 'fake-graphical' not in CONF.baremetal.enabled_console_interfaces:
+            raise cls.skipException('These tests rely on fake-graphical being'
+                                    'included in enabled_console_interfaces')
+
+    def setUp(self):
+        super(TestNodeGraphicalConsole, self).setUp()
+
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'],
+                                        console_interface="fake-graphical")
+
+    @decorators.idempotent_id('80504575-9b21-4670-92d1-143b948f9437')
+    def test_graphical_console_connection(self):
+        self.client.set_console_mode(self.node['uuid'], True)
+        waiters.wait_for_bm_node_status(self.client, self.node['uuid'],
+                                        'console_enabled', True)
+        self.addCleanup(self.client.set_console_mode, self.node['uuid'],
+                        False)
+
+        _, body = self.client.get_console(self.node['uuid'])
+        console_info = body['console_info']
+        self.assertEqual('vnc', console_info['type'])
+        # Do the initial HTTP Request to novncproxy to get the NoVNC JavaScript
+        self.validate_novnc_html(console_info['url'])
+        # Do the WebSockify HTTP Request to novncproxy to do the RFB connection
+        self.websocket = compute.create_websocket(console_info['url'])
+        self.addCleanup(self.websocket.close)
+        # Validate that we successfully connected and upgraded to Web Sockets
+        self.validate_websocket_upgrade()
+        # Validate the RFB Negotiation to determine if a valid VNC session
+        self.validate_rfb_negotiation()
