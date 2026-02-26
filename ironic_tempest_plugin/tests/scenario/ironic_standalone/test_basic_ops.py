@@ -423,18 +423,6 @@ class BaremetalIdracDirectPxeWholedisk(
         self.boot_and_verify_node()
 
 
-class BaremetalIdracWSManDirectIPxeWholedisk(
-        BaremetalIdracDirectIPxeWholedisk):
-    power_interface = 'idrac-wsman'
-    management_interface = 'idrac-wsman'
-
-
-class BaremetalIdracWSManDirectPxeWholedisk(
-        BaremetalIdracDirectPxeWholedisk):
-    power_interface = 'idrac-wsman'
-    management_interface = 'idrac-wsman'
-
-
 class BaremetalIdracRedfishDirectIPxeWholedisk(
         BaremetalIdracDirectIPxeWholedisk):
 

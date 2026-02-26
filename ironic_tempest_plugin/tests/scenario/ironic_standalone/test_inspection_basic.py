@@ -139,7 +139,3 @@ class BaremetalIdracInspect(BaremetalInspectBase,
 
 class BaremetalIdracRedfishInspect(BaremetalIdracInspect):
     inspect_interface = 'idrac-redfish'
-
-
-class BaremetalIdracWSManInspect(BaremetalIdracInspect):
-    inspect_interface = 'idrac-wsman'

@@ -125,8 +125,3 @@ class BaremetalIdracBiosCleaning(
 class BaremetalIdracRedfishBios(
         BaremetalIdracBiosCleaning):
     bios_interface = 'idrac-redfish'
-
-
-class BaremetalIdracWSManBios(
-        BaremetalIdracBiosCleaning):
-    bios_interface = 'idrac-wsman'

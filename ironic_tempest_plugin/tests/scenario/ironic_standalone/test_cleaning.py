@@ -198,13 +198,6 @@ class BaremetalIdracRedfishManagementCleaning(
     power_interface = 'idrac-redfish'
 
 
-class BaremetalIdracWSManManagementCleaning(
-        BaremetalIdracManagementCleaning):
-
-    management_interface = 'idrac-wsman'
-    power_interface = 'idrac-wsman'
-
-
 class BaremetalIdracRaidCleaning(bsm.BaremetalStandaloneScenarioTest):
 
     mandatory_attr = ['driver', 'raid_interface']
@@ -317,11 +310,6 @@ class BaremetalIdracRaidCleaning(bsm.BaremetalStandaloneScenarioTest):
 class BaremetalIdracRedfishRaidCleaning(
         BaremetalIdracRaidCleaning):
     raid_interface = 'idrac-redfish'
-
-
-class BaremetalIdracWSManRaidCleaning(
-        BaremetalIdracRaidCleaning):
-    raid_interface = 'idrac-wsman'
 
 
 class BaremetalRedfishFirmwareUpdate(bsm.BaremetalStandaloneScenarioTest):
