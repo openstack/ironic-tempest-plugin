@@ -174,7 +174,13 @@ class BaremetalMultitenancy(baremetal_manager.BaremetalScenarioTest,
     @decorators.idempotent_id('26e2f145-2a8e-4dc7-8457-7f2eb2c6749d')
     @utils.services('compute', 'image', 'network')
     def test_baremetal_multitenancy(self):
-        self.multitenancy_check()
+        if CONF.service_available.nova:
+            # If nova is not present, run the test, otherwise
+            # skip the test in order to not duplicate test execution.
+            self.skipTest('Compute service is present, skipping this test '
+                          'to avoid duplication.')
+        else:
+            self.multitenancy_check()
 
     @decorators.idempotent_id('9e38631a-2df2-11e9-810e-8c16450ea513')
     @utils.services('compute', 'image', 'network')
