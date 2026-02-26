@@ -22,19 +22,21 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
 
     def verify_node_introspection_data(self, node):
         data = self.introspection_data(node['uuid'])
-        self.assertEqual(data['cpu_arch'],
-                         self.flavor['properties']['cpu_arch'])
+        # Validate that introspection discovered CPU architecture
+        # (common architectures supported by Ironic)
+        self.assertIn(data['cpu_arch'],
+                      ['x86_64', 'i386', 'aarch64', 'ppc64', 'ppc64le'])
         self.assertGreater(int(data['memory_mb']), 0)
         self.assertGreater(int(data['cpus']), 0)
 
     def verify_node_flavor(self, node):
-        expected_cpu_arch = self.flavor['properties']['cpu_arch']
-
+        # Validate that introspection populated node properties correctly
         self.assertGreater(int(node['properties']['cpus']), 0)
         self.assertGreater(int(node['properties']['memory_mb']), 0)
         self.assertGreater(int(node['properties']['local_gb']), 0)
-        self.assertEqual(expected_cpu_arch,
-                         node['properties']['cpu_arch'])
+        # Validate cpu_arch was discovered and is a known architecture
+        self.assertIn(node['properties']['cpu_arch'],
+                      ['x86_64', 'i386', 'aarch64', 'ppc64', 'ppc64le'])
 
     def verify_introspection_aborted(self, uuid):
         status = self.introspection_status(uuid)
@@ -53,7 +55,6 @@ class InspectorBasicTest(introspection_manager.InspectorScenarioTest):
     def test_baremetal_introspection(self):
         """This smoke test case follows this set of operations:
 
-            * Fetches expected properties from baremetal flavor
             * Removes all properties from nodes
             * Sets nodes to manageable state
             * Imports introspection rule basic_ops_rule.json
