@@ -769,7 +769,10 @@ class TestHardwareInterfaces(base.BaseBaremetalTest):
                 # we need to not fail when that is the case.
                 self.assertNotEqual(self.node[field], node[field])
             else:
-                self.assertEqual('fake', node[field])
+                # NOTE(abongale): Use startswith instead of exact equality to
+                # handle cases where the interface value may have a prefix
+                # (e.g., graphical console interface returns 'fake-graphical')
+                self.assertTrue(node[field].startswith('fake'))
 
 
 class TestResetInterfaces(TestHardwareInterfaces):
