@@ -18,6 +18,7 @@
         - ironic-standalone-redfish-2025.1
         - ironic-tempest-standalone-advanced
         - ironic-tempest-bios-ipmi-direct
+        - ironic-tempest-bios-ipmi-autodetect
         # NOTE(dtantsur): these jobs cover rarely changed tests and are quite
         # unstable, so keep them non-voting.
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode:
@@ -36,3 +37,4 @@
         - ironic-standalone-redfish-2025.2
         - ironic-standalone-redfish-2025.1
         - ironic-tempest-bios-ipmi-direct
+        - ironic-tempest-bios-ipmi-autodetect

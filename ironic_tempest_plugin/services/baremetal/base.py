@@ -25,8 +25,8 @@ BAREMETAL_MICROVERSION = None
 
 # Interfaces that can be set via the baremetal client and by logic in scenario
 # managers.
-SUPPORTED_INTERFACES = ['bios', 'deploy', 'rescue', 'boot', 'raid',
-                        'management', 'power', 'inspect']
+SUPPORTED_INTERFACES = (['bios', 'deploy', 'rescue', 'boot', 'raid',
+                         'management', 'power', 'inspect', 'console'])
 
 
 def set_baremetal_api_microversion(baremetal_microversion):
