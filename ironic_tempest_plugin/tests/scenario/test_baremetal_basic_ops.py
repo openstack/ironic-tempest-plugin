@@ -14,19 +14,22 @@
 # under the License.
 
 from oslo_log import log as logging
+from tempest.common import compute
 from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common import api_version_request
 from tempest.lib import decorators
 
+from ironic_tempest_plugin.services.baremetal import base
 from ironic_tempest_plugin.tests.scenario import baremetal_manager
 
 LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
+class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest,
+                        compute.NoVNCValidateMixin):
     """This smoke test tests an Ironic driver.
 
     It follows this basic set of operations:
@@ -47,10 +50,15 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
 
     credentials = ['primary', 'admin', 'system_admin']
 
+    # Note: 1.31 API microversion is needed to enable the graphical console.
+    # So that we can validate the graphical console functionality.
+    min_microversion = '1.65'
+
     TEST_RESCUE_MODE = False
     image_ref = None
     wholedisk_image = None
     auto_lease = False
+    console_interface = 'fake-graphical'
 
     @classmethod
     def skip_checks(cls):
@@ -69,6 +77,13 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
                 msg = ('Node rescue interface is enabled, but %s class '
                        'cannot test rescue operations.' % cls.__name__)
                 raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        "Setup the default API microversion."
+        super(BaremetalBasicOps, cls).resource_setup()
+        base.set_baremetal_api_microversion(cls.min_microversion)
+        cls.addClassCleanup(base.reset_baremetal_api_microversion)
 
     @staticmethod
     def _is_version_supported(version):
@@ -222,9 +237,35 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest):
             # set the lessee.
             self.assertEqual(iinfo['project_id'], self.node['lessee'])
 
+    def validate_console(self):
+        """Validate graphical console functionality.
+
+        Tests that nova-novncproxy can connect to the console container.
+        Validation passing here means the novnc console will be available
+        in horizon for an instance using the ironic nova driver.
+        """
+        body = self.servers_client.get_vnc_console(self.instance['id'],
+                                                   type='novnc')['console']
+        self.assertEqual('novnc', body['type'])
+        # Do the initial HTTP Request to novncproxy to get the NoVNC JavaScript
+        self.validate_novnc_html(body['url'])
+        # Do the WebSockify HTTP Request to novncproxy to do the RFB connection
+        self.websocket = compute.create_websocket(body['url'])
+        self.addCleanup(self.websocket.close)
+        # Validate that we successfully connected and upgraded to Web Sockets
+        self.validate_websocket_upgrade()
+        # Validate the RFB Negotiation to determine if a valid VNC session
+        self.validate_rfb_negotiation()
+
     def baremetal_server_ops(self):
         self.add_keypair()
         self.instance, self.node = self.boot_instance(image_id=self.image_ref)
+        # Validate graphical console if fake-graphical interface is configured.
+        # Note: Only fake-graphical is tested (redfish-graphical excluded as
+        # sushy-tools doesn't support VNC yet). If configured but proxy is
+        # missing, test will fail revealing the misconfiguration.
+        if self.node.get('console_interface') == 'fake-graphical':
+            self.validate_console()
         self.validate_image()
         self.validate_ports()
         self.validate_scheduling()

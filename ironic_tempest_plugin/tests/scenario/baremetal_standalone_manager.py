@@ -634,6 +634,12 @@ class BaremetalStandaloneScenarioTest(BaremetalStandaloneManager):
     # been set via a different test).
     inspect_interface = None
 
+    # The console interface to use by the HW type. The console interface of the
+    # node used in the test will be set to this value. If set to None, the
+    # node will retain its existing console_interface value (which may have
+    # been set via a different test).
+    console_interface = None
+
     # Boolean value specify if image is wholedisk or not.
     wholedisk_image = None
 
