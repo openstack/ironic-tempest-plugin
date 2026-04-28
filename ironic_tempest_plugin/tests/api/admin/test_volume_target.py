@@ -72,6 +72,8 @@ class TestVolumeTarget(base.BaseBaremetalTest):
     @decorators.idempotent_id('532a06bc-a9b2-44b0-828a-c53279c87cb2')
     def test_delete_volume_target_error(self):
         """Fail when deleting a volume target on node with power on state."""
+        # Move node out of delete allowed states
+        self.provide_node(self.node['uuid'])
         # Powering on the Node before deleting a volume target.
         self.client.set_node_power_state(self.node['uuid'], 'power on')
 

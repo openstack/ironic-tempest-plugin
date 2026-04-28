@@ -75,6 +75,8 @@ class TestVolumeConnector(base.BaseBaremetalTest):
         with powered on state.
         """
 
+        # Move node out of delete allowed states
+        self.provide_node(self.node['uuid'])
         # Powering on the Node before deleting a volume connector.
         self.client.set_node_power_state(self.node['uuid'], 'power on')
 
