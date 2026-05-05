@@ -50,8 +50,8 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest,
 
     credentials = ['primary', 'admin', 'system_admin']
 
-    # Note: 1.31 API microversion is needed to enable the graphical console.
-    # So that we can validate the graphical console functionality.
+    # Note: 1.65 API microversion is needed to enable the graphical console
+    # and lesse. So that we can validate the graphical console functionality.
     min_microversion = '1.65'
 
     TEST_RESCUE_MODE = False
@@ -96,25 +96,32 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest,
         return min_version <= version <= max_version
 
     def rebuild_instance(self, preserve_ephemeral=False):
+        LOG.info("Starting instance rebuild (preserve_ephemeral=%s)",
+                 preserve_ephemeral)
         self.rebuild_server(server_id=self.instance['id'],
                             preserve_ephemeral=preserve_ephemeral,
                             wait=False)
-
         node = self.get_node(instance_id=self.instance['id'])
 
         # We should remain on the same node
+        LOG.info("Instance rebuild initiated on node %s", node['uuid'])
         self.assertEqual(self.node['uuid'], node['uuid'])
         self.node = node
 
+        LOG.info("Waiting for server to enter REBUILD status")
         waiters.wait_for_server_status(
             self.servers_client,
             server_id=self.instance['id'],
             status='REBUILD',
             ready_wait=False)
+        LOG.info("Server entered REBUILD status")
+
+        LOG.info("Waiting for server to return to ACTIVE status")
         waiters.wait_for_server_status(
             self.servers_client,
             server_id=self.instance['id'],
             status='ACTIVE')
+        LOG.info("Instance rebuild completed successfully")
 
     def verify_partition(self, client, label, mount, gib_size):
         """Verify a labeled partition's mount point and size."""
@@ -244,56 +251,107 @@ class BaremetalBasicOps(baremetal_manager.BaremetalScenarioTest,
         Validation passing here means the novnc console will be available
         in horizon for an instance using the ironic nova driver.
         """
+        LOG.info("Requesting VNC console for instance %s", self.instance['id'])
         body = self.servers_client.get_vnc_console(self.instance['id'],
                                                    type='novnc')['console']
+        LOG.info("VNC console URL obtained: %s", body['url'])
         self.assertEqual('novnc', body['type'])
         # Do the initial HTTP Request to novncproxy to get the NoVNC JavaScript
+        LOG.info("Starting NoVNC HTML response validation")
         self.validate_novnc_html(body['url'])
         # Do the WebSockify HTTP Request to novncproxy to do the RFB connection
+        LOG.info("Creating WebSocket connection for RFB")
         self.websocket = compute.create_websocket(body['url'])
         self.addCleanup(self.websocket.close)
         # Validate that we successfully connected and upgraded to Web Sockets
+        LOG.info("Validating WebSocket upgrade")
         self.validate_websocket_upgrade()
         # Validate the RFB Negotiation to determine if a valid VNC session
+        LOG.info("Validating RFB negotiation")
         self.validate_rfb_negotiation()
+        LOG.info("Console validation completed successfully")
 
     def baremetal_server_ops(self):
+        LOG.info("Starting baremetal server operations test")
+
+        LOG.info("Creating keypair")
         self.add_keypair()
+
+        LOG.info("Booting instance with image_id=%s", self.image_ref)
         self.instance, self.node = self.boot_instance(image_id=self.image_ref)
+        LOG.info("Instance booted successfully: instance_id=%s, node_uuid=%s",
+                 self.instance['id'], self.node['uuid'])
+
         # Validate graphical console if fake-graphical interface is configured.
         # Note: Only fake-graphical is tested (redfish-graphical excluded as
         # sushy-tools doesn't support VNC yet). If configured but proxy is
         # missing, test will fail revealing the misconfiguration.
         if self.node.get('console_interface') == 'fake-graphical':
+            LOG.info("Starting graphical console validation for instance %s",
+                     self.instance['id'])
             self.validate_console()
+
+        LOG.info("Starting image validation")
         self.validate_image()
+        LOG.info("Image validation completed")
+
+        LOG.info("Starting port validation for node %s", self.node['uuid'])
         self.validate_ports()
+        LOG.info("Port validation completed")
+
+        LOG.info("Starting scheduling validation")
         self.validate_scheduling()
+        LOG.info("Scheduling validation completed")
+
+        LOG.info("Starting lessee validation")
         self.validate_lessee()
+        LOG.info("Lessee validation completed")
+
+        LOG.info("Getting server IP address")
         ip_address = self.get_server_ip(self.instance)
+        LOG.info("Server IP address: %s", ip_address)
+
+        LOG.info("Checking VM connectivity to %s", ip_address)
         self.check_vm_connectivity(ip_address=ip_address,
                                    private_key=self.keypair['private_key'],
                                    server=self.instance)
+        LOG.info("VM connectivity verified")
+
+        LOG.info("Getting remote client for instance")
         vm_client = self.get_remote_client(ip_address, server=self.instance)
 
         # We expect the ephemeral partition to be mounted on /mnt and to have
         # the same size as our flavor definition.
         eph_size = self.get_flavor_ephemeral_size()
         if eph_size and not self.wholedisk_image:
+            LOG.info("Starting ephemeral partition verification (size=%d GiB)",
+                     eph_size)
             self.verify_partition(vm_client, 'ephemeral0', '/mnt', eph_size)
+            LOG.info("Ephemeral partition verified successfully")
+
+            LOG.info("Creating timestamp file on ephemeral partition")
             # Create the test file
             self.create_timestamp(ip_address,
                                   private_key=self.keypair['private_key'],
                                   server=self.instance)
+            LOG.info("Timestamp file created")
 
         if CONF.baremetal.boot_mode == "uefi":
+            LOG.info("Starting UEFI boot mode validation")
             self.validate_uefi(vm_client)
+            LOG.info("UEFI validation completed")
 
         # Test rescue mode
         if self.TEST_RESCUE_MODE:
+            LOG.info("Starting rescue mode test for instance %s, node %s",
+                     self.instance['id'], self.node['uuid'])
             self.rescue_instance(self.instance, self.node, ip_address)
+
+            LOG.info("Starting unrescue operation for instance %s",
+                     self.instance['id'])
             self.unrescue_instance(self.instance, self.node, ip_address)
 
+        LOG.info("Terminating instance %s", self.instance['id'])
         self.terminate_instance(self.instance)
 
     @decorators.idempotent_id('549173a5-38ec-42bb-b0e2-c8b9f4a08943')

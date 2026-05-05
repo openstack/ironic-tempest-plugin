@@ -225,25 +225,42 @@ class BaremetalScenarioTest(manager.ScenarioTest):
                 clients=clients,
                 **create_kwargs
             )
+        LOG.info("Server created: instance_id=%s", instance['id'])
 
+        LOG.info("Waiting for node association for instance %s",
+                 instance['id'])
         self.wait_node(instance['id'])
         node = self.get_node(instance_id=instance['id'])
+        LOG.info("Node associated: node_uuid=%s", node['uuid'])
 
+        LOG.info("Waiting for node %s to reach power state POWER_ON",
+                 node['uuid'])
         self.wait_power_state(node['uuid'], BaremetalPowerStates.POWER_ON)
+        LOG.info("Node %s is powered on", node['uuid'])
 
+        LOG.info("Waiting for node %s to reach DEPLOYWAIT or ACTIVE "
+                 "provision state", node['uuid'])
         self.wait_provisioning_state(
             node['uuid'],
             [BaremetalProvisionStates.DEPLOYWAIT,
              BaremetalProvisionStates.ACTIVE],
             timeout=CONF.baremetal.deploywait_timeout)
+        LOG.info("Node %s reached expected provision state", node['uuid'])
 
+        LOG.info("Waiting for node %s to reach ACTIVE provision state",
+                 node['uuid'])
         self.wait_provisioning_state(node['uuid'],
                                      BaremetalProvisionStates.ACTIVE,
                                      timeout=CONF.baremetal.active_timeout,
                                      interval=30)
+        LOG.info("Node %s is ACTIVE", node['uuid'])
 
+        LOG.info("Waiting for server %s to reach ACTIVE status",
+                 instance['id'])
         waiters.wait_for_server_status(servers_client,
                                        instance['id'], 'ACTIVE')
+        LOG.info("Server %s is ACTIVE", instance['id'])
+
         node = self.get_node(instance_id=instance['id'])
         instance = servers_client.show_server(instance['id'])['server']
 
@@ -261,15 +278,21 @@ class BaremetalScenarioTest(manager.ScenarioTest):
             servers_client = self.os_primary.servers_client
 
         node = self.get_node(instance_id=instance['id'])
+        LOG.info("Deleting server %s (node=%s)", instance['id'], node['uuid'])
         servers_client.delete_server(instance['id'])
+        LOG.info("Waiting for node %s to power off", node['uuid'])
         self.wait_power_state(node['uuid'],
                               BaremetalPowerStates.POWER_OFF)
+        LOG.info("Node %s powered off", node['uuid'])
+        LOG.info("Waiting for node %s to reach NOSTATE or AVAILABLE "
+                 "provision state", node['uuid'])
         self.wait_provisioning_state(
             node['uuid'],
             [BaremetalProvisionStates.NOSTATE,
              BaremetalProvisionStates.AVAILABLE],
             timeout=CONF.baremetal.unprovision_timeout,
             interval=30)
+        LOG.info("Node %s deprovisioned successfully", node['uuid'])
 
     def rescue_instance(self, instance, node, server_ip,
                         servers_client=None):
@@ -277,18 +300,28 @@ class BaremetalScenarioTest(manager.ScenarioTest):
         if servers_client is None:
             servers_client = self.os_primary.servers_client
 
+        LOG.info("Starting rescue operation for instance %s", instance['id'])
         rescuing_instance = servers_client.rescue_server(instance['id'])
         rescue_password = rescuing_instance['adminPass']
 
+        LOG.info("Waiting for node %s to reach RESCUE provision state",
+                 node['uuid'])
         self.wait_provisioning_state(
             node['uuid'],
             BaremetalProvisionStates.RESCUE,
             timeout=CONF.baremetal.rescue_timeout)
+        LOG.info("Node %s is in RESCUE provision state", node['uuid'])
+        LOG.info("Waiting for server %s to reach RESCUE status",
+                 instance['id'])
         waiters.wait_for_server_status(servers_client,
                                        instance['id'], 'RESCUE')
+        LOG.info("Server %s is in RESCUE status", instance['id'])
         # Ping server ip
+        LOG.info("Verifying ping to rescue instance at %s", server_ip)
         self.assertTrue(self.ping_ip_address(server_ip))
         # Open ssh connection to server
+        LOG.info("Establishing SSH connection to rescue instance at %s",
+                 server_ip)
         linux_client = remote_client.RemoteClient(
             server_ip,
             'rescue',
@@ -298,20 +331,30 @@ class BaremetalScenarioTest(manager.ScenarioTest):
             ssh_timeout=CONF.baremetal.rescue_timeout,
             ssh_allow_agent=False)
         linux_client.validate_authentication()
+        LOG.info("Rescue instance SSH authentication successful")
 
     def unrescue_instance(self, instance, node, server_ip,
                           servers_client=None):
         if servers_client is None:
             servers_client = self.os_primary.servers_client
+        LOG.info("Starting unrescue operation for instance %s", instance['id'])
         self.os_primary.servers_client.unrescue_server(instance['id'])
+        LOG.info("Waiting for node %s to return to ACTIVE provision state",
+                 node['uuid'])
         self.wait_provisioning_state(
             node['uuid'],
             BaremetalProvisionStates.ACTIVE,
             timeout=CONF.baremetal.unrescue_timeout)
+        LOG.info("Node %s returned to ACTIVE provision state", node['uuid'])
+        LOG.info("Waiting for server %s to return to ACTIVE status",
+                 instance['id'])
         waiters.wait_for_server_status(servers_client,
                                        instance['id'], 'ACTIVE')
+        LOG.info("Server %s returned to ACTIVE status", instance['id'])
         # Verify server connection
+        LOG.info("Verifying server connectivity after unrescue")
         self.get_remote_client(server_ip, server=instance)
+        LOG.info("Unrescue operation completed successfully")
 
     def wait_for_ssh(self, ip_address,
                      username=None,
@@ -344,8 +387,10 @@ class BaremetalScenarioTest(manager.ScenarioTest):
         # ssh by cloud init. Wait for SSH can pass authentication before
         # checking connectivity.
         if should_connect:
+            LOG.info("Waiting for SSH to become available on %s", ip_address)
             self.wait_for_ssh(ip_address=ip_address, username=username,
                               private_key=private_key, server=server)
+            LOG.info("SSH is now available on %s", ip_address)
         super().check_vm_connectivity(ip_address=ip_address,
                                       username=username,
                                       private_key=private_key,
