@@ -22,6 +22,12 @@ from tempest.test_discover import plugins
 from ironic_tempest_plugin import config as project_config
 
 _opts = [
+    (config.service_available_group,
+     [project_config.ironic_service_option,
+      project_config.inspector_service_option]),
+    (config.enforce_scope_group,
+     [project_config.ironic_scope_enforcement,
+      project_config.inspector_scope_enforcement]),
     (project_config.baremetal_group, project_config.BaremetalGroup),
     (project_config.baremetal_features_group,
      project_config.BaremetalFeaturesGroup),
@@ -39,14 +45,6 @@ class IronicTempestPlugin(plugins.TempestPlugin):
         return full_test_dir, base_path
 
     def register_opts(self, conf):
-        conf.register_opt(project_config.ironic_service_option,
-                          group='service_available')
-        conf.register_opt(project_config.inspector_service_option,
-                          group='service_available')
-        conf.register_opt(project_config.ironic_scope_enforcement,
-                          group='enforce_scope')
-        conf.register_opt(project_config.inspector_scope_enforcement,
-                          group='enforce_scope')
         for group, option in _opts:
             config.register_opt_group(conf, group, option)
 
