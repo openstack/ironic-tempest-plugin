@@ -50,6 +50,30 @@ class BaremetalDriverIscsiWholedisk(bsm.BaremetalStandaloneScenarioTest):
         self.boot_and_verify_node()
 
 
+class BaremetalDriverAutodetectWholedisk(bsm.BaremetalStandaloneScenarioTest):
+
+    api_microversion = '1.31'  # to set the deploy_interface
+    if 'redfish' in CONF.baremetal.enabled_hardware_types:
+        driver = 'redfish'
+    else:
+        driver = 'ipmi'
+    deploy_interface = 'autodetect'
+    image_ref = CONF.baremetal.whole_disk_image_ref
+    wholedisk_image = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaremetalDriverAutodetectWholedisk, cls).skip_checks()
+        if cls.driver == 'ipmi':
+            skip_msg = ("Test covered when using redfish")
+            raise cls.skipException(skip_msg)
+
+    @decorators.idempotent_id('c2db24e7-07dc-4a20-8f93-d4efae2bfd4e')
+    @utils.services('image', 'network')
+    def test_ip_access_to_server(self):
+        self.boot_and_verify_node()
+
+
 class BaremetalDriverDirectWholedisk(bsm.BaremetalStandaloneScenarioTest):
 
     api_microversion = '1.31'  # to set the deploy_interface
