@@ -666,6 +666,26 @@ class BaremetalClient(base.BaremetalClient):
                                  target)
 
     @base.handle_errors
+    def set_node_console_mode(self, node_uuid, enabled):
+        """Enable or disable the console of the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+        :param enabled: whether the console should be enabled or disabled.
+
+        """
+        return self._put_request('nodes/%s/states/console' % node_uuid,
+                                 {'enabled': enabled})
+
+    @base.handle_errors
+    def show_node_console(self, node_uuid):
+        """Get the console state and connection info of the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+
+        """
+        return self._list_request('/nodes/%s/states/console' % node_uuid)
+
+    @base.handle_errors
     def set_node_state(self, node_uuid, state, target):
         """Set state for the specified node.
 
