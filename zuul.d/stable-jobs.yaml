@@ -1,4 +1,9 @@
 - job:
+    name: ironic-standalone-redfish-2026.2
+    parent: ironic-standalone-redfish
+    override-checkout: stable/2026.2
+
+- job:
     name: ironic-standalone-redfish-2026.1
     parent: ironic-standalone-redfish
     override-checkout: stable/2026.1
@@ -9,9 +14,9 @@
     override-checkout: stable/2025.2
 
 - job:
-    name: ironic-standalone-redfish-2025.1
-    parent: ironic-standalone-redfish
-    override-checkout: stable/2025.1
+    name: ironic-standalone-anaconda-2026.2
+    parent: ironic-standalone-anaconda
+    override-checkout: stable/2026.2
 
 - job:
     name: ironic-standalone-anaconda-2026.1
@@ -24,9 +29,9 @@
     override-checkout: stable/2025.2
 
 - job:
-    name: ironic-standalone-anaconda-2025.1
-    parent: ironic-standalone-anaconda
-    override-checkout: stable/2025.1
+    name: ironic-tempest-functional-python3-2026.2
+    parent: ironic-tempest-functional-python3
+    override-checkout: stable/2026.2
 
 - job:
     name: ironic-tempest-functional-python3-2026.1
@@ -39,11 +44,6 @@
     override-checkout: stable/2025.2
 
 - job:
-    name: ironic-tempest-functional-python3-2025.1
-    parent: ironic-tempest-functional-python3
-    override-checkout: stable/2025.1
-
-- job:
-    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2026.1
+    name: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2026.2
     parent: ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode
-    override-checkout: stable/2026.1
+    override-checkout: stable/2026.2
