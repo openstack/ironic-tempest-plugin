@@ -1,6 +1,40 @@
 [build-system]
-requires = ["pbr>=6.0.0", "setuptools>=64.0.0"]
+requires = ["pbr>=6.1.1"]
 build-backend = "pbr.build"
+
+[project]
+name = "ironic-tempest-plugin"
+description = "Tempest plugin for ironic and ironic-inspector"
+authors = [
+    {name = "OpenStack", email = "openstack-discuss@lists.openstack.org"},
+]
+readme = {file = "README.rst", content-type = "text/x-rst"}
+license = "Apache-2.0"
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.11"
+classifiers = [
+    "Environment :: OpenStack",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[project.urls]
+Homepage = "https://docs.openstack.org/ironic-tempest-plugin"
+Repository = "https://opendev.org/openstack/ironic-tempest-plugin"
+Bugs = "https://bugs.launchpad.net/ironic"
+
+[project.entry-points."tempest.test_plugins"]
+ironic_tests = "ironic_tempest_plugin.plugin:IronicTempestPlugin"
+
+[tool.setuptools.packages.find]
+include = ["ironic_tempest_plugin*"]
 
 [tool.doc8]
 ignore = ["D001"]
