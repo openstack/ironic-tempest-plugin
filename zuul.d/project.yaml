@@ -29,8 +29,6 @@
             voting: false
         - ironic-tempest-ipa-wholedisk-direct-tinyipa-multinode-2026.2:
             voting: false
-        - ironic-inspector-tempest-discovery:
-            voting: false
     gate:
       jobs:
         - ironic-tempest-functional-python3
