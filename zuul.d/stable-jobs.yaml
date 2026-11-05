@@ -14,21 +14,6 @@
     override-checkout: stable/2025.2
 
 - job:
-    name: ironic-standalone-anaconda-2026.2
-    parent: ironic-standalone-anaconda
-    override-checkout: stable/2026.2
-
-- job:
-    name: ironic-standalone-anaconda-2026.1
-    parent: ironic-standalone-anaconda
-    override-checkout: stable/2026.1
-
-- job:
-    name: ironic-standalone-anaconda-2025.2
-    parent: ironic-standalone-anaconda
-    override-checkout: stable/2025.2
-
-- job:
     name: ironic-tempest-functional-python3-2026.2
     parent: ironic-tempest-functional-python3
     override-checkout: stable/2026.2
