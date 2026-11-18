@@ -48,7 +48,8 @@ def _determine_and_check_timeout_interval(timeout, default_timeout,
 
 
 def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
-                            interval=None, abort_on_error_state=False):
+                            interval=None, abort_on_error_state=False,
+                            wait_for_unlock=False):
     """Waits for a baremetal node attribute to reach given status.
 
     :param client: an instance of tempest plugin BaremetalClient.
@@ -61,6 +62,11 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
         Defaults to client.build_interval.
     :param abort_on_error_state: whether to abort waiting if the node reaches
         an error state.
+    :param wait_for_unlock: whether to also wait for the node to have no
+        reservation. The API reports a new provision state as soon as it is
+        saved, but the conductor keeps the node locked until the worker that
+        made the change has finished, so a follow-up request sent right away
+        can fail with "node is locked".
 
     The client should have a show_node(node_id) method to get the node.
     """
@@ -70,9 +76,17 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
     if not isinstance(status, list):
         status = [status]
 
+    last_seen = {}
+
     def is_attr_in_status():
         node = utils.get_node(client, node_id=node_id)
+        last_seen.update(
+            {attr: node[attr],
+             'provision_state': node['provision_state'],
+             'reservation': node.get('reservation')})
         if node[attr] in status:
+            if wait_for_unlock and node.get('reservation'):
+                return False
             return True
         elif (abort_on_error_state
               and (node['provision_state'].endswith(' failed')
@@ -90,11 +104,17 @@ def wait_for_bm_node_status(client, node_id, attr, status, timeout=None,
     if not test_utils.call_until_true(is_attr_in_status, timeout,
                                       interval):
         message = ('Node %(node_id)s failed to reach %(attr)s=%(status)s '
-                   'within the required time (%(timeout)s s).' %
+                   '%(unlock)swithin the required time (%(timeout)s s). '
+                   'Last seen: %(attr)s=%(seen)s, provision_state='
+                   '%(prov)s, reservation=%(reservation)s.' %
                    {'node_id': node_id,
                     'attr': attr,
                     'status': status,
-                    'timeout': timeout})
+                    'unlock': 'and be unlocked ' if wait_for_unlock else '',
+                    'timeout': timeout,
+                    'seen': last_seen.get(attr),
+                    'prov': last_seen.get('provision_state'),
+                    'reservation': last_seen.get('reservation')})
         caller = test_utils.find_test_caller()
         if caller:
             message = '(%s) %s' % (caller, message)

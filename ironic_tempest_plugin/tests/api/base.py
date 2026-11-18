@@ -246,9 +246,13 @@ class BaseBaremetalTest(api_version_utils.BaseMicroversionTest,
             Defaults to client.build_interval.
         """
         cls.client.set_node_provision_state(node_id, target)
+        # Also wait for the lock to be released, the conductor worker that
+        # performed the transition may still hold it once the state shows up
+        # in the API and the next request would fail with a 409.
         waiters.wait_for_bm_node_status(cls.client, node_id,
                                         'provision_state', expected,
-                                        timeout=timeout, interval=interval)
+                                        timeout=timeout, interval=interval,
+                                        wait_for_unlock=True)
 
     @classmethod
     def provide_node(cls, node_id, cleaning_timeout=None):

@@ -5,3 +5,4 @@ oslo.serialization>=2.18.0 # Apache-2.0
 oslo.utils>=3.33.0 # Apache-2.0
 fixtures>=3.0.0 # Apache-2.0/BSD
 tempest>=27.0.0 # Apache-2.0
+tenacity>=6.3.1 # Apache-2.0

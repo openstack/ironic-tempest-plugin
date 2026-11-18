@@ -15,9 +15,14 @@ import functools
 from http import client as http_client
 from urllib import parse as urllib_parse
 
+from oslo_log import log
 from oslo_serialization import jsonutils as json
 from tempest.lib.common import api_version_utils
 from tempest.lib.common import rest_client
+from tempest.lib import exceptions as lib_exc
+import tenacity
+
+LOG = log.getLogger(__name__)
 
 # NOTE(vsaienko): concurrent tests work because they are launched in
 # separate processes so global variables are not shared among them.
@@ -27,6 +32,67 @@ BAREMETAL_MICROVERSION = None
 # managers.
 SUPPORTED_INTERFACES = (['bios', 'deploy', 'rescue', 'boot', 'raid',
                          'management', 'power', 'inspect', 'console'])
+
+
+# Number of times a request is retried when the node is locked, in addition
+# to the initial attempt. Ironic itself already retries for a couple of
+# seconds before returning the 409, so this covers longer lock holders such
+# as a conductor worker that is still finishing the previous action.
+NODE_LOCKED_RETRIES = 3
+
+
+def _is_node_locked(exc):
+    # NOTE: Ironic does not use a distinct status code for this, it is a
+    # plain 409 whose message is "Node <uuid> is locked by host <host>,
+    # please retry after the current operation is completed."
+    return (isinstance(exc, lib_exc.Conflict)
+            and 'is locked by host' in str(exc))
+
+
+def retry_on_node_locked(f):
+    """Retry a node request that fails because the node is locked.
+
+    The decorated method must take the node identifier as its first argument
+    after ``self``. Only the "node is locked" flavour of 409 is retried, so
+    tests that expect a Conflict for any other reason are unaffected. When
+    the retries are exhausted the original exception is raised.
+    """
+
+    @functools.wraps(f)
+    def wrapper(self, node_uuid, *args, **kwargs):
+        def _log_retry(retry_state):
+            LOG.warning('Node %(node)s was locked during %(func)s, retrying '
+                        '(attempt %(att)d of %(max)d): %(err)s',
+                        {'node': node_uuid, 'func': f.__name__,
+                         'att': retry_state.attempt_number,
+                         'max': NODE_LOCKED_RETRIES + 1,
+                         'err': retry_state.outcome.exception()})
+
+        def _log_giving_up(retry_state):
+            exc = retry_state.outcome.exception()
+            LOG.error('Node %(node)s was still locked after %(att)d '
+                      'attempts of %(func)s(%(args)s). The lock was held by '
+                      'an earlier operation that had not finished: %(err)s',
+                      {'node': node_uuid, 'att': retry_state.attempt_number,
+                       'func': f.__name__,
+                       'args': ', '.join(
+                           [repr(a) for a in args]
+                           + ['%s=%r' % kv for kv in kwargs.items()
+                              if kv[1] is not None]),
+                       'err': exc})
+            raise exc
+
+        retrying = tenacity.Retrying(
+            retry=tenacity.retry_if_exception(_is_node_locked),
+            stop=tenacity.stop_after_attempt(NODE_LOCKED_RETRIES + 1),
+            # 2s, 4s, 8s
+            wait=tenacity.wait_exponential(multiplier=2, max=10),
+            before_sleep=_log_retry,
+            retry_error_callback=_log_giving_up,
+            reraise=False)
+        return retrying(f, self, node_uuid, *args, **kwargs)
+
+    return wrapper
 
 
 def set_baremetal_api_microversion(baremetal_microversion):

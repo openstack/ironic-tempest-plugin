@@ -654,6 +654,7 @@ class BaremetalClient(base.BaremetalClient):
         return self._patch_request('runbooks', runbook_ident, patch)
 
     @base.handle_errors
+    @base.retry_on_node_locked
     def set_node_power_state(self, node_uuid, state):
         """Set power state of the specified node.
 
@@ -699,6 +700,7 @@ class BaremetalClient(base.BaremetalClient):
                                  target)
 
     @base.handle_errors
+    @base.retry_on_node_locked
     def set_node_provision_state(self, node_uuid, state, configdrive=None,
                                  clean_steps=None, rescue_password=None,
                                  runbook=None):

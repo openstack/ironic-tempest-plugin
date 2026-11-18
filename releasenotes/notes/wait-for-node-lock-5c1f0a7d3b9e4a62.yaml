@@ -1,0 +1,13 @@
+---
+fixes:
+  - |
+    API tests no longer fail with ``409 Node ... is locked by host ...`` right
+    after a node reaches a new provision state. The conductor can still hold
+    the node lock for a while after the new state is visible in the API, so
+    ``BaseBaremetalTest.set_node_provision_state`` now also waits for the
+    node's ``reservation`` to clear, and the baremetal client retries
+    ``set_node_provision_state`` and ``set_node_power_state`` up to three
+    times when the node is locked. The retry applies to that conflict only.
+  - |
+    ``wait_for_bm_node_status`` timeout errors now report the last observed
+    value of the attribute, the provision state and the node reservation.
